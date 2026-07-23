@@ -54,6 +54,7 @@ The  **Medical Center** full-stack web application is an innovative platform des
 - **OAuth 2.0**: Google login integration with secure token exchange.
 - **Email Verification**: Ensures only verified users can access the system.
 - **Password Policies**: Enforced strong password rules and secure password storage using hashing algorithms.
+- **Pre-commit Secret Scanning**: Gitleaks runs on every commit via pre-commit hooks to block credential leaks before they reach the repository.
 
 ## Getting Started
 
@@ -70,3 +71,23 @@ To run this project locally, ensure the following tools are installed:
 ```bash
 git clone https://github.com/mostafasharaby/Medical-Center.git
 cd Medical-Center
+```
+
+#### Install Pre-commit Secret Scanning
+
+Install [pre-commit](https://pre-commit.com/) and enable the repository hooks before committing:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+Hooks scan staged files with [Gitleaks](https://github.com/gitleaks/gitleaks) using `.gitleaks.toml`. To run manually:
+
+```bash
+pre-commit run --all-files
+```
+
+To verify the hook blocks secrets, create a temporary file containing a test pattern such as `"password": "realpassword123"` in a JSON object and attempt to commit it — the hook should fail.
+
+Enable [GitHub secret scanning](https://docs.github.com/en/code-security/secret-scanning/about-secret-scanning) on the repository in GitHub Settings → Code security and analysis.
