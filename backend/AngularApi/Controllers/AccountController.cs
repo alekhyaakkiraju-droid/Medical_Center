@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using System.Net;
 using System.Security.Claims;
@@ -70,6 +71,7 @@ namespace AngularApi.Controllers
 
         //}
         [AllowAnonymous]
+        [EnableRateLimiting(AuthRateLimitingExtensions.RegisterPolicy)]
         [HttpPost("register/user")]
         public async Task<IActionResult> Register(RegisterUserDTO registerUser)
         {
@@ -113,6 +115,7 @@ namespace AngularApi.Controllers
 
 
         [Authorize(Policy = "AdminPolicy")]
+        [EnableRateLimiting(AuthRateLimitingExtensions.RegisterPolicy)]
         [HttpPost("Register/admin")]
         public async Task<IActionResult> RegisterWithAdmin(RegisterUserDTO registerUser)
         {
@@ -136,6 +139,7 @@ namespace AngularApi.Controllers
         }
 
         [Authorize(Policy = "AdminPolicy")]
+        [EnableRateLimiting(AuthRateLimitingExtensions.RegisterPolicy)]
         [HttpPost("Register/doctor")]
         public async Task<IActionResult> RegisterWithDoctor(RegisterUserDTO registerUser)
         {
@@ -159,6 +163,7 @@ namespace AngularApi.Controllers
 
 
         [AllowAnonymous]
+        [EnableRateLimiting(AuthRateLimitingExtensions.LoginPolicy)]
         [HttpPost("login")]
         public async Task<IActionResult> Login(LogInUserDTO logInUser)
         {
@@ -219,6 +224,7 @@ namespace AngularApi.Controllers
 
 
         [AllowAnonymous]
+        [EnableRateLimiting(AuthRateLimitingExtensions.ForgotPasswordPolicy)]
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDTO forgotPasswordDto)
         {

@@ -20,12 +20,16 @@ namespace AngularApi.Services.impelementation
             _configuration = configuration;
         }
 
-        public string GenerateJwtToken(AppUser user) => GenerateJwtTokenResult(user).Token;
+        public async Task<string> GenerateJwtTokenAsync(AppUser user)
+        {
+            var result = await GenerateJwtTokenResultAsync(user);
+            return result.Token;
+        }
 
-        public JwtTokenResult GenerateJwtTokenResult(AppUser user)
+        public async Task<JwtTokenResult> GenerateJwtTokenResultAsync(AppUser user)
         {
             ValidateUser(user);
-            var claims = GetClaimsForUser(user);
+            var claims = await GetClaimsForUserAsync(user);
             var signingCredentials = GetSigningCredentials();
             var jti = Guid.NewGuid().ToString();
             claims.Add(new Claim(JwtRegisteredClaimNames.Jti, jti));
@@ -90,7 +94,7 @@ namespace AngularApi.Services.impelementation
             }
         }
 
-        private List<Claim> GetClaimsForUser(AppUser user)
+        private async Task<List<Claim>> GetClaimsForUserAsync(AppUser user)
         {
             var claims = new List<Claim>
             {
@@ -99,7 +103,7 @@ namespace AngularApi.Services.impelementation
                 new(ClaimTypes.Name, user.UserName),
             };
 
-            var roles = _userManager.GetRolesAsync(user).Result;
+            var roles = await _userManager.GetRolesAsync(user);
             foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));

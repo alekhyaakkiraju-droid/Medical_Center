@@ -116,6 +116,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     const earningSub = this.totalEarningService.getTotalEarnings().subscribe({
       next: (data) => {
         this.totalAmountEarning = data.totalEarnings;
+        this.optimizeWidget();
       },
       error: (err) => {
         console.error('Error fetching total earnings:', err);
@@ -138,32 +139,24 @@ export class BoardComponent implements OnInit, OnDestroy {
         iconClass: 'fas fa-users',
         text: 'Appointments',
         number: this.numOfAppointments,
-        progress: 45,
-        description: '45% Increase in 28 Days',
       },
       {
         bgClass: 'bg-orange',
         iconClass: 'fas fa-user',
         text: 'New Patients',
         number: this.numOfPatients,
-        progress: 40,
-        description: '40% Increase in 28 Days',
       },
       {
         bgClass: 'bg-purple',
         iconClass: 'fas fa-syringe',
         text: 'Doctors',
         number: this.numOfDoctors,
-        progress: 85,
-        description: '85% Increase in 28 Days',
       },
       {
         bgClass: 'bg-success',
         iconClass: 'fas fa-dollar-sign',
         text: 'PrimeCare Earning',
         number: this.totalAmountEarning,
-        progress: 50,
-        description: '50% Increase in 28 Days',
       },
     ];
   }
