@@ -35,5 +35,14 @@ appsettings*.json
 appsettings.*.json
 appsettings.json
 
+# Secrets and local environment files
+.env
+.env.*
+*.env
+credentials.json
+secrets.json
+**/local.settings.json
+**/launchSettings.json
+
 # Windows
 Thumbs.db
