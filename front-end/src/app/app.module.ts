@@ -8,7 +8,8 @@ import { RouterModule } from '@angular/router';
 import { GeneralModule } from './pages/general/general.module';
 import { AuthModule } from './pages/auth/auth.module';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule, provideHttpClient, withFetch } from '@angular/common/http';
+import { HttpClientModule, provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { credentialsInterceptor } from './core/interceptors/credentials.interceptor';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { DoctorModule } from './doctor/doctor.module';
@@ -45,7 +46,7 @@ import { AdminModule } from './admin/admin.module';
     provideClientHydration(),  
     provideAnimationsAsync(), 
     provideToastr(),
-    provideHttpClient(withFetch()),
+    provideHttpClient(withFetch(), withInterceptors([credentialsInterceptor])),
   ],
   bootstrap: [AppComponent]
 })

@@ -89,6 +89,56 @@ public class CookieAuthIntegrationTests : IClassFixture<MedicalCenterWebApplicat
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
+    [Fact]
+    public async Task Me_ReturnsAuthenticatedUserProfile()
+    {
+        await SeedUserAsync();
+        var client = AntiforgeryTestHelper.CreateClient(_factory);
+        await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
+
+        var loginResponse = await client.PostAsJsonAsync("/api/Account/login", new LogInUserDTO
+        {
+            Email = SeedData.TestUserEmail,
+            Password = SeedData.TestUserPassword,
+        });
+        loginResponse.EnsureSuccessStatusCode();
+        AntiforgeryTestHelper.ImportAuthCookies(loginResponse, client);
+
+        var response = await client.GetAsync("/api/Account/me");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain(SeedData.TestUserEmail);
+        body.Should().Contain("roles");
+    }
+
+    [Fact]
+    public async Task Logout_ClearsAuthCookiesAndBlocksProtectedEndpoint()
+    {
+        await SeedUserAsync();
+        var client = AntiforgeryTestHelper.CreateClient(_factory);
+        await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
+
+        var loginResponse = await client.PostAsJsonAsync("/api/Account/login", new LogInUserDTO
+        {
+            Email = SeedData.TestUserEmail,
+            Password = SeedData.TestUserPassword,
+        });
+        loginResponse.EnsureSuccessStatusCode();
+        AntiforgeryTestHelper.ImportAuthCookies(loginResponse, client);
+
+        await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
+        var logoutResponse = await client.PostAsync("/api/Account/logout", null);
+        logoutResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        logoutResponse.Headers.TryGetValues("Set-Cookie", out var logoutCookies).Should().BeTrue();
+        string.Join("; ", logoutCookies!).Should().Contain("MedCenter.Auth=");
+
+        client.DefaultRequestHeaders.Remove("Cookie");
+
+        var meResponse = await client.GetAsync("/api/Account/me");
+        meResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
     private async Task SeedUserAsync()
     {
         using var scope = _factory.Services.CreateScope();

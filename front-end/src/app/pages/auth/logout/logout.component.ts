@@ -17,10 +17,10 @@ export class LogoutComponent implements OnInit {
   //--------------------logout Dialog-------------------
   
   confirmLogout(): void {
-    console.log('Logging out...');    
-    this.authService.logout();     
-    this.router.navigate(['/auth/login']).then(() => {
-      window.location.reload();
+    this.authService.logout().subscribe(() => {
+      this.router.navigate(['/auth/login']).then(() => {
+        window.location.reload();
+      });
     });
   }
 

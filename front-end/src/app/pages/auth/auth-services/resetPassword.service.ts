@@ -19,8 +19,7 @@ export class ResetPasswordService {
 
   resetPassword(email: string, token: string, newPassword: string): Observable<any> {
     const payload = { email, token, newPassword };
-    const headers = this.authService.getHeaders();  
-    return this.http.post(`${this.apiUrl}/reset-password`, payload, { headers }).pipe(
+    return this.http.post(`${this.apiUrl}/reset-password`, payload, this.authService.getHttpOptions()).pipe(
       catchError(this.handeErrorService.handleError)
     );     
   }

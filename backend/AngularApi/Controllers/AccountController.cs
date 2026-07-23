@@ -406,6 +406,41 @@ namespace AngularApi.Controllers
         }
 
 
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUserProfile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            return Ok(new
+            {
+                userId = user.Id,
+                email = user.Email,
+                userName = user.UserName,
+                roles,
+            });
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            _authCookieService.ClearAuthCookies();
+            return Ok(new { message = "Logged out successfully" });
+        }
+
         [Authorize(Policy = "UserPolicy")]
         [HttpGet("user-details")]
         public async Task<IActionResult> GetUserDetails()

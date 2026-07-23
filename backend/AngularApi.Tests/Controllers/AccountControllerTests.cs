@@ -280,5 +280,50 @@ namespace AngularApi.Tests.Controllers
             user.Address.Should().Be(updateProfileDto.Address);
             user.PhoneNumber.Should().Be(updateProfileDto.PhoneNumber);
         }
+
+        [Fact]
+        public async Task GetCurrentUserProfile_AuthenticatedUser_ReturnsProfileWithRoles()
+        {
+            var user = new AppUser
+            {
+                Id = "user-id",
+                Email = SeedData.TestUserEmail,
+                UserName = "test-user",
+            };
+
+            _userManagerMock.Setup(x => x.FindByIdAsync("user-id"))
+                .ReturnsAsync(user);
+            _userManagerMock.Setup(x => x.GetRolesAsync(user))
+                .ReturnsAsync(new List<string> { "user" });
+
+            var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "user-id") };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = principal }
+            };
+
+            var result = await _controller.GetCurrentUserProfile();
+
+            var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+            okResult.Value.Should().BeEquivalentTo(new
+            {
+                userId = "user-id",
+                email = SeedData.TestUserEmail,
+                userName = "test-user",
+                roles = new[] { "user" },
+            });
+        }
+
+        [Fact]
+        public void Logout_ClearsAuthCookies()
+        {
+            var result = _controller.Logout();
+
+            var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+            okResult.Value.Should().BeEquivalentTo(new { message = "Logged out successfully" });
+            _authCookieServiceMock.Verify(x => x.ClearAuthCookies(), Times.Once);
+        }
     }
 }

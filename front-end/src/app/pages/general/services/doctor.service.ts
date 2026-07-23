@@ -23,8 +23,7 @@ cartItems$ = this.doctorsSubject.asObservable();
 
 
   getAllDoctors(): Observable<Doctor[]> {
-    const headers = this.authService.getHeaders();  
-    return this.http.get<Doctor[]>(this.apiUrl, { headers }).pipe(
+    return this.http.get<Doctor[]>(this.apiUrl, this.authService.getHttpOptions()).pipe(
       tap((doctors: Doctor[]) => {
         this.doctorsSubject.next(doctors);
         console.log('Doctors fetched from API:', doctors.length);

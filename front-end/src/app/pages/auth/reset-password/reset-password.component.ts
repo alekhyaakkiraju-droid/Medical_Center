@@ -47,7 +47,6 @@ export class ResetPasswordComponent implements OnInit {
 
     const { newPassword, confirmPassword } = this.resetForm.value;
 
-    console.log(this.email, this.token,newPassword, confirmPassword)
     if (newPassword !== confirmPassword) {
       this.toastr.error('Passwords do not match!');
 
