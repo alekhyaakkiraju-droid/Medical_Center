@@ -36,6 +36,8 @@ namespace AngularApi.Controllers
         private readonly IAuthCookieService _authCookieService;
         private readonly IAntiforgery _antiforgery;
         private readonly AuthCookieOptions _authCookieOptions;
+        private readonly IAuditService _auditService;
+        private readonly ILogger<AccountController> _logger;
 
         public AccountController(
             UserManager<AppUser> userManager,
@@ -46,7 +48,9 @@ namespace AngularApi.Controllers
             IGoogleService googleService,
             IAuthCookieService authCookieService,
             IAntiforgery antiforgery,
-            IOptions<AuthCookieOptions> authCookieOptions)
+            IOptions<AuthCookieOptions> authCookieOptions,
+            IAuditService auditService,
+            ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _Configuration = Configuration;
@@ -57,6 +61,8 @@ namespace AngularApi.Controllers
             _authCookieService = authCookieService;
             _antiforgery = antiforgery;
             _authCookieOptions = authCookieOptions.Value;
+            _auditService = auditService;
+            _logger = logger;
         }
 
         //public AccountController(UserManager<AppUser> userManager, IConfiguration Configuration, IEmailService emailService,
@@ -179,12 +185,14 @@ namespace AngularApi.Controllers
                     if (checkpass)
                     {
                         var cookieResult = await _authCookieService.IssueAuthCookiesAsync(found);
+                        await _auditService.RecordAuthEventAsync("LoginSuccess", found.Email, true);
                         return Ok(new
                         {
                             expiration = cookieResult.ExpirationUtc
                         });
                     }
                 }
+                await _auditService.RecordAuthEventAsync("LoginFailure", logInUser.Email, false);
                 return Unauthorized();
             }
             return BadRequest(ModelState);
@@ -250,11 +258,12 @@ namespace AngularApi.Controllers
                 try
                 {
                     await _emailService.SendEmailAsync(message);
+                    await _auditService.RecordAuthEventAsync("PasswordResetRequested", user.Email, true);
                     return Ok(new Response("Success", $"Password reset link sent to {user.Email}. Please check your email."));
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Failed to send email: {ex.Message}");
+                    _logger.LogError(ex, "Failed to send password reset email");
                     return StatusCode(StatusCodes.Status500InternalServerError, new Response("Error", "Failed to send email, please try again later."));
                 }
 
@@ -297,10 +306,11 @@ namespace AngularApi.Controllers
 
                 if (result.Succeeded)
                 {
+                    await _auditService.RecordAuthEventAsync("PasswordResetCompleted", user.Email, true);
                     return Ok(new { message = "Password has been reset successfully." });
                 }
 
-                Console.WriteLine($"Errors: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                _logger.LogWarning("Password reset failed: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
                 return BadRequest(result.Errors.FirstOrDefault()?.Description);
             }
 
@@ -441,9 +451,13 @@ namespace AngularApi.Controllers
 
         [Authorize]
         [HttpPost("logout")]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
+            var actor = User.FindFirstValue(ClaimTypes.Email)
+                ?? User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? "anonymous";
             _authCookieService.ClearAuthCookies();
+            await _auditService.RecordAuthEventAsync("Logout", actor, true);
             return Ok(new { message = "Logged out successfully" });
         }
 
