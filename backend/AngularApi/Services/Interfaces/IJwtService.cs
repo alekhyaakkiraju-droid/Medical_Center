@@ -5,9 +5,9 @@ namespace AngularApi.Services.Interfaces;
 
 public interface IJwtService
 {
-    string GenerateJwtToken(AppUser user);
+    Task<string> GenerateJwtTokenAsync(AppUser user);
 
-    JwtTokenResult GenerateJwtTokenResult(AppUser user);
+    Task<JwtTokenResult> GenerateJwtTokenResultAsync(AppUser user);
 
     JwtTokenResult? ReadToken(string token, bool validateLifetime = true);
 }

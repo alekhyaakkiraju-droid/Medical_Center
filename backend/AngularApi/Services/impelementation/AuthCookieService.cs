@@ -37,7 +37,7 @@ public class AuthCookieService : IAuthCookieService
 
     public async Task<AuthCookieIssueResult> IssueAuthCookiesAsync(AppUser user, CancellationToken cancellationToken = default)
     {
-        var jwt = _jwtService.GenerateJwtTokenResult(user);
+        var jwt = await _jwtService.GenerateJwtTokenResultAsync(user);
         var refreshToken = await _refreshTokenService.CreateRefreshTokenAsync(user.Id, jwt.JwtId, cancellationToken);
         SetAuthCookies(jwt.Token, refreshToken, jwt.ExpiresUtc);
         return new AuthCookieIssueResult(jwt.ExpiresUtc);

@@ -22,8 +22,8 @@ public class AuthCookieServiceTests
         httpContextAccessor.Setup(accessor => accessor.HttpContext).Returns(httpContext);
 
         var jwtService = new Mock<IJwtService>();
-        jwtService.Setup(service => service.GenerateJwtTokenResult(It.IsAny<AppUser>()))
-            .Returns(new AngularApi.Services.JwtTokenResult("jwt-token", "jwt-id", DateTime.UtcNow.AddHours(1)));
+        jwtService.Setup(service => service.GenerateJwtTokenResultAsync(It.IsAny<AppUser>()))
+            .ReturnsAsync(new AngularApi.Services.JwtTokenResult("jwt-token", "jwt-id", DateTime.UtcNow.AddHours(1)));
 
         var refreshTokenService = new Mock<IRefreshTokenService>();
         refreshTokenService.Setup(service => service.CreateRefreshTokenAsync(It.IsAny<string>(), It.IsAny<string>(), default))

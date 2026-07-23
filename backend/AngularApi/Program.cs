@@ -41,6 +41,7 @@ namespace WebApiDemo
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerServices();
+            builder.Services.AddAuthRateLimiting();
             builder.Services.AddApplicationServices(builder.Configuration);
             builder.Services.AddAuthenticationServices(builder.Configuration);
             builder.Services.AddAuthorization(options =>
@@ -72,6 +73,7 @@ namespace WebApiDemo
             }
 
             app.UseResponseCompression();
+            app.UseRateLimiter();
             app.UseStaticFiles();
             app.UseCors("MyPolicy");
             app.UseAuthentication();
