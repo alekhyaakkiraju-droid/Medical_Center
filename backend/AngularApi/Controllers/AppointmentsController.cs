@@ -45,16 +45,16 @@ namespace AngularApi.Controllers
 
         [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointments()
+        public async Task<ActionResult<PagedResult<AppointmentDTO>>> GetAppointments([FromQuery] PaginationParameters pagination)
         {
-            return await _context.Appointments.SelectAppointmentDto().ToListAsync();
+            return await _context.Appointments.SelectAppointmentDto().ToPagedResultAsync(pagination);
         }
 
         [Authorize(Policy = "AdminPolicy")]
         [HttpGet("GetAllAppointments")]
-        public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAllAppointments()
+        public async Task<ActionResult<PagedResult<AppointmentDTO>>> GetAllAppointments([FromQuery] PaginationParameters pagination)
         {
-            return await _context.Appointments.SelectAppointmentDto().ToListAsync();
+            return await _context.Appointments.SelectAppointmentDto().ToPagedResultAsync(pagination);
         }
 
 
@@ -205,7 +205,7 @@ namespace AngularApi.Controllers
 
         [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpGet("patient/{patientId}")]
-        public async Task<IActionResult> GetAppointmentsByPatient(string patientId)
+        public async Task<IActionResult> GetAppointmentsByPatient(string patientId, [FromQuery] PaginationParameters pagination)
         {
             if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
             {
@@ -215,7 +215,7 @@ namespace AngularApi.Controllers
             var appointments = await _context.Appointments
                 .Where(a => a.PatientId == patientId)
                 .SelectAppointmentDto()
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
 
             return Ok(appointments);
         }
@@ -223,55 +223,55 @@ namespace AngularApi.Controllers
 
         [Authorize(Policy = "DoctorPolicy")]
         [HttpGet("date/{date}")]
-        public async Task<IActionResult> GetAppointmentsByDate(DateTime date)
+        public async Task<IActionResult> GetAppointmentsByDate(DateTime date, [FromQuery] PaginationParameters pagination)
         {
             var appointments = await _context.Appointments
                 .Where(a => a.ProbableStartTime!.Value.Date == date.Date)
                 .SelectAppointmentDto()
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
             return Ok(appointments);
         }
 
         [Authorize(Policy = "DoctorPolicy")]
         [HttpGet("status/{status}")]
-        public async Task<IActionResult> GetAppointmentsByStatus(AppointmentStatusEnum status)
+        public async Task<IActionResult> GetAppointmentsByStatus(AppointmentStatusEnum status, [FromQuery] PaginationParameters pagination)
         {
             var appointments = await _context.Appointments
                 .Where(a => a.AppointmentStatus!.Status == status)
                 .SelectAppointmentDto()
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
             return Ok(appointments);
         }
 
         [Authorize(Policy = "DoctorPolicy")]
         [HttpGet("today")]
-        public async Task<IActionResult> GetTodaysAppointments()
+        public async Task<IActionResult> GetTodaysAppointments([FromQuery] PaginationParameters pagination)
         {
             var today = DateTime.Today;
             var appointments = await _context.Appointments
                 .Where(a => a.ProbableStartTime!.Value.Date == today)
                 .SelectAppointmentDto()
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
             return Ok(appointments);
         }
 
 
         [Authorize(Policy = "DoctorPolicy")]
         [HttpGet("upcoming")]
-        public async Task<IActionResult> GetUpcomingAppointments()
+        public async Task<IActionResult> GetUpcomingAppointments([FromQuery] PaginationParameters pagination)
         {
             var now = DateTime.Now;
             var appointments = await _context.Appointments
                 .Where(a => a.ProbableStartTime > now)
                 .OrderBy(a => a.ProbableStartTime)
                 .SelectAppointmentDto()
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
             return Ok(appointments);
         }
 
         [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpGet("patient/{patientId}/status/{status}")]
-        public async Task<IActionResult> GetAppointmentsByPatientAndStatus(string patientId, AppointmentStatusEnum status)
+        public async Task<IActionResult> GetAppointmentsByPatientAndStatus(string patientId, AppointmentStatusEnum status, [FromQuery] PaginationParameters pagination)
         {
             if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
             {
@@ -281,13 +281,13 @@ namespace AngularApi.Controllers
             var appointments = await _context.Appointments
                 .Where(a => a.PatientId == patientId && a.AppointmentStatus!.Status == status)
                 .SelectAppointmentDto()
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
             return Ok(appointments);
         }
 
         [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpGet("patient/{patientId}/history")]
-        public async Task<IActionResult> GetAppointmentHistoryByPatient(string patientId)
+        public async Task<IActionResult> GetAppointmentHistoryByPatient(string patientId, [FromQuery] PaginationParameters pagination)
         {
             if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
             {
@@ -298,7 +298,7 @@ namespace AngularApi.Controllers
                 .Where(a => a.PatientId == patientId)
                 .OrderByDescending(a => a.ProbableStartTime)
                 .SelectAppointmentDto()
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
             return Ok(appointments);
         }
 

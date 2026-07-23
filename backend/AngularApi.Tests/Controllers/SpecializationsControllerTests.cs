@@ -45,13 +45,13 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetSpecializations();
+            var result = await _controller.GetSpecializations(new PaginationParameters());
 
             // Assert
-            var specializations = result.Value.Should().BeAssignableTo<List<SpecializationListItemDTO>>().Subject;
-            specializations.Should().HaveCount(2);
-            specializations[0].SpecializationName.Should().Be("Cardiology");
-            specializations[1].SpecializationName.Should().Be("Neurology");
+            var paged = result.Value.Should().BeAssignableTo<PagedResult<SpecializationListItemDTO>>().Subject;
+            paged.Items.Should().HaveCount(2);
+            paged.Items[0].SpecializationName.Should().Be("Cardiology");
+            paged.Items[1].SpecializationName.Should().Be("Neurology");
         }
 
         [Fact]

@@ -41,14 +41,13 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetPatientReviews();
+            var result = await _controller.GetPatientReviews(new PaginationParameters());
 
             // Assert
-            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var reviews = okResult.Value.Should().BeAssignableTo<List<ReviewDTO>>().Subject;
-            reviews.Should().HaveCount(2);
-            reviews[0].Patient.Should().NotBeNull();
-            reviews[0].Patient.Name.Should().Be("John Doe");
+            var paged = result.Value.Should().BeAssignableTo<PagedResult<ReviewDTO>>().Subject;
+            paged.Items.Should().HaveCount(2);
+            paged.Items[0].PatientId.Should().Be("patient1");
+            paged.Items[0].OverallRating.Should().Be(5);
         }
 
         [Fact]

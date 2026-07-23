@@ -32,19 +32,18 @@ namespace AngularApi.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DoctorDTO>>> GetDoctors()
+        public async Task<ActionResult<PagedResult<DoctorDTO>>> GetDoctors([FromQuery] PaginationParameters pagination)
         {
-            return await _context.Doctors.SelectDoctorDto().ToListAsync();
+            return await _context.Doctors.SelectDoctorDto().ToPagedResultAsync(pagination);
         }
 
 
 
         [AllowAnonymous]
         [HttpGet("/api/DoctorsWithSpectialization")]
-        public async Task<IActionResult> GetDoctorsWithSpectialization()
+        public async Task<ActionResult<PagedResult<DoctorDTO>>> GetDoctorsWithSpectialization([FromQuery] PaginationParameters pagination)
         {
-            var doctorDTOs = await _context.Doctors.SelectDoctorDto().ToListAsync();
-            return Ok(doctorDTOs);
+            return await _context.Doctors.SelectDoctorDto().ToPagedResultAsync(pagination);
         }
 
 
@@ -117,7 +116,7 @@ namespace AngularApi.Controllers
 
 
         [HttpGet("{doctorId}/bookings")]
-        public async Task<IActionResult> GetBookings(string doctorId)
+        public async Task<IActionResult> GetBookings(string doctorId, [FromQuery] PaginationParameters pagination)
         {
             if (IsDoctorAccessDenied(doctorId))
             {
@@ -130,13 +129,13 @@ namespace AngularApi.Controllers
                     .Where(a => a.DoctorId == doctorId &&
                                 a.AppointmentStatus!.Status == AppointmentStatusEnum.Active)
                     .SelectBookingDto()
-                    .ToListAsync();
+                    .ToPagedResultAsync(pagination);
             });
             return Ok(result);
         }
 
         [HttpGet("{doctorId}/bookings/status/{status}")]
-        public async Task<IActionResult> GetBookingsByStatus(string doctorId, AppointmentStatusEnum status)
+        public async Task<IActionResult> GetBookingsByStatus(string doctorId, AppointmentStatusEnum status, [FromQuery] PaginationParameters pagination)
         {
             if (IsDoctorAccessDenied(doctorId))
             {
@@ -146,12 +145,12 @@ namespace AngularApi.Controllers
             var bookings = await _context.Appointments
                 .Where(a => a.DoctorId == doctorId && a.AppointmentStatus!.Status == status)
                 .SelectBookingDto()
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
             return Ok(bookings);
         }
 
         [HttpGet("{doctorId}/bookings/today")]
-        public async Task<IActionResult> GetTodaysBookings(string doctorId)
+        public async Task<IActionResult> GetTodaysBookings(string doctorId, [FromQuery] PaginationParameters pagination)
         {
             if (IsDoctorAccessDenied(doctorId))
             {
@@ -162,13 +161,13 @@ namespace AngularApi.Controllers
             var bookings = await _context.Appointments
                 .Where(a => a.DoctorId == doctorId && a.AppointmentTakenDate == today && a.AppointmentStatus!.Status == AppointmentStatusEnum.Active)
                 .SelectBookingDto()
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
             return Ok(bookings);
         }
 
 
         [HttpGet("{doctorId}/bookings/UpComing")]
-        public async Task<IActionResult> GetUpComingBookings(string doctorId)
+        public async Task<IActionResult> GetUpComingBookings(string doctorId, [FromQuery] PaginationParameters pagination)
         {
             if (IsDoctorAccessDenied(doctorId))
             {
@@ -179,12 +178,12 @@ namespace AngularApi.Controllers
             var bookings = await _context.Appointments
                 .Where(a => a.DoctorId == doctorId && a.AppointmentTakenDate >= today && a.AppointmentStatus!.Status == AppointmentStatusEnum.Active)
                 .SelectBookingDto()
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
             return Ok(bookings);
         }
 
         [HttpGet("{doctorId}/bookings/Last30Days")]
-        public async Task<IActionResult> GetLast30DaysBookings(string doctorId)
+        public async Task<IActionResult> GetLast30DaysBookings(string doctorId, [FromQuery] PaginationParameters pagination)
         {
             if (IsDoctorAccessDenied(doctorId))
             {
@@ -200,14 +199,14 @@ namespace AngularApi.Controllers
                     && a.AppointmentTakenDate <= today
                     && a.AppointmentStatus!.Status == AppointmentStatusEnum.Active)
                 .SelectBookingDto()
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
 
             return Ok(bookings);
         }
 
 
         [HttpGet("{doctorId}/reviews")]
-        public async Task<IActionResult> GetReviews(string doctorId)
+        public async Task<IActionResult> GetReviews(string doctorId, [FromQuery] PaginationParameters pagination)
         {
             if (IsDoctorAccessDenied(doctorId))
             {
@@ -229,7 +228,7 @@ namespace AngularApi.Controllers
                     IsDoctorRecommended = r.IsDoctorRecommended,
                     ReviewDate = r.ReviewDate
                 })
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
             return Ok(reviews);
         }
 
@@ -250,7 +249,7 @@ namespace AngularApi.Controllers
 
 
         [HttpGet("{doctorId}/qualifications")]
-        public async Task<IActionResult> GetQualifications(string doctorId)
+        public async Task<IActionResult> GetQualifications(string doctorId, [FromQuery] PaginationParameters pagination)
         {
             if (IsDoctorAccessDenied(doctorId))
             {
@@ -267,13 +266,13 @@ namespace AngularApi.Controllers
                     InstituteName = q.InstituteName,
                     ProcurementYear = q.ProcurementYear
                 })
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
             return Ok(qualifications);
         }
 
 
         [HttpGet("{doctorId}/specializations")]
-        public async Task<IActionResult> GetSpecializations(string doctorId)
+        public async Task<IActionResult> GetSpecializations(string doctorId, [FromQuery] PaginationParameters pagination)
         {
             if (IsDoctorAccessDenied(doctorId))
             {
@@ -283,7 +282,7 @@ namespace AngularApi.Controllers
             var specializations = await _context.DoctorSpecialization
                 .Where(s => s.DoctorId == doctorId)
                 .Select(s => s.Specialization!.SpecializationName!)
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
             return Ok(specializations);
         }
 

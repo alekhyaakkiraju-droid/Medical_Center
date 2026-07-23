@@ -22,6 +22,10 @@ import * as XLSX from 'xlsx';
 export class BoardComponent implements OnInit, OnDestroy {
 
   appointments: any[] = [];
+  currentPage = 1;
+  pageSize = 20;
+  pageCount = 0;
+  totalCount = 0;
   infoBoxes: any[] = [];
   doctorsData: Doctor[] = [];
   numOfAppointments: number = 0;
@@ -55,11 +59,14 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.getTotalEarning();
   }
 
-  loadAppointments(): void {
-    const appointmentSub = this.appointmentService.getAppointments().subscribe(
+  loadAppointments(page = 1): void {
+    const appointmentSub = this.appointmentService.getAppointments(page, this.pageSize).subscribe(
       (data) => {
-        this.appointments = data;
-        this.numOfAppointments = this.appointments.length;
+        this.appointments = data.items;
+        this.currentPage = data.currentPage;
+        this.pageCount = data.pageCount;
+        this.totalCount = data.totalCount;
+        this.numOfAppointments = data.totalCount;
         this.optimizeWidget();
         this.setBadgeForAppointments();
       },
@@ -70,12 +77,19 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.subscriptions.push(appointmentSub);
   }
 
+  goToAppointmentPage(page: number): void {
+    if (page < 1 || (this.pageCount > 0 && page > this.pageCount)) {
+      return;
+    }
+    this.loadAppointments(page);
+  }
+
   loadDoctor(): void {
     const doctorSub = this.doctorService.getAllDoctors().subscribe(
-      (doctorFetched: Doctor[]) => {
-        if (doctorFetched) {
-          this.doctorsData = doctorFetched;
-          this.numOfDoctors = this.doctorsData.length;
+      (result) => {
+        if (result?.items) {
+          this.doctorsData = result.items;
+          this.numOfDoctors = result.totalCount;
         }
       },
       (error) => {

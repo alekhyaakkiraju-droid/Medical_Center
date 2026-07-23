@@ -56,14 +56,13 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetDoctorsWithSpectialization();
+            var result = await _controller.GetDoctorsWithSpectialization(new PaginationParameters());
 
             // Assert
-            var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var dtos = okResult.Value.Should().BeAssignableTo<List<DoctorDTO>>().Subject;
-            dtos.Should().HaveCount(1);
-            dtos[0].Name.Should().Be("Dr. Smith");
-            dtos[0].Specializations.Should().Contain("Cardiology");
+            var paged = result.Value.Should().BeAssignableTo<PagedResult<DoctorDTO>>().Subject;
+            paged.Items.Should().HaveCount(1);
+            paged.Items[0].Name.Should().Be("Dr. Smith");
+            paged.Items[0].Specializations.Should().Contain("Cardiology");
         }
 
         [Fact]
@@ -122,13 +121,13 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetBookings("doctor1");
+            var result = await _controller.GetBookings("doctor1", new PaginationParameters());
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var bookings = okResult.Value.Should().BeAssignableTo<List<BookingDTO>>().Subject;
-            bookings.Should().HaveCount(1);
-            bookings[0].AppointmentId.Should().Be(1);
+            var paged = okResult.Value.Should().BeAssignableTo<PagedResult<BookingDTO>>().Subject;
+            paged.Items.Should().HaveCount(1);
+            paged.Items[0].AppointmentId.Should().Be(1);
         }
 
         [Fact]
@@ -143,13 +142,13 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetBookingsByStatus("doctor1", AppointmentStatusEnum.Canceled);
+            var result = await _controller.GetBookingsByStatus("doctor1", AppointmentStatusEnum.Canceled, new PaginationParameters());
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var bookings = okResult.Value.Should().BeAssignableTo<List<BookingDTO>>().Subject;
-            bookings.Should().HaveCount(1);
-            bookings[0].AppointmentId.Should().Be(2);
+            var paged = okResult.Value.Should().BeAssignableTo<PagedResult<BookingDTO>>().Subject;
+            paged.Items.Should().HaveCount(1);
+            paged.Items[0].AppointmentId.Should().Be(2);
         }
 
         [Fact]
@@ -165,13 +164,13 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetTodaysBookings("doctor1");
+            var result = await _controller.GetTodaysBookings("doctor1", new PaginationParameters());
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var bookings = okResult.Value.Should().BeAssignableTo<List<BookingDTO>>().Subject;
-            bookings.Should().HaveCount(1);
-            bookings[0].AppointmentId.Should().Be(1);
+            var paged = okResult.Value.Should().BeAssignableTo<PagedResult<BookingDTO>>().Subject;
+            paged.Items.Should().HaveCount(1);
+            paged.Items[0].AppointmentId.Should().Be(1);
         }
 
         [Fact]
@@ -187,13 +186,13 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetUpComingBookings("doctor1");
+            var result = await _controller.GetUpComingBookings("doctor1", new PaginationParameters());
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var bookings = okResult.Value.Should().BeAssignableTo<List<BookingDTO>>().Subject;
-            bookings.Should().HaveCount(1);
-            bookings[0].AppointmentId.Should().Be(1);
+            var paged = okResult.Value.Should().BeAssignableTo<PagedResult<BookingDTO>>().Subject;
+            paged.Items.Should().HaveCount(1);
+            paged.Items[0].AppointmentId.Should().Be(1);
         }
 
         [Fact]
@@ -209,13 +208,13 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetLast30DaysBookings("doctor1");
+            var result = await _controller.GetLast30DaysBookings("doctor1", new PaginationParameters());
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var bookings = okResult.Value.Should().BeAssignableTo<List<BookingDTO>>().Subject;
-            bookings.Should().HaveCount(1);
-            bookings[0].AppointmentId.Should().Be(1);
+            var paged = okResult.Value.Should().BeAssignableTo<PagedResult<BookingDTO>>().Subject;
+            paged.Items.Should().HaveCount(1);
+            paged.Items[0].AppointmentId.Should().Be(1);
         }
 
         [Fact]
@@ -230,12 +229,12 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetReviews("doctor1");
+            var result = await _controller.GetReviews("doctor1", new PaginationParameters());
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var reviews = okResult.Value.Should().BeAssignableTo<List<ReviewDTO>>().Subject;
-            reviews.Should().HaveCount(2);
+            var paged = okResult.Value.Should().BeAssignableTo<PagedResult<ReviewDTO>>().Subject;
+            paged.Items.Should().HaveCount(2);
         }
 
         [Fact]
@@ -270,12 +269,12 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetQualifications("doctor1");
+            var result = await _controller.GetQualifications("doctor1", new PaginationParameters());
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var qualifications = okResult.Value.Should().BeAssignableTo<List<DoctorQualificationDTO>>().Subject;
-            qualifications.Should().HaveCount(2);
+            var paged = okResult.Value.Should().BeAssignableTo<PagedResult<DoctorQualificationDTO>>().Subject;
+            paged.Items.Should().HaveCount(2);
         }
 
         [Fact]
@@ -290,12 +289,12 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetSpecializations("doctor1");
+            var result = await _controller.GetSpecializations("doctor1", new PaginationParameters());
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var specializations = okResult.Value.Should().BeAssignableTo<List<string>>().Subject;
-            specializations.Should().HaveCount(2);
+            var paged = okResult.Value.Should().BeAssignableTo<PagedResult<string>>().Subject;
+            paged.Items.Should().HaveCount(2);
         }
 
 

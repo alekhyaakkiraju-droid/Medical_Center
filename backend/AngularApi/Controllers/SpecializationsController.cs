@@ -26,7 +26,7 @@ namespace AngularApi.Controllers
         
         [AllowAnonymous]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SpecializationListItemDTO>>> GetSpecializations()
+        public async Task<ActionResult<PagedResult<SpecializationListItemDTO>>> GetSpecializations([FromQuery] PaginationParameters pagination)
         {
             return await _context.Specializations
                 .Select(s => new SpecializationListItemDTO
@@ -37,7 +37,7 @@ namespace AngularApi.Controllers
                     Description = s.Description,
                     IsActive = s.IsActive
                 })
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
         }
     
 

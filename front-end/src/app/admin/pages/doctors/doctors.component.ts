@@ -41,9 +41,9 @@ export class DoctorsComponent implements OnInit, OnDestroy {
   }
   loadDoctor(): void {
     this.doctorSubscription = this.doctorService.getAllDoctors().subscribe(
-      (doctorFetched: Doctor[]) => {
-        if (doctorFetched) {
-          this.doctorsData = doctorFetched;
+      (result) => {
+        if (result?.items) {
+          this.doctorsData = result.items;
           console.log('Fetched doctorsData :', this.doctorsData, this.doctorsData.length);
         } else {
           console.log('No  doctorsData');
@@ -57,7 +57,7 @@ export class DoctorsComponent implements OnInit, OnDestroy {
   loadAppointments(): void {
     const appointmentSub = this.appointmentService.getAppointments().subscribe(
       (data) => {
-        this.numOfAppointments = data.length;
+        this.numOfAppointments = data.totalCount;
         this.setBadgeForAppointments();
       },
       (error) => {

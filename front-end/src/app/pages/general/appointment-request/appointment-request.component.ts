@@ -92,7 +92,7 @@ export class AppointmentRequestComponent implements OnInit, OnDestroy {
   loadSpecializations() {
     const specSub = this.specializationService.getSpecializations().subscribe(
       (data) => {
-        this.specializations = data;
+        this.specializations = data.items;
         console.log('specializations ', this.specializations);
       },
       (error) => {
@@ -104,9 +104,9 @@ export class AppointmentRequestComponent implements OnInit, OnDestroy {
 
   loadDoctors() {
     const docSub = this.doctorService.getAllDoctors().subscribe(
-      (doctorFetched: any[]) => {
-        if (doctorFetched) {
-          this.doctorsData = doctorFetched;
+      (result) => {
+        if (result?.items) {
+          this.doctorsData = result.items;
           console.log('Fetched doctorsData :', this.doctorsData, this.doctorsData.length);
         } else {
           console.log('No doctorsData');
@@ -215,8 +215,8 @@ export class AppointmentRequestComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
     const appointmentsSub = this.appointmentsService.getUserAppointments().subscribe(
-      (appointments) => {
-        this.userAppointments = appointments;
+      (result) => {
+        this.userAppointments = result.items;
         this.isLoading = false;
         console.log('User appointments loaded:', this.userAppointments);
       },
