@@ -2,6 +2,7 @@
 using AngularApi.Models;
 using AngularApi.Services;
 using AngularApi.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -53,6 +54,7 @@ namespace AngularApi.Controllers
         //    // this._signInManager = _signInManager;
 
         //}
+        [AllowAnonymous]
         [HttpPost("register/user")]
         public async Task<IActionResult> Register(RegisterUserDTO registerUser)
         {
@@ -139,6 +141,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login(LogInUserDTO logInUser)
         {
@@ -167,6 +170,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [AllowAnonymous]
         [HttpGet("LoginWithGoogle")]
         public IActionResult LoginWithGoogle()
         {
@@ -175,6 +179,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [AllowAnonymous]
         [HttpGet("GoogleLoginCallback")]
         public async Task<IActionResult> GoogleLoginCallback()
         {
@@ -314,6 +319,7 @@ namespace AngularApi.Controllers
             return Ok("Profile updated successfully");
         }
 
+        [AllowAnonymous]
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
