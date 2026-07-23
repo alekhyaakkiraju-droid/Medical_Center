@@ -175,26 +175,19 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.subscriptions.push(deleteSub);
   }
 
-  @ViewChild('editModal', { static: false }) editModal!: ElementRef;
   appointmentDate: string = '';
   appointmentTime: string = '';
+  showEditModal = false;
 
   onEditeAppointment(id: number, appointmentDate: string): void {
     this.selectedAppointmentId = id;
     this.appointmentDate = appointmentDate.split('T')[0];
     this.appointmentTime = appointmentDate.split('T')[1]?.substring(0, 5) || '';
-
-    const modalElement = document.getElementById('editModal');
-    if (modalElement) {
-      modalElement.classList.remove('hidden');
-    }
+    this.showEditModal = true;
   }
 
   closeModal(): void {
-    const modalElement = document.getElementById('editModal');
-    if (modalElement) {
-      modalElement.classList.add('hidden');
-    }
+    this.showEditModal = false;
   }
 
   saveAppointment(): void {
@@ -211,6 +204,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     const editSub = this.appointmentService.editeBooking(this.selectedAppointmentId, updatedAppointment).subscribe({
       next: () => {
         this.toaster.success("Appointment Updated successfully");
+        this.closeModal();
         this.loadAppointments();
       },
       error: (err) => {

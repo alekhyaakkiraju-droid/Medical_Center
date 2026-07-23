@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ReloadService } from './shared/service/reload.service';
 import { Router } from '@angular/router';
-import { initFlowbite } from 'flowbite';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -9,23 +9,24 @@ import { initFlowbite } from 'flowbite';
 })
 export class AppComponent {
   title = 'MedicalCenter';
+  showHeaderAndNavbar = true;
 
-  showHeaderAndNavbar: boolean = true;
-  constructor(private router: Router ,
-    private reload : ReloadService
-  ) { }
+  constructor(
+    private router: Router,
+    private reload: ReloadService
+  ) {}
 
-
-  ngAfterViewInit(): void {   
+  ngAfterViewInit(): void {
     this.reload.initializeLoader();
   }
-  
-  ngOnInit(): void {
-    initFlowbite();  
 
+  ngOnInit(): void {
     this.router.events.subscribe(() => {
-      this.showHeaderAndNavbar = !this.router.url.includes('/admin')  &&!this.router.url.includes('/doctor')  && !this.router.url.includes('/error') && !this.router.url.includes('/auth');
+      this.showHeaderAndNavbar =
+        !this.router.url.includes('/admin') &&
+        !this.router.url.includes('/doctor') &&
+        !this.router.url.includes('/error') &&
+        !this.router.url.includes('/auth');
     });
   }
-  
 }

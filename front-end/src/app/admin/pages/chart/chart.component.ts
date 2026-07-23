@@ -1,27 +1,33 @@
-import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, PLATFORM_ID, QueryList, ViewChildren } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+
 @Component({
   selector: 'app-chart',
   templateUrl: './chart.component.html'
 })
-export class ChartComponent  implements OnInit {
-
+export class ChartComponent implements AfterViewInit {
   private ApexCharts: any;
+
+  @ViewChildren('chartHost') chartHosts!: QueryList<ElementRef<HTMLElement>>;
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
 
-  ngOnInit(): void {
+  ngAfterViewInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       import('apexcharts').then((module) => {
-        this.ApexCharts = module.default; 
-        
-        this.smallchart1();        
+        this.ApexCharts = module.default;
+        this.smallchart1();
         this.smallchart2();
       });
     }
   }
 
-  smallchart1() {
+  smallchart1(): void {
+    const host = this.chartHosts.get(0)?.nativeElement;
+    if (!host || !this.ApexCharts) {
+      return;
+    }
+
     const options = {
       chart: {
         height: 400,
@@ -112,11 +118,16 @@ export class ChartComponent  implements OnInit {
       },
     };
 
-    const chart = new ApexCharts(document.querySelector('#chart1'), options);
+    const chart = new this.ApexCharts(host, options);
     chart.render();
   }
 
-  smallchart2() {
+  smallchart2(): void {
+    const host = this.chartHosts.get(1)?.nativeElement;
+    if (!host || !this.ApexCharts) {
+      return;
+    }
+
     const options = {
       series: [
         {
@@ -194,7 +205,7 @@ export class ChartComponent  implements OnInit {
       },
     };
 
-    const chart = new ApexCharts(document.querySelector('#chart2'), options);
+    const chart = new this.ApexCharts(host, options);
     chart.render();
   }
 
@@ -202,7 +213,7 @@ export class ChartComponent  implements OnInit {
     {
       id: 'chart1',
       title: 'CENTER SURVEY',
-      size: 'col-md-8', 
+      size: 'col-md-8',
       tools: [
         { icon: 'fa-repeat', action: 'refresh' },
         { icon: 'fa-chevron-down', action: 'collapse' },
@@ -220,7 +231,4 @@ export class ChartComponent  implements OnInit {
       ]
     }
   ];
-
-} 
-
-
+}
