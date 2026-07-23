@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { DoctorService } from '../services/doctor.service';
-import { Doctor } from '../../models/doctor';
+import { Doctor } from '../../models';
 import { ReloadService } from '../../../shared/service/reload.service';
 import { TEAM_TABS } from '../../models/teamTabs ';
 import { Subscription } from 'rxjs';

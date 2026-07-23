@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Doctor } from '../../../pages/models/doctor';
+import { Doctor } from '../../../pages/models';
 import { DoctorService } from '../../../pages/general/services/doctor.service';
 import { ReloadService } from '../../../shared/service/reload.service';
 import { Subscription } from 'rxjs';

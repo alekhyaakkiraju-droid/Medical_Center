@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { AuthServiceService } from '../../auth/auth-services/auth-service.service';
 import { HandleErrorsService } from '../../../shared/service/handle-errors.service';
 import { BehaviorSubject, catchError, Observable, tap } from 'rxjs';
-import { Doctor } from '../../models/doctor';
+import { Doctor } from '../../models';
 
 @Injectable({
   providedIn: 'root'
