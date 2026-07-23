@@ -25,7 +25,7 @@ namespace AngularApi.Controllers
 
         // GET: api/AppointmentStatus
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AppointmentStatusListItemDTO>>> GetAppointmentStatus()
+        public async Task<ActionResult<PagedResult<AppointmentStatusListItemDTO>>> GetAppointmentStatus([FromQuery] PaginationParameters pagination)
         {
             return await _context.AppointmentStatus
                 .Select(s => new AppointmentStatusListItemDTO
@@ -33,7 +33,7 @@ namespace AngularApi.Controllers
                     Id = s.Id,
                     Status = s.Status
                 })
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
         }
 
         // GET: api/AppointmentStatus/5

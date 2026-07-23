@@ -86,13 +86,12 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetPatientAppointments("patient1");
+            var result = await _controller.GetPatientAppointments("patient1", new PaginationParameters());
 
             // Assert
-            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var appointments = okResult.Value.Should().BeAssignableTo<List<AppointmentDTO>>().Subject;
-            appointments.Should().HaveCount(2);
-            appointments.All(a => a.PatientId == "patient1").Should().BeTrue();
+            var paged = result.Value.Should().BeAssignableTo<PagedResult<AppointmentDTO>>().Subject;
+            paged.Items.Should().HaveCount(2);
+            paged.Items.All(a => a.Patient!.PatientId == "patient1").Should().BeTrue();
         }
 
         [Fact]
@@ -110,13 +109,12 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetAppointmentsByDateRange("patient1", startDate, endDate);
+            var result = await _controller.GetAppointmentsByDateRange("patient1", startDate, endDate, new PaginationParameters());
 
             // Assert
-            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var appointments = okResult.Value.Should().BeAssignableTo<List<AppointmentDTO>>().Subject;
-            appointments.Should().HaveCount(2);
-            appointments.All(a => a.AppointmentTakenDate >= startDate && a.AppointmentTakenDate <= endDate).Should().BeTrue();
+            var paged = result.Value.Should().BeAssignableTo<PagedResult<AppointmentDTO>>().Subject;
+            paged.Items.Should().HaveCount(2);
+            paged.Items.All(a => a.AppointmentDate >= startDate && a.AppointmentDate <= endDate).Should().BeTrue();
         }
 
         [Fact]
@@ -128,12 +126,11 @@ namespace AngularApi.Tests.Controllers
             // No appointments added
 
             // Act
-            var result = await _controller.GetAppointmentsByDateRange("patient1", startDate, endDate);
+            var result = await _controller.GetAppointmentsByDateRange("patient1", startDate, endDate, new PaginationParameters());
 
             // Assert
-            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var appointments = okResult.Value.Should().BeAssignableTo<List<AppointmentDTO>>().Subject;
-            appointments.Should().BeEmpty();
+            var paged = result.Value.Should().BeAssignableTo<PagedResult<AppointmentDTO>>().Subject;
+            paged.Items.Should().BeEmpty();
         }
 
 

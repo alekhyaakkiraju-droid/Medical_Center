@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../environments/environment';
+import { Appointment, PagedResult, UpdateAppointment } from '../../models';
 import { AuthServiceService } from '../../auth/auth-services/auth-service.service';
-import { Appointment, UpdateAppointment } from '../../models';
 
 @Injectable({
   providedIn: 'root'
@@ -14,12 +14,21 @@ export class AppointmentService {
 
   constructor(private http: HttpClient, private authService: AuthServiceService) {}
 
+  private buildParams(page = 1, pageSize = 20): HttpParams {
+    return new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+  }
+
   postAppointment(data: Appointment): Observable<unknown> {
     return this.http.post(this.apiUrl, JSON.stringify(data), this.authService.getHttpOptions());
   }
 
-  getAppointments(): Observable<Appointment[]> {
-    return this.http.get<Appointment[]>(this.getAppointmentsUrl, this.authService.getHttpOptions());
+  getAppointments(page = 1, pageSize = 20): Observable<PagedResult<Appointment>> {
+    return this.http.get<PagedResult<Appointment>>(
+      this.getAppointmentsUrl,
+      { ...this.authService.getHttpOptions(), params: this.buildParams(page, pageSize) }
+    );
   }
 
   deleteBookingById(id: number): Observable<unknown> {
@@ -30,10 +39,10 @@ export class AppointmentService {
     return this.http.put(`${this.apiUrl}/${id}`, updatedAppointment, this.authService.getHttpOptions());
   }
 
-  getUserAppointments(): Observable<Appointment[]> {
-    return this.http.get<Appointment[]>(
+  getUserAppointments(page = 1, pageSize = 20): Observable<PagedResult<Appointment>> {
+    return this.http.get<PagedResult<Appointment>>(
       `${this.apiUrl}/patient/${this.authService.getNameIdentifier()}`,
-      this.authService.getHttpOptions()
+      { ...this.authService.getHttpOptions(), params: this.buildParams(page, pageSize) }
     );
   }
 

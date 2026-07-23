@@ -20,9 +20,9 @@ namespace AngularApi.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReviewDTO>>> GetPatientReviews()
+        public async Task<ActionResult<PagedResult<ReviewDTO>>> GetPatientReviews([FromQuery] PaginationParameters pagination)
         {
-            var reviews = await _context.PatientReviews
+            return await _context.PatientReviews
                 .Select(r => new ReviewDTO
                 {
                     Id = r.Id,
@@ -36,14 +36,13 @@ namespace AngularApi.Controllers
                     IsDoctorRecommended = r.IsDoctorRecommended,
                     ReviewDate = r.ReviewDate
                 })
-                .ToListAsync();
-            return Ok(reviews);
+                .ToPagedResultAsync(pagination);
         }
 
         [HttpGet("unique-patients")]
-        public async Task<ActionResult<IEnumerable<PatientDTO>>> GetUniquePatients()
+        public async Task<ActionResult<PagedResult<PatientDTO>>> GetUniquePatients([FromQuery] PaginationParameters pagination)
         {
-            var uniquePatients = await _context.PatientReviews
+            return await _context.PatientReviews
                 .Where(pr => pr.Patient != null)
                 .Select(pr => new PatientDTO
                 {
@@ -53,9 +52,7 @@ namespace AngularApi.Controllers
                     Image = pr.Patient.Image
                 })
                 .Distinct()
-                .ToListAsync();
-
-            return Ok(uniquePatients);
+                .ToPagedResultAsync(pagination);
         }
 
         [HttpGet("{id}")]

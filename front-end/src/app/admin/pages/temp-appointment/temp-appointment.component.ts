@@ -20,8 +20,8 @@ export class TempAppointmentComponent implements OnInit {
   loadAppointments(): void {
     this.appointmentService.getAppointments().subscribe(
       (data) => {
-        this.appointments = data;
-        this.numOfAppointments = this.appointments.length;
+        this.appointments = data.items;
+        this.numOfAppointments = data.totalCount;
         console.log('Fetched appointments:', this.appointments);
       },
       (error) => {

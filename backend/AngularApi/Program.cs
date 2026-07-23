@@ -34,6 +34,10 @@ namespace WebApiDemo
             });
             builder.Services.AddFluentValidationAutoValidation();
             builder.Services.AddValidatorsFromAssemblyContaining<RegisterUserDTOValidator>();
+            builder.Services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
+            });
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerServices();
@@ -67,6 +71,7 @@ namespace WebApiDemo
                 });
             }
 
+            app.UseResponseCompression();
             app.UseStaticFiles();
             app.UseCors("MyPolicy");
             app.UseAuthentication();

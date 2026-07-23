@@ -23,7 +23,7 @@ namespace AngularApi.Controllers
         }
         [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
-        public async Task<IActionResult> GetAllPatientsWithReviews()
+        public async Task<IActionResult> GetAllPatientsWithReviews([FromQuery] PaginationParameters pagination)
         {
             var patients = await _context.Patients
                 .Select(p => new PatientDTO
@@ -46,7 +46,7 @@ namespace AngularApi.Controllers
                         ReviewDate = r.ReviewDate
                     }).ToList()
                 })
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
 
             return Ok(patients);
         }
@@ -79,36 +79,32 @@ namespace AngularApi.Controllers
 
         [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpGet("{patientId}/appointments")]
-        public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetPatientAppointments(string patientId)
+        public async Task<ActionResult<PagedResult<AppointmentDTO>>> GetPatientAppointments(string patientId, [FromQuery] PaginationParameters pagination)
         {
             if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
             {
                 return Forbid();
             }
 
-            var appointments = await _context.Appointments
+            return await _context.Appointments
                 .Where(a => a.PatientId == patientId)
                 .SelectAppointmentDto()
-                .ToListAsync();
-
-            return Ok(appointments);
+                .ToPagedResultAsync(pagination);
         }
 
         [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpGet("{patientId}/appointments/date-range")]
-        public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointmentsByDateRange(string patientId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        public async Task<ActionResult<PagedResult<AppointmentDTO>>> GetAppointmentsByDateRange(string patientId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate, [FromQuery] PaginationParameters pagination)
         {
             if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
             {
                 return Forbid();
             }
 
-            var appointments = await _context.Appointments
+            return await _context.Appointments
                 .Where(a => a.PatientId == patientId && a.AppointmentTakenDate >= startDate && a.AppointmentTakenDate <= endDate)
                 .SelectAppointmentDto()
-                .ToListAsync();
-
-            return Ok(appointments);
+                .ToPagedResultAsync(pagination);
         }
 
 

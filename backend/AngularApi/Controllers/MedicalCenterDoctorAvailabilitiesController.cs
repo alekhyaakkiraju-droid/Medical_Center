@@ -25,7 +25,7 @@ namespace AngularApi.Controllers
 
         // GET: api/MedicalCenterDoctorAvailabilities
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MedicalCenterDoctorAvailabilityDTO>>> GetMedicalCenterDoctorAvailability()
+        public async Task<ActionResult<PagedResult<MedicalCenterDoctorAvailabilityDTO>>> GetMedicalCenterDoctorAvailability([FromQuery] PaginationParameters pagination)
         {
             return await _context.MedicalCenterDoctorAvailability
                 .Select(a => new MedicalCenterDoctorAvailabilityDTO
@@ -38,7 +38,7 @@ namespace AngularApi.Controllers
                     IsAvailable = a.IsAvailable,
                     ReasonOfUnavailability = a.ReasonOfUnavailability
                 })
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
         }
 
         // GET: api/MedicalCenterDoctorAvailabilities/5

@@ -32,7 +32,7 @@ export class HomeComponent implements  OnInit , AfterViewInit {
 
     this.specializationService.getSpecializations().subscribe(
       (data) => {
-        this.specializations = data.slice(0,6);
+        this.specializations = data.items.slice(0, 6);
         console.log("specializations ",this.specializations);
       },
       (error) => {

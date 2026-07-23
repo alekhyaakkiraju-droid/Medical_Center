@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AngularApi.DTO;
+using AngularApi.DTO;
 using AngularApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -25,7 +26,7 @@ namespace AngularApi.Controllers
 
         // GET: api/MedicalCenters
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MedicalCenterListItemDTO>>> GetMedicalCenter()
+        public async Task<ActionResult<PagedResult<MedicalCenterListItemDTO>>> GetMedicalCenter([FromQuery] PaginationParameters pagination)
         {
             return await _context.MedicalCenter
                 .Select(m => new MedicalCenterListItemDTO
@@ -40,7 +41,7 @@ namespace AngularApi.Controllers
                     State = m.State,
                     Zip = m.Zip
                 })
-                .ToListAsync();
+                .ToPagedResultAsync(pagination);
         }
 
         // GET: api/MedicalCenters/5

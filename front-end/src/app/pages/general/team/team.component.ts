@@ -30,9 +30,9 @@ export class TeamComponent implements OnInit, OnDestroy {
   }
   loadDoctor() {
     const doctorSub =  this.doctorService.getAllDoctors().subscribe(
-      (doctorFetched: Doctor[]) => {
-        if (doctorFetched) {
-          this.doctorsData = doctorFetched;
+      (result) => {
+        if (result?.items) {
+          this.doctorsData = result.items;
           console.log('Fetched doctorsData :',this.doctorsData , this.doctorsData.length);
         } else {
           console.log('No  doctorsData');

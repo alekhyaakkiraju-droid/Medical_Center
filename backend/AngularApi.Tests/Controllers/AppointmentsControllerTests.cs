@@ -95,13 +95,13 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetAllAppointments();
+            var result = await _controller.GetAllAppointments(new PaginationParameters());
 
             // Assert
-            var dtos = result.Value.Should().BeAssignableTo<List<AppointmentDTO>>().Subject;
-            dtos.Should().HaveCount(1);
-            dtos[0].Doctor.Specializations.Should().Contain("Cardiology");
-            dtos[0].Patient.Name.Should().Be("Patient1");
+            var paged = result.Value.Should().BeAssignableTo<PagedResult<AppointmentDTO>>().Subject;
+            paged.Items.Should().HaveCount(1);
+            paged.Items[0].Doctor.Specializations.Should().Contain("Cardiology");
+            paged.Items[0].Patient.Name.Should().Be("Patient1");
         }
 
 
@@ -223,12 +223,12 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetAppointmentsByPatient("patient1");
+            var result = await _controller.GetAppointmentsByPatient("patient1", new PaginationParameters());
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedAppointments = okResult.Value.Should().BeAssignableTo<List<AppointmentDTO>>().Subject;
-            returnedAppointments.Should().HaveCount(2);
+            var paged = okResult.Value.Should().BeAssignableTo<PagedResult<AppointmentDTO>>().Subject;
+            paged.Items.Should().HaveCount(2);
         }
 
         [Fact]
@@ -244,13 +244,13 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetTodaysAppointments();
+            var result = await _controller.GetTodaysAppointments(new PaginationParameters());
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedAppointments = okResult.Value.Should().BeAssignableTo<List<AppointmentDTO>>().Subject;
-            returnedAppointments.Should().HaveCount(1);
-            returnedAppointments[0].AppointmentId.Should().Be(1);
+            var paged = okResult.Value.Should().BeAssignableTo<PagedResult<AppointmentDTO>>().Subject;
+            paged.Items.Should().HaveCount(1);
+            paged.Items[0].AppointmentId.Should().Be(1);
         }
 
         [Fact]
