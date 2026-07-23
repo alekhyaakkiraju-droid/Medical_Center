@@ -1,34 +1,29 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
-import * as Flowbite from 'flowbite';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+
 @Component({
   selector: 'app-delete-modal',
   templateUrl: './delete-modal.component.html'
 })
-export class DeleteModalComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-  @ViewChild('deleteModal') deleteModal!: ElementRef;
-  @ViewChild('cancelDelete') cancelDelete!: ElementRef;
-  @ViewChild('confirmDelete') confirmDelete!: ElementRef;
-
+export class DeleteModalComponent {
   @Input() itemId!: number;
-  @Output() confirm = new EventEmitter<number>(); 
-  private modalInstance: any;
-  ngAfterViewInit() {
-    this.modalInstance = new Flowbite.Modal(this.deleteModal.nativeElement);
+  @Output() confirm = new EventEmitter<number>();
+
+  isVisible = false;
+
+  showModal(): void {
+    this.isVisible = true;
   }
 
-  showModal() {
-    if (this.modalInstance) {
-      this.modalInstance.show();
-      this.cancelDelete.nativeElement.onclick = () => this.modalInstance.hide();
-      this.confirmDelete.nativeElement.onclick = () => {
-        this.modalInstance.hide();
-        this.confirm.emit(this.itemId);
-      };
-    }
+  hideModal(): void {
+    this.isVisible = false;
+  }
+
+  onCancel(): void {
+    this.hideModal();
+  }
+
+  onConfirm(): void {
+    this.hideModal();
+    this.confirm.emit(this.itemId);
   }
 }

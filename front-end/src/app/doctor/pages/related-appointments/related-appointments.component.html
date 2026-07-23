@@ -6,7 +6,7 @@
     <div class="mt-5 relative overflow-x-auto shadow-md sm:rounded-lg">
         <div class="flex flex-column sm:flex-row flex-wrap space-y-4 sm:space-y-0 items-center justify-between pb-4">
             <div class="relative flex flex-wrap items-center justify-between w-full mt-5 mb-5">
-                <button id="dropdownRadioButton" data-dropdown-toggle="dropdownRadio"
+                <button (click)="toggleDropdown()"
                     class="inline-flex items-center ms-3 text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 "
                     type="button">
                     <svg class="w-3 h-3 text-gray-500 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -21,8 +21,8 @@
                     </svg>
                 </button>
 
-                <div id="dropdownRadio"
-                    class="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm ">
+                <div [class.hidden]="!isDropdownOpen"
+                    class="z-10 w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm absolute mt-2">
                     <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200"
                         aria-labelledby="dropdownRadioButton">
                         <li *ngFor="let filter of filters">

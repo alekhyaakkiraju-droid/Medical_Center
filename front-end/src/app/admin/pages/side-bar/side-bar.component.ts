@@ -1,49 +1,34 @@
 import { Component, OnInit } from '@angular/core';
-import { DoctorMENU, MENU } from '../../menu';
-import * as Flowbite from 'flowbite';
 import { Router } from '@angular/router';
+import { DoctorMENU, MENU } from '../../menu';
 
 @Component({
   selector: 'app-side-bar',
   templateUrl: './side-bar.component.html'
 })
 export class SideBarComponent implements OnInit {
-  
-  constructor(private router: Router) { }
-  ngOnInit() {
-   // this.loadFlowbite();
-    this.checkIfDoctorRoute();
+  menuItems: any;
+  isDropdownOpen = false;
 
+  constructor(private router: Router) {}
+
+  ngOnInit(): void {
+    this.checkIfDoctorRoute();
   }
-  menuItems:any;
+
   checkIfDoctorRoute(): void {
     if (this.router.url.includes('doctor/')) {
-      this.menuItems = DoctorMENU; 
+      this.menuItems = DoctorMENU;
     } else {
-      this.menuItems = MENU; 
+      this.menuItems = MENU;
     }
   }
 
-  loadFlowbite(): void {
-    if (typeof Flowbite !== 'undefined') {
-      const dropdownMenu = document.getElementById('dropdown-user');
-      
-      if (dropdownMenu) {
-        dropdownMenu.addEventListener('click', () => {
-          dropdownMenu.classList.toggle('hidden');
-        });
-      }
-    }
-  }
-
-  isDropdownOpen = false; // Track dropdown state
-
-  toggleDropdown() {
+  toggleDropdown(): void {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
-  closeDropdown() {
+  closeDropdown(): void {
     this.isDropdownOpen = false;
   }
- 
 }
