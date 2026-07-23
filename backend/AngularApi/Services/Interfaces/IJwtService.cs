@@ -1,9 +1,13 @@
 ﻿using AngularApi.Models;
+using AngularApi.Services;
 
-namespace AngularApi.Services.Interfaces
+namespace AngularApi.Services.Interfaces;
+
+public interface IJwtService
 {
-    public interface IJwtService
-    {
-        string GenerateJwtToken(AppUser user);
-    }
+    string GenerateJwtToken(AppUser user);
+
+    JwtTokenResult GenerateJwtTokenResult(AppUser user);
+
+    JwtTokenResult? ReadToken(string token, bool validateLifetime = true);
 }

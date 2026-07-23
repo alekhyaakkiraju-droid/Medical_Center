@@ -42,6 +42,7 @@ public class OwnershipValidationIntegrationTests : IClassFixture<MedicalCenterWe
     public async Task DeletePatientAppointment_WhenPatientIdDoesNotMatchUser_ReturnsForbidden()
     {
         var client = CreateAuthenticatedClient("patient-a", "user");
+        await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
 
         var response = await client.DeleteAsync("/api/Patients/patient-b/appointments/1");
 
@@ -74,10 +75,7 @@ public class OwnershipValidationIntegrationTests : IClassFixture<MedicalCenterWe
 
     private HttpClient CreateAuthenticatedClient(string userId, params string[] roles)
     {
-        var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
-        {
-            AllowAutoRedirect = false
-        });
+        var client = AntiforgeryTestHelper.CreateClient(_factory);
 
         using var scope = _factory.Services.CreateScope();
         var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();

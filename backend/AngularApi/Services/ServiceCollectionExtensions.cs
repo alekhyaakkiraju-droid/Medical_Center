@@ -1,4 +1,5 @@
 ﻿using AngularApi.Models;
+using AngularApi.Options;
 using AngularApi.Services.impelementation;
 using AngularApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -16,12 +17,16 @@ namespace AngularApi.Services
     {
         public static void AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.Configure<AuthCookieOptions>(configuration.GetSection(AuthCookieOptions.SectionName));
+
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>(); // should be addTrasient
             services.AddScoped<EmailTemplateService>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IGoogleService, GoogleService>();
             services.AddScoped<IOwnershipValidator, OwnershipValidator>();
+            services.AddScoped<IAuthCookieService, AuthCookieService>();
+            services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
@@ -42,6 +47,8 @@ namespace AngularApi.Services
 
         public static void AddAuthenticationServices(this IServiceCollection services, IConfiguration configuration)
         {
+            var authCookieName = configuration["Jwt:AuthCookieName"] ?? "MedCenter.Auth";
+
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -62,7 +69,20 @@ namespace AngularApi.Services
                     ValidAudience = configuration["Jwt:ValidAudience"],
                     ValidateLifetime = true, //  Enforce expiration check
                     ClockSkew = TimeSpan.Zero,//  Prevents extra allowed time
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!))
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        if (string.IsNullOrEmpty(context.Token)
+                            && context.Request.Cookies.TryGetValue(authCookieName, out var cookieToken))
+                        {
+                            context.Token = cookieToken;
+                        }
+
+                        return Task.CompletedTask;
+                    },
                 };
             })
             .AddCookie()

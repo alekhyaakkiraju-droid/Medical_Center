@@ -1,16 +1,19 @@
 ﻿using AngularApi.Controllers;
 using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Options;
 using AngularApi.Services;
 using AngularApi.Services.Interfaces;
 using AngularApi.Tests.TestData;
 using FluentAssertions;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Moq;
 using System.Security.Claims;
 
@@ -23,6 +26,8 @@ namespace AngularApi.Tests.Controllers
         private readonly Mock<IEmailService> _emailServiceMock;
         private readonly Mock<IJwtService> _jwtServiceMock;
         private readonly Mock<IGoogleService> _googleServiceMock;
+        private readonly Mock<IAuthCookieService> _authCookieServiceMock;
+        private readonly Mock<IAntiforgery> _antiforgeryMock;
         private readonly EmailTemplateService _emailTemplateService;
         private readonly AccountController _controller;
 
@@ -35,6 +40,8 @@ namespace AngularApi.Tests.Controllers
             _emailServiceMock = new Mock<IEmailService>();
             _jwtServiceMock = new Mock<IJwtService>();
             _googleServiceMock = new Mock<IGoogleService>();
+            _authCookieServiceMock = new Mock<IAuthCookieService>();
+            _antiforgeryMock = new Mock<IAntiforgery>();
 
             var webHostEnvironmentMock = new Mock<IWebHostEnvironment>();
             webHostEnvironmentMock
@@ -48,7 +55,15 @@ namespace AngularApi.Tests.Controllers
                 _emailServiceMock.Object,
                 _emailTemplateService,
                 _jwtServiceMock.Object,
-                _googleServiceMock.Object);
+                _googleServiceMock.Object,
+                _authCookieServiceMock.Object,
+                _antiforgeryMock.Object,
+                Microsoft.Extensions.Options.Options.Create(new AuthCookieOptions()));
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext(),
+            };
         }
 
 
@@ -97,13 +112,13 @@ namespace AngularApi.Tests.Controllers
                 Email = SeedData.TestUserEmail,
                 Password = SeedData.TestUserPassword
             };
-            var user = new AppUser { Email = loginDto.Email };
+            var user = new AppUser { Email = loginDto.Email, Id = "user-1", UserName = "test-user" };
             _userManagerMock.Setup(x => x.FindByEmailAsync(loginDto.Email))
                 .ReturnsAsync(user);
             _userManagerMock.Setup(x => x.CheckPasswordAsync(user, loginDto.Password))
                 .ReturnsAsync(true);
-            _jwtServiceMock.Setup(x => x.GenerateJwtToken(user))
-                .Returns("jwt-token");
+            _authCookieServiceMock.Setup(x => x.IssueAuthCookiesAsync(user, default))
+                .ReturnsAsync(new AuthCookieIssueResult(DateTime.UtcNow.AddDays(1)));
 
             // Act
             var result = await _controller.Login(loginDto);
@@ -112,8 +127,9 @@ namespace AngularApi.Tests.Controllers
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
             okResult.Value.Should().BeEquivalentTo(new
             {
-                token = "jwt-token"
-            });
+                expiration = DateTime.UtcNow.AddDays(1)
+            }, options => options.Using<DateTime>(ctx =>
+                ctx.Subject.Should().BeCloseTo(ctx.Expectation, TimeSpan.FromMinutes(1))).WhenTypeIs<DateTime>());
         }
 
         [Fact]

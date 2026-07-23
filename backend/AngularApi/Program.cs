@@ -1,6 +1,8 @@
+using AngularApi.Filters;
 using AngularApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WebApiDemo
 {
@@ -10,7 +12,23 @@ namespace WebApiDemo
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllers();
+            builder.Services.AddAntiforgery(options =>
+            {
+                options.HeaderName = "X-XSRF-TOKEN";
+                options.Cookie.Name = "MedCenter.AntiForgery";
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+                    ? CookieSecurePolicy.SameAsRequest
+                    : CookieSecurePolicy.Always;
+                options.Cookie.SameSite = SameSiteMode.Strict;
+                options.Cookie.Path = "/api";
+            });
+
+            builder.Services.AddScoped<ValidateAntiforgeryForMutatingRequestsFilter>();
+            builder.Services.AddControllers(options =>
+            {
+                options.Filters.AddService<ValidateAntiforgeryForMutatingRequestsFilter>();
+            });
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerServices();

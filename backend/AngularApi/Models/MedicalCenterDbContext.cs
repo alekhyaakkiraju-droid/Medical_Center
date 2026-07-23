@@ -20,6 +20,7 @@ namespace AngularApi.Models
         public DbSet<MedicalCenterDoctorAvailability> MedicalCenterDoctorAvailability { get; set; }       
         public DbSet<MedicalCenter> MedicalCenter { get; set; }
         public DbSet<PatientReview> PatientReviews { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
