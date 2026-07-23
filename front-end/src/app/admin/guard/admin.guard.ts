@@ -13,10 +13,15 @@ export class AdminGuard implements CanActivate {
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+    if (this.authService.isTokenExpired()) {
+      this.router.navigate(['/auth/login']);
+      return false;
+    }
+
     if (this.authService.isRole('admin')) {
-      this.authService.isLoggedSubject.next(true);
       return true;
     }
+
     this.router.navigate(['/pages/general/errorPage']);
     return false;
   }
