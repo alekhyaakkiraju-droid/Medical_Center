@@ -1,11 +1,13 @@
 ﻿using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Options;
 using AngularApi.Services;
 using AngularApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
 
 namespace AngularApi.Controllers
@@ -20,19 +22,22 @@ namespace AngularApi.Controllers
         private readonly EmailTemplateService _emailTemplateService;
         private readonly IEmailService _emailService;
         private readonly IOwnershipValidator _ownershipValidator;
+        private readonly AppointmentSettings _appointmentSettings;
 
         public AppointmentsController(
             MedicalCenterDbContext context,
             UserManager<AppUser> userManager,
             IEmailService emailService,
             EmailTemplateService emailTemplateService,
-            IOwnershipValidator ownershipValidator)
+            IOwnershipValidator ownershipValidator,
+            IOptions<AppointmentSettings> appointmentSettings)
         {
             _userManager = userManager;
             _context = context;
             _emailService = emailService;
             _emailTemplateService = emailTemplateService;
             _ownershipValidator = ownershipValidator;
+            _appointmentSettings = appointmentSettings.Value;
         }
 
         //public AppointmentsController(MedicalCenterDbContext context, UserManager<AppUser> userManager, IEmailService emailService)
@@ -148,19 +153,18 @@ namespace AngularApi.Controllers
         [HttpPost]
         public async Task<ActionResult<Appointment>> PostAppointment(Appointment appointment)
         {
-
-            if (!string.IsNullOrEmpty(appointment.DoctorName))
+            if (string.IsNullOrEmpty(appointment.DoctorId))
             {
-                var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.Name == appointment.DoctorName);
-                if (doctor != null)
-                {
-                    appointment.DoctorId = doctor.Id;
-                }
-                else
-                {
-                    return BadRequest("Invalid DoctorName");
-                }
+                return BadRequest("DoctorId is required");
             }
+
+            var doctor = await _context.Doctors.FindAsync(appointment.DoctorId);
+            if (doctor == null)
+            {
+                return BadRequest("Invalid DoctorId");
+            }
+
+            appointment.DoctorName = doctor.Name;
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var user = await _userManager.FindByIdAsync(userId);
@@ -170,20 +174,28 @@ namespace AngularApi.Controllers
             }
 
             appointment.PatientId = user.Id;
-            appointment.MedicalCenterId = 2;
-            appointment.AppointmentStatusId = (int)AppointmentStatusEnum.Active + (int)1;
-            appointment.Amount = 30;
+            appointment.MedicalCenterId = _appointmentSettings.DefaultCenterId;
+            appointment.AppointmentStatusId = (int)AppointmentStatusEnum.Active;
+            appointment.Amount = _appointmentSettings.DefaultFee;
             appointment.PaymentStatus = "Pending";
 
             _context.Appointments.Add(appointment);
             await _context.SaveChangesAsync();
 
-            var emailTemplateService = HttpContext.RequestServices.GetRequiredService<EmailTemplateService>();
+            try
+            {
+                var emailBody = _emailTemplateService.GetAppointmentConfirmationEamil(
+                    user.UserName,
+                    appointment.DoctorName,
+                    appointment.AppointmentTakenDate.ToString());
+                var messageObj = new Message(new[] { user.Email }, "Appointment Confirmation", emailBody);
+                _emailService.SendEmail(messageObj);
+            }
+            catch (Exception)
+            {
+                // Email failure must not prevent appointment creation.
+            }
 
-            var emailBody = _emailTemplateService.GetAppointmentConfirmationEamil(user.UserName, appointment.DoctorName, appointment.AppointmentTakenDate.ToString());
-            var messageObj = new Message(new[] { user.Email }, "Appointment Confirmation", emailBody);
-
-            _emailService.SendEmail(messageObj);
             return CreatedAtAction("GetAppointment", new { id = appointment.Id }, appointment);
         }
 

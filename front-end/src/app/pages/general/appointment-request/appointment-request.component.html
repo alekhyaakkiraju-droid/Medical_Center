@@ -113,7 +113,7 @@
               [ngClass]="{ 'is-invalid': doctor?.invalid && doctor?.touched }"
             >
               <option value="">Select Doctor</option>
-              <option *ngFor="let x of filteredDoctors" [value]="x.name">
+              <option *ngFor="let x of filteredDoctors" [value]="x.id">
                 {{ x.name }}
               </option>
             </select>

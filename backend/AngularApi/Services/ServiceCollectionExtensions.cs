@@ -18,6 +18,7 @@ namespace AngularApi.Services
         public static void AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<AuthCookieOptions>(configuration.GetSection(AuthCookieOptions.SectionName));
+            services.Configure<AppointmentSettings>(configuration.GetSection(AppointmentSettings.SectionName));
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>(); // should be addTrasient

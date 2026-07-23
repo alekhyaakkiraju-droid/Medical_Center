@@ -1,6 +1,7 @@
 ﻿using AngularApi.Controllers;
 using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Options;
 using AngularApi.Services;
 using AngularApi.Services.impelementation;
 using AngularApi.Services.Interfaces;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Moq;
 using System.Security.Claims;
 
@@ -42,13 +44,15 @@ namespace AngularApi.Tests.Controllers
                 .Returns(Path.Combine(AppContext.BaseDirectory, "wwwroot"));
             _emailTemplateService = new EmailTemplateService(webHostEnvironmentMock.Object);
             _ownershipValidator = new OwnershipValidator();
+            var appointmentSettings = Microsoft.Extensions.Options.Options.Create(new AppointmentSettings { DefaultFee = 30, DefaultCenterId = 2 });
 
             _controller = new AppointmentsController(
                 _context,
                 _userManagerMock.Object,
                 _emailServiceMock.Object,
                 _emailTemplateService,
-                _ownershipValidator);
+                _ownershipValidator,
+                appointmentSettings);
 
             var claims = new[]
             {
@@ -150,24 +154,35 @@ namespace AngularApi.Tests.Controllers
 
 
         [Fact]
-        public async Task PostAppointment_InvalidDoctorName_ReturnsBadRequest()
+        public async Task PostAppointment_InvalidDoctorId_ReturnsBadRequest()
         {
             // Arrange
-            var appointment = new Appointment { Id = 1, DoctorName = "InvalidDoctor" };
+            var appointment = new Appointment { Id = 1, DoctorId = "invalid-doctor" };
 
             // Act
             var result = await _controller.PostAppointment(appointment);
 
             // Assert
             var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
-            badRequestResult.Value.Should().Be("Invalid DoctorName");
+            badRequestResult.Value.Should().Be("Invalid DoctorId");
+        }
+
+        [Fact]
+        public async Task PostAppointment_MissingDoctorId_ReturnsBadRequest()
+        {
+            var appointment = new Appointment { Id = 1 };
+
+            var result = await _controller.PostAppointment(appointment);
+
+            var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
+            badRequestResult.Value.Should().Be("DoctorId is required");
         }
 
         [Fact]
         public async Task PostAppointment_UserNotFound_ReturnsNotFound()
         {
             // Arrange
-            var appointment = new Appointment { Id = 1, DoctorName = "Dr. Smith" };
+            var appointment = new Appointment { Id = 1, DoctorId = "doctor-id" };
             var doctor = new Doctor { Id = "doctor-id", Name = "Dr. Smith" };
             _context.Doctors.Add(doctor);
             await _context.SaveChangesAsync();
@@ -179,6 +194,62 @@ namespace AngularApi.Tests.Controllers
             // Assert
             var notFoundResult = result.Result.Should().BeOfType<NotFoundObjectResult>().Subject;
             notFoundResult.Value.Should().Be("User not found");
+        }
+
+        [Fact]
+        public async Task PostAppointment_ValidInput_UsesConfigurationAndDoctorId()
+        {
+            var doctor = new Doctor { Id = "doctor-id", Name = "Dr. Smith" };
+            _context.Doctors.Add(doctor);
+            await _context.SaveChangesAsync();
+
+            var user = new AppUser { Id = "patient1", UserName = "Patient1", Email = "patient1@example.com" };
+            _userManagerMock.Setup(x => x.FindByIdAsync("patient1")).ReturnsAsync(user);
+
+            var settings = Microsoft.Extensions.Options.Options.Create(new AppointmentSettings { DefaultFee = 55, DefaultCenterId = 9 });
+            var controller = new AppointmentsController(
+                _context,
+                _userManagerMock.Object,
+                _emailServiceMock.Object,
+                _emailTemplateService,
+                _ownershipValidator,
+                settings)
+            {
+                ControllerContext = _controller.ControllerContext
+            };
+
+            var appointment = new Appointment { DoctorId = "doctor-id", AppointmentTakenDate = DateTime.UtcNow };
+
+            var result = await controller.PostAppointment(appointment);
+
+            var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
+            var createdAppointment = createdResult.Value.Should().BeAssignableTo<Appointment>().Subject;
+            createdAppointment.DoctorId.Should().Be("doctor-id");
+            createdAppointment.DoctorName.Should().Be("Dr. Smith");
+            createdAppointment.MedicalCenterId.Should().Be(9);
+            createdAppointment.Amount.Should().Be(55);
+            createdAppointment.AppointmentStatusId.Should().Be((int)AppointmentStatusEnum.Active);
+        }
+
+        [Fact]
+        public async Task PostAppointment_EmailFailure_StillCreatesAppointment()
+        {
+            var doctor = new Doctor { Id = "doctor-id", Name = "Dr. Smith" };
+            _context.Doctors.Add(doctor);
+            await _context.SaveChangesAsync();
+
+            var user = new AppUser { Id = "patient1", UserName = "Patient1", Email = "patient1@example.com" };
+            _userManagerMock.Setup(x => x.FindByIdAsync("patient1")).ReturnsAsync(user);
+            _emailServiceMock
+                .Setup(x => x.SendEmail(It.IsAny<Message>()))
+                .Throws(new InvalidOperationException("SMTP unavailable"));
+
+            var appointment = new Appointment { DoctorId = "doctor-id", AppointmentTakenDate = DateTime.UtcNow };
+
+            var result = await _controller.PostAppointment(appointment);
+
+            result.Result.Should().BeOfType<CreatedAtActionResult>();
+            (await _context.Appointments.CountAsync()).Should().Be(1);
         }
 
         [Fact]

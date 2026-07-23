@@ -1,12 +1,14 @@
 using AngularApi.Controllers;
 using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Options;
 using AngularApi.Services.impelementation;
 using AngularApi.Services.Interfaces;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
 
 namespace AngularApi.Tests.Controllers;
@@ -29,7 +31,8 @@ public class AppointmentsPaginationControllerTests : IDisposable
             null!,
             null!,
             null!,
-            ownershipValidator);
+            ownershipValidator,
+            Microsoft.Extensions.Options.Options.Create(new AppointmentSettings()));
 
         var claims = new[]
         {
