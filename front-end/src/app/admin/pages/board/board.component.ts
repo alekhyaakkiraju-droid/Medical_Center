@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 import { MENU } from '../../menu';
 import { PatientService } from '../../services/patient.service';
 import { ToastrService } from 'ngx-toastr';
-import { Doctor } from '../../../pages/models/doctor';
+import { Doctor } from '../../../pages/models';
 import { AppointmentService } from '../../../pages/general/services/appointment.service';
 import { DoctorService } from '../../../pages/general/services/doctor.service';
 import { ReloadService } from '../../../shared/service/reload.service';

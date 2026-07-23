@@ -7,7 +7,7 @@ import { AuthServiceService } from '../../auth/auth-services/auth-service.servic
 import { ToastrService } from 'ngx-toastr';
 import { ChangePasswordService } from '../services/change-password.service';
 import { ProfileService } from '../services/Profile.service';
-import { Profile } from '../../models/profile';
+import { Profile, ProfileDetails } from '../../models';
 
 @Component({
   selector: 'app-user-profile',
@@ -94,7 +94,7 @@ this.reload.initializeLoader();
   }
 
 
-  profileData: Profile = {
+  profileData: ProfileDetails = {
     email: '',
     userName: '',
     phoneNumber: '',
