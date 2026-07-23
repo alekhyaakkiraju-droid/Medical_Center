@@ -19,15 +19,15 @@ export class ProfileService {
               private authService :AuthServiceService ,
               private handeErrorService :HandleErrorsService) {}
 
-  getProfileDetails2(): Observable<any> {   
-    return this.http.get<any>(this.apiGetUrl, {
-      headers: this.authService.getHeaders()
-    })
+  getProfileDetails2(): Observable<any> {
+    return this.http.get<any>(this.apiGetUrl, this.authService.getHttpOptions());
   }
 
   updateProfileDetails(profile: any): Observable<any> {
-    const headers = this.authService.getHeaders();  
-    return this.http.put<any>(`${this.apiUpdateUrl}`, profile, { headers ,responseType: 'text' as 'json' }).pipe(
+    return this.http.put<any>(`${this.apiUpdateUrl}`, profile, {
+      ...this.authService.getHttpOptions(),
+      responseType: 'text' as 'json'
+    }).pipe(
       catchError(this.handeErrorService.handleError)
       
     );

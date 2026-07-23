@@ -14,8 +14,7 @@ private apiUrl = `${environment}/Appointments`;
   constructor(private http: HttpClient , private authService :AuthServiceService) {}
 
   getAppointments(): Observable<any[]> {
-    const headers = this.authService.getHeaders();  
-    return this.http.get<any[]>(this.apiUrl,{ headers });
+    return this.http.get<any[]>(this.apiUrl, this.authService.getHttpOptions());
   }
 
 }

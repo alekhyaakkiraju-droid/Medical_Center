@@ -25,8 +25,7 @@ export class ConfirmEmailComponent implements OnInit, OnDestroy {
     this.routeSubscription = this.route.queryParams.subscribe(params => {
       const userId = params['userId'];
       const token = params['token'];
-      
-      console.log(token);
+
       if (userId && token) {
         this.confirmEmail(userId, token);
       } else {

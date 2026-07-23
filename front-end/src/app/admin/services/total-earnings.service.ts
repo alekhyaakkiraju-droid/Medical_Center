@@ -13,8 +13,7 @@ export class TotalEarningsService {
   constructor(private http: HttpClient , private authService :AuthServiceService) {}
 
   getTotalEarnings(): Observable<any> {
-    const headers = this.authService.getHeaders();  
-    return this.http.get<any>(this.patientUrl , {headers});
+    return this.http.get<any>(this.patientUrl, this.authService.getHttpOptions());
   }
 
 }

@@ -15,8 +15,7 @@ export class SpecializationService {
 
 
   getSpecializations(): Observable<any> {
-    const headers = this.authService.getHeaders(); 
-    return this.http.get<any>(this.apiUrl,{headers});
+    return this.http.get<any>(this.apiUrl, this.authService.getHttpOptions());
   }
 
 }

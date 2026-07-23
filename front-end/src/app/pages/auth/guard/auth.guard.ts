@@ -14,11 +14,11 @@ export class AuthGuard implements CanActivate {
 
   canActivate(): boolean {
     if (this.authService.isTokenExpired()) {
-      console.log('Token expired');
-      this.authService.logout();
-      return false; 
+      this.authService.logout().subscribe();
+      this.router.navigate(['/auth/login']);
+      return false;
     }
-    console.log('token is valid'); 
-    return true; 
+
+    return true;
   }
 }
