@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { Appointment, PagedResult, UpdateAppointment } from '../../models';
 import { AuthServiceService } from '../../auth/auth-services/auth-service.service';
 

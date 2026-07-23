@@ -7,13 +7,13 @@ WORKDIR /app
 COPY package.json package-lock.json /app/
 
 # Install dependencies
-RUN npm install --legacy-peer-deps
+RUN npm install
 
 # Copy the rest of the code
 COPY . /app
 
 # Build the Angular project 
-RUN npm run build --prod
+RUN npm run build -- --configuration production
 
 # Stage 2: Use Nginx to Serve the App
 FROM nginx:1-alpine-slim
