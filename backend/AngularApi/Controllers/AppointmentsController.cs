@@ -2,6 +2,7 @@
 using AngularApi.Models;
 using AngularApi.Services;
 using AngularApi.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,8 +11,8 @@ using System.Security.Claims;
 namespace AngularApi.Controllers
 {
     [Route("api/[controller]")]
-
     [ApiController]
+    [Authorize]
     public class AppointmentsController : ControllerBase
     {
         private readonly MedicalCenterDbContext _context;
@@ -34,12 +35,14 @@ namespace AngularApi.Controllers
         //}
 
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointments()
         {
             return await _context.Appointments.Include(i => i.Patient).ToListAsync();
         }
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("GetAllAppointments")]
         public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAllAppointments()
         {
@@ -74,6 +77,7 @@ namespace AngularApi.Controllers
 
 
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Appointment>> GetAppointment(int id)
         {
@@ -117,6 +121,7 @@ namespace AngularApi.Controllers
         //    return NoContent();
         //}
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAppointment(int id, [FromBody] UpdateAppointmentDTO appointmentDto)
         {
@@ -147,6 +152,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("total-earnings")]
         public async Task<IActionResult> GetPatientTotalEarnings()
         {
@@ -156,6 +162,7 @@ namespace AngularApi.Controllers
             return Ok(new { TotalEarnings = totalEarnings });
         }
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpPost]
         public async Task<ActionResult<Appointment>> PostAppointment(Appointment appointment)
         {
@@ -198,6 +205,7 @@ namespace AngularApi.Controllers
             return CreatedAtAction("GetAppointment", new { id = appointment.Id }, appointment);
         }
 
+        [Authorize(Roles = "admin,doctor")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAppointment(int id)
         {
@@ -213,6 +221,7 @@ namespace AngularApi.Controllers
             return NoContent();
         }
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpGet("patient/{patientId}")]
         public async Task<IActionResult> GetAppointmentsByPatient(string patientId)
         {
@@ -234,6 +243,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [Authorize(Policy = "DoctorPolicy")]
         [HttpGet("date/{date}")]
         public async Task<IActionResult> GetAppointmentsByDate(DateTime date)
         {
@@ -243,6 +253,7 @@ namespace AngularApi.Controllers
             return Ok(appointments);
         }
 
+        [Authorize(Policy = "DoctorPolicy")]
         [HttpGet("status/{status}")]
         public async Task<IActionResult> GetAppointmentsByStatus(AppointmentStatusEnum status)
         {
@@ -252,6 +263,7 @@ namespace AngularApi.Controllers
             return Ok(appointments);
         }
 
+        [Authorize(Policy = "DoctorPolicy")]
         [HttpGet("today")]
         public async Task<IActionResult> GetTodaysAppointments()
         {
@@ -263,6 +275,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [Authorize(Policy = "DoctorPolicy")]
         [HttpGet("upcoming")]
         public async Task<IActionResult> GetUpcomingAppointments()
         {
@@ -274,6 +287,7 @@ namespace AngularApi.Controllers
             return Ok(appointments);
         }
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpGet("patient/{patientId}/status/{status}")]
         public async Task<IActionResult> GetAppointmentsByPatientAndStatus(string patientId, AppointmentStatusEnum status)
         {
@@ -283,6 +297,7 @@ namespace AngularApi.Controllers
             return Ok(appointments);
         }
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpGet("patient/{patientId}/history")]
         public async Task<IActionResult> GetAppointmentHistoryByPatient(string patientId)
         {

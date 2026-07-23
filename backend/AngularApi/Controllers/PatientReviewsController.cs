@@ -1,4 +1,5 @@
 ﻿using AngularApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,6 +7,7 @@ namespace AngularApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "AdminPolicy")]
     public class PatientReviewsController : ControllerBase
     {
         private readonly MedicalCenterDbContext _context;

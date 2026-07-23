@@ -1,5 +1,6 @@
 ﻿using AngularApi.DTO;
 using AngularApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +8,7 @@ namespace AngularApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PatientsController : ControllerBase
     {
 
@@ -16,6 +18,7 @@ namespace AngularApi.Controllers
         {
             _context = context;
         }
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
         public async Task<IActionResult> GetAllPatientsWithReviews()
         {
@@ -35,6 +38,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpGet("{id}")]
         public async Task<ActionResult<PatientDTO>> GetPatientById(string id)
         {
@@ -54,6 +58,7 @@ namespace AngularApi.Controllers
             return Ok(patient);
         }
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpGet("{patientId}/appointments")]
         public async Task<ActionResult<IEnumerable<Appointment>>> GetPatientAppointments(string patientId)
         {
@@ -64,6 +69,7 @@ namespace AngularApi.Controllers
             return Ok(appointments);
         }
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpGet("{patientId}/appointments/date-range")]
         public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentsByDateRange(string patientId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
@@ -77,6 +83,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpPut("{patientId}/reviews/{reviewId}")]
         public async Task<IActionResult> UpdateReview(string patientId, int reviewId, [FromBody] PatientReview review)
         {
@@ -91,6 +98,7 @@ namespace AngularApi.Controllers
             return NoContent();
         }
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpDelete("{patientId}/appointments/{appointmentId}")]
         public async Task<IActionResult> DeleteAppointment(string patientId, int appointmentId)
         {
@@ -104,6 +112,7 @@ namespace AngularApi.Controllers
             return NoContent();
         }
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePatient(string id, [FromBody] PatientDTO model)
         {
@@ -121,6 +130,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePatient(string id)
         {

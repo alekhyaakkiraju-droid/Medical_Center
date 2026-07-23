@@ -14,6 +14,7 @@ namespace AngularApi.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class AccountController : ControllerBase
     {
 
@@ -97,6 +98,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost("Register/admin")]
         public async Task<IActionResult> RegisterWithAdmin(RegisterUserDTO registerUser)
         {
@@ -119,6 +121,7 @@ namespace AngularApi.Controllers
             return BadRequest(ModelState);
         }
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost("Register/doctor")]
         public async Task<IActionResult> RegisterWithDoctor(RegisterUserDTO registerUser)
         {
@@ -199,6 +202,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [AllowAnonymous]
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDTO forgotPasswordDto)
         {
@@ -237,6 +241,7 @@ namespace AngularApi.Controllers
             return BadRequest(ModelState);
         }
 
+        [AllowAnonymous]
         [HttpGet("reset-password")]
         public IActionResult ResetPassword(string token, string email)
         {
@@ -252,6 +257,7 @@ namespace AngularApi.Controllers
 
 
 
+        [AllowAnonymous]
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDTO resetPasswordDto)
         {
@@ -286,6 +292,7 @@ namespace AngularApi.Controllers
         /// 
 
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto model)
         {
@@ -300,6 +307,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpPut("update-profile")]
         public async Task<IActionResult> UpdateProfile(UpdateProfileDto model)
         {
@@ -334,6 +342,7 @@ namespace AngularApi.Controllers
             return Ok(new { Message = "Email confirmed successfully." });
         }
 
+        [AllowAnonymous]
         [HttpPost("resend-email-confirmation")]
         public async Task<IActionResult> ResendEmailConfirmation([FromBody] ResendEmailConfirmationDto model)
         {
@@ -350,6 +359,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpGet("user-details")]
         public async Task<IActionResult> GetUserDetails()
         {
@@ -368,6 +378,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpDelete("delete")]
         public async Task<IActionResult> DeleteAccount()
         {

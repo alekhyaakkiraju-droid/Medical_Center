@@ -1,5 +1,6 @@
 ﻿using AngularApi.DTO;
 using AngularApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Polly;
@@ -9,7 +10,7 @@ namespace AngularApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //  [Authorize(Roles = "doctor")]
+    [Authorize(Policy = "DoctorPolicy")]
     public class DoctorsController : ControllerBase
     {
         private readonly MedicalCenterDbContext _context;
@@ -31,6 +32,7 @@ namespace AngularApi.Controllers
 
 
 
+        [AllowAnonymous]
         [HttpGet("/api/DoctorsWithSpectialization")]
         public async Task<IActionResult> GetDoctorsWithSpectialization()
         {
@@ -105,6 +107,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost]
         public async Task<ActionResult<Doctor>> PostDoctor(Doctor doctor)
         {
@@ -276,6 +279,7 @@ namespace AngularApi.Controllers
             return NoContent();
         }
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{doctorId}")]
         public async Task<IActionResult> DeleteDoctor(string id)
         {
