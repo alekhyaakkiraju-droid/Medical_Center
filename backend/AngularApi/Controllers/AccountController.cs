@@ -19,10 +19,8 @@ namespace AngularApi.Controllers
     {
 
         /// <summary>
-        ///    { "email": "mustafasharaby18@gmail.com", "password": "0133asdASD*"}      
-        ///   { "email": "dodo@gmail.com", "password": "0133asdASD*"}   
-        ///   {"email": "admin@gmail.com", "password": "0133asdASD*"}
-        ///   works
+        /// Authenticates a user and returns a JWT token.
+        /// Example request body: { "email": "user@example.com", "password": "YourSecurePassword123!" }
         /// </summary>
         private readonly UserManager<AppUser> _userManager;
         private readonly IConfiguration _Configuration;
@@ -285,9 +283,8 @@ namespace AngularApi.Controllers
         }
 
         /// <summary>
-        ///    { "email": "mustafasharaby18@gmail.com", "password": "0133asdASD//"}      
-        ///   { "email": "ramyy@gmail.com", "password": "0133asdASD*"}      
-        ///   works
+        /// Changes the authenticated user's password.
+        /// Example request body: { "currentPassword": "OldPassword123!", "newPassword": "NewPassword123!" }
         /// </summary>
         /// 
 

@@ -123,10 +123,7 @@
 													</label>
 												</td>
 												<td> {{ appointment.patient?.name || 'Unknown' }} </td>
-												<td>
-													<a href="mailto:therichposts@gmail.com"> {{ appointment.doctor.name
-														|| 'Not Assigned' }} </a>
-												</td>
+												<td> {{ appointment.doctor.name || 'Not Assigned' }} </td>
 												<td class="center"> {{ appointment.appointmentDate | date:
 													'MM/dd/yyyy' }} </td>
 												<td class="center"> {{ appointment.appointmentDate | date: 'shortTime'
