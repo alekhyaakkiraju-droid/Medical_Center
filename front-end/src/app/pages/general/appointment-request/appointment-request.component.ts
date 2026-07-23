@@ -166,7 +166,7 @@ export class AppointmentRequestComponent implements OnInit, OnDestroy {
           name: this.name?.value,
           email: this.email?.value,
           phone: this.phone?.value,
-          doctorName: this.doctor?.value,
+          doctorId: this.doctor?.value,
           probableStartTime: this.date?.value,
           appointmentTakenDate: this.date?.value,
           paymentStatus: 'complete'

@@ -237,7 +237,12 @@ export class BoardComponent implements OnInit, OnDestroy {
 
     autoTable(doc,{
       head:[["Patient Name","Assigned Doctor","Date","Time"]],
-      body:this.appointments .map(i => [i.patient.name , i.doctor.name , i.appointmentDate , i.appointmentDate])
+      body:this.appointments.map(i => [
+        i.patient?.name,
+        i.doctor?.name,
+        i.appointmentDate,
+        i.appointmentTime ?? ''
+      ])
     })
     doc.save("table.pdf")
   }
