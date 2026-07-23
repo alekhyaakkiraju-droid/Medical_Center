@@ -162,7 +162,7 @@ namespace AngularApi.Tests.Controllers
                 .ReturnsAsync(user);
             _userManagerMock.Setup(x => x.GeneratePasswordResetTokenAsync(user))
                 .ReturnsAsync("reset-token");
-            _emailServiceMock.Setup(x => x.SendEmail(It.IsAny<Message>()));
+            _emailServiceMock.Setup(x => x.SendEmailAsync(It.IsAny<Message>())).Returns(Task.CompletedTask);
 
             var httpContext = new DefaultHttpContext();
             httpContext.Request.Scheme = "https";

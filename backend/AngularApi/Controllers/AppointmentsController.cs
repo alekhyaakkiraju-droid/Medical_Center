@@ -184,12 +184,12 @@ namespace AngularApi.Controllers
 
             try
             {
-                var emailBody = _emailTemplateService.GetAppointmentConfirmationEamil(
+                var emailBody = _emailTemplateService.GetAppointmentConfirmationEmail(
                     user.UserName,
                     appointment.DoctorName,
                     appointment.AppointmentTakenDate.ToString());
                 var messageObj = new Message(new[] { user.Email }, "Appointment Confirmation", emailBody);
-                _emailService.SendEmail(messageObj);
+                await _emailService.SendEmailAsync(messageObj);
             }
             catch (Exception)
             {
