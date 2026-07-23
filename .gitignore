@@ -8,6 +8,8 @@ package-lock.json
 /src/assets/*.json
 /src/assets/images/
 *.tsbuildinfo
+front-end/src/app/api/generated/api.ts
+openapi/swagger.json
 
 # Visual Studio files
 .vs/

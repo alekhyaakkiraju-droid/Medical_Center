@@ -1,0 +1,3 @@
+# Generated at build time
+
+Run `npm run generate-api-types` from `front-end/` (or `npm run build`, which runs it first).
