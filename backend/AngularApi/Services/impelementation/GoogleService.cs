@@ -25,7 +25,7 @@ namespace AngularApi.Services.impelementation
             return new AuthenticationProperties { RedirectUri = redirectUri };
         }
 
-        public async Task<string> GoogleLoginCallbackAsync()
+        public async Task<AppUser> GoogleLoginCallbackAsync()
         {
             var authenticateResult = await AuthenticateExternalUserAsync();
             if (authenticateResult == null)
@@ -35,9 +35,7 @@ namespace AngularApi.Services.impelementation
 
             var externalUser = authenticateResult.Principal;
             var email = externalUser.FindFirstValue(ClaimTypes.Email);
-            var user = await FindOrCreateUserAsync(externalUser, email);
-
-            return _jwtService.GenerateJwtToken(user);
+            return await FindOrCreateUserAsync(externalUser, email);
         }
 
         private async Task<AuthenticateResult> AuthenticateExternalUserAsync()

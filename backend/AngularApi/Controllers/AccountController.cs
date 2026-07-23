@@ -1,10 +1,13 @@
 ﻿using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Options;
 using AngularApi.Services;
 using AngularApi.Services.Interfaces;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Net;
 using System.Security.Claims;
 using Response = AngularApi.Services.Response;
@@ -19,7 +22,7 @@ namespace AngularApi.Controllers
     {
 
         /// <summary>
-        /// Authenticates a user and returns a JWT token.
+        /// Authenticates a user and issues an HttpOnly auth cookie.
         /// Example request body: { "email": "user@example.com", "password": "YourSecurePassword123!" }
         /// </summary>
         private readonly UserManager<AppUser> _userManager;
@@ -29,8 +32,20 @@ namespace AngularApi.Controllers
         private readonly IJwtService _jwtService;
         private readonly IGoogleService _googleService;
         private readonly EmailTemplateService _emailTemplateService;
-        public AccountController(UserManager<AppUser> userManager, IConfiguration Configuration, IEmailService emailService,
-            EmailTemplateService emailTemplateService, IJwtService jwtService, IGoogleService googleService)
+        private readonly IAuthCookieService _authCookieService;
+        private readonly IAntiforgery _antiforgery;
+        private readonly AuthCookieOptions _authCookieOptions;
+
+        public AccountController(
+            UserManager<AppUser> userManager,
+            IConfiguration Configuration,
+            IEmailService emailService,
+            EmailTemplateService emailTemplateService,
+            IJwtService jwtService,
+            IGoogleService googleService,
+            IAuthCookieService authCookieService,
+            IAntiforgery antiforgery,
+            IOptions<AuthCookieOptions> authCookieOptions)
         {
             _userManager = userManager;
             _Configuration = Configuration;
@@ -38,8 +53,9 @@ namespace AngularApi.Controllers
             _emailTemplateService = emailTemplateService;
             _jwtService = jwtService;
             _googleService = googleService;
-            // this._signInManager = _signInManager;
-
+            _authCookieService = authCookieService;
+            _antiforgery = antiforgery;
+            _authCookieOptions = authCookieOptions.Value;
         }
 
         //public AccountController(UserManager<AppUser> userManager, IConfiguration Configuration, IEmailService emailService,
@@ -157,11 +173,10 @@ namespace AngularApi.Controllers
                     var checkpass = await _userManager.CheckPasswordAsync(found, logInUser.Password);
                     if (checkpass)
                     {
-                        var tokenGenerated = _jwtService.GenerateJwtToken(found);
+                        var cookieResult = await _authCookieService.IssueAuthCookiesAsync(found);
                         return Ok(new
                         {
-                            token = tokenGenerated,
-                            expiration = DateTime.Now.AddDays(1)
+                            expiration = cookieResult.ExpirationUtc
                         });
                     }
                 }
@@ -172,6 +187,7 @@ namespace AngularApi.Controllers
 
 
         [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
         [HttpGet("LoginWithGoogle")]
         public IActionResult LoginWithGoogle()
         {
@@ -181,13 +197,15 @@ namespace AngularApi.Controllers
 
 
         [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
         [HttpGet("GoogleLoginCallback")]
         public async Task<IActionResult> GoogleLoginCallback()
         {
             try
             {
-                var token = await _googleService.GoogleLoginCallbackAsync();
-                return Redirect($"http://localhost:4200/auth/login-success?token={token}");
+                var user = await _googleService.GoogleLoginCallbackAsync();
+                await _authCookieService.IssueAuthCookiesAsync(user);
+                return Redirect(_authCookieOptions.FrontendLoginSuccessUrl);
             }
             catch (UnauthorizedAccessException)
             {
@@ -240,6 +258,7 @@ namespace AngularApi.Controllers
         }
 
         [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
         [HttpGet("reset-password")]
         public IActionResult ResetPassword(string token, string email)
         {
@@ -288,6 +307,36 @@ namespace AngularApi.Controllers
         /// </summary>
         /// 
 
+        [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
+        [HttpGet("antiforgery-token")]
+        public IActionResult GetAntiforgeryToken()
+        {
+            var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
+            return Ok(new { token = tokens.RequestToken });
+        }
+
+        [AllowAnonymous]
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            if (!Request.Cookies.TryGetValue(_authCookieOptions.AuthCookieName, out var jwtToken)
+                || !Request.Cookies.TryGetValue(_authCookieOptions.RefreshCookieName, out var refreshToken))
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                var cookieResult = await _authCookieService.RefreshAuthCookiesAsync(jwtToken, refreshToken);
+                return Ok(new { expiration = cookieResult.ExpirationUtc });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+        }
+
 
         [Authorize(Policy = "UserPolicy")]
         [HttpPost("change-password")]
@@ -325,6 +374,7 @@ namespace AngularApi.Controllers
         }
 
         [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
