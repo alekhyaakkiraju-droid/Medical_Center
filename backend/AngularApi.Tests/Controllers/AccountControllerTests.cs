@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using System.Security.Claims;
@@ -21,7 +22,7 @@ namespace AngularApi.Tests.Controllers
         private readonly Mock<IEmailService> _emailServiceMock;
         private readonly Mock<IJwtService> _jwtServiceMock;
         private readonly Mock<IGoogleService> _googleServiceMock;
-        private readonly Mock<EmailTemplateService> _emailTemplateService;
+        private readonly EmailTemplateService _emailTemplateService;
         private readonly AccountController _controller;
 
         public AccountControllerTests()
@@ -33,13 +34,18 @@ namespace AngularApi.Tests.Controllers
             _emailServiceMock = new Mock<IEmailService>();
             _jwtServiceMock = new Mock<IJwtService>();
             _googleServiceMock = new Mock<IGoogleService>();
-            _emailTemplateService = new Mock<EmailTemplateService>();
+
+            var webHostEnvironmentMock = new Mock<IWebHostEnvironment>();
+            webHostEnvironmentMock
+                .Setup(env => env.WebRootPath)
+                .Returns(Path.Combine(AppContext.BaseDirectory, "wwwroot"));
+            _emailTemplateService = new EmailTemplateService(webHostEnvironmentMock.Object);
 
             _controller = new AccountController(
                 _userManagerMock.Object,
                 _configurationMock.Object,
                 _emailServiceMock.Object,
-                _emailTemplateService.Object,
+                _emailTemplateService,
                 _jwtServiceMock.Object,
                 _googleServiceMock.Object);
         }

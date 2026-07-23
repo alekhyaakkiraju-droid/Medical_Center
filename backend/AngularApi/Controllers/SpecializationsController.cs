@@ -12,6 +12,7 @@ namespace AngularApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "AdminPolicy")]
     public class SpecializationsController : ControllerBase
     {
         private readonly MedicalCenterDbContext _context;
