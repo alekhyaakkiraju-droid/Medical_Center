@@ -3,6 +3,7 @@ using AngularApi.DTO;
 using AngularApi.Models;
 using AngularApi.Services;
 using AngularApi.Services.Interfaces;
+using AngularApi.Tests.TestData;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -93,8 +94,8 @@ namespace AngularApi.Tests.Controllers
             // Arrange
             var loginDto = new LogInUserDTO
             {
-                Email = "ramyy@gmail.com",
-                Password = "0133asdASD*"
+                Email = SeedData.TestUserEmail,
+                Password = SeedData.TestUserPassword
             };
             var user = new AppUser { Email = loginDto.Email };
             _userManagerMock.Setup(x => x.FindByEmailAsync(loginDto.Email))
@@ -138,7 +139,7 @@ namespace AngularApi.Tests.Controllers
         public async Task ForgotPassword_ValidEmail_SendsResetLink()
         {
             // Arrange
-            var forgotPasswordDto = new ForgotPasswordDTO { Email = "ramyy@gmail.com" };
+            var forgotPasswordDto = new ForgotPasswordDTO { Email = SeedData.TestUserEmail };
             var user = new AppUser { Email = forgotPasswordDto.Email };
 
             _userManagerMock.Setup(x => x.FindByEmailAsync(forgotPasswordDto.Email))
@@ -169,7 +170,7 @@ namespace AngularApi.Tests.Controllers
 
             var expectedResponse = new Response(
                 "Success",
-                "Password reset link sent to ramyy@gmail.com. Please check your email."
+                $"Password reset link sent to {SeedData.TestUserEmail}. Please check your email."
             );
 
             okResult.Value.Should().BeEquivalentTo(expectedResponse);
