@@ -1,10 +1,13 @@
 ﻿using AngularApi.Controllers;
 using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Services.impelementation;
+using AngularApi.Services.Interfaces;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace AngularApi.Tests.Controllers
 {
@@ -21,11 +24,18 @@ namespace AngularApi.Tests.Controllers
                       .Options;
             _context = new MedicalCenterDbContext(_options);
 
-            _controller = new DoctorsController(_context);
+            var ownershipValidator = new OwnershipValidator();
+            _controller = new DoctorsController(_context, ownershipValidator);
 
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "doctor1"),
+                new Claim(ClaimTypes.Role, "doctor"),
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
             _controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext()
+                HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) }
             };
         }
 

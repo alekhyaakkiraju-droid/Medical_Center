@@ -21,6 +21,7 @@ namespace AngularApi.Services
             services.AddScoped<EmailTemplateService>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IGoogleService, GoogleService>();
+            services.AddScoped<IOwnershipValidator, OwnershipValidator>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 

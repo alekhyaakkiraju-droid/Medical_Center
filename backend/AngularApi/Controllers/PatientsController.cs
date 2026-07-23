@@ -1,5 +1,6 @@
 ﻿using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +14,12 @@ namespace AngularApi.Controllers
     {
 
         private readonly MedicalCenterDbContext _context;
+        private readonly IOwnershipValidator _ownershipValidator;
 
-        public PatientsController(MedicalCenterDbContext context)
+        public PatientsController(MedicalCenterDbContext context, IOwnershipValidator ownershipValidator)
         {
             _context = context;
+            _ownershipValidator = ownershipValidator;
         }
         [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
@@ -38,10 +41,15 @@ namespace AngularApi.Controllers
         }
 
 
-        [Authorize(Policy = "UserPolicy")]
+        [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpGet("{id}")]
         public async Task<ActionResult<PatientDTO>> GetPatientById(string id)
         {
+            if (!_ownershipValidator.CanAccessPatientResource(User, id))
+            {
+                return Forbid();
+            }
+
             var patient = await _context.Patients
                 .Where(p => p.Id == id)
                 .Select(p => new PatientDTO
@@ -58,10 +66,15 @@ namespace AngularApi.Controllers
             return Ok(patient);
         }
 
-        [Authorize(Policy = "UserPolicy")]
+        [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpGet("{patientId}/appointments")]
         public async Task<ActionResult<IEnumerable<Appointment>>> GetPatientAppointments(string patientId)
         {
+            if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
+            {
+                return Forbid();
+            }
+
             var appointments = await _context.Appointments
                 .Where(a => a.PatientId == patientId)
                 .ToListAsync();
@@ -69,10 +82,15 @@ namespace AngularApi.Controllers
             return Ok(appointments);
         }
 
-        [Authorize(Policy = "UserPolicy")]
+        [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpGet("{patientId}/appointments/date-range")]
         public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentsByDateRange(string patientId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
+            if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
+            {
+                return Forbid();
+            }
+
             var appointments = await _context.Appointments
                 .Where(a => a.PatientId == patientId && a.AppointmentTakenDate >= startDate && a.AppointmentTakenDate <= endDate)
                 .ToListAsync();
@@ -83,10 +101,18 @@ namespace AngularApi.Controllers
         }
 
 
-        [Authorize(Policy = "UserPolicy")]
+        [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpPut("{patientId}/reviews/{reviewId}")]
         public async Task<IActionResult> UpdateReview(string patientId, int reviewId, [FromBody] PatientReview review)
         {
+            if (!_ownershipValidator.CanAccessPatientResource(User, patientId)
+                || !string.Equals(review.PatientId, patientId, StringComparison.Ordinal)
+                || (!_ownershipValidator.IsAdmin(User)
+                    && !string.Equals(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, review.PatientId, StringComparison.Ordinal)))
+            {
+                return Forbid();
+            }
+
             if (patientId != review.PatientId || reviewId != review.Id)
             {
                 return BadRequest("Patient ID or Review ID mismatch.");
@@ -98,10 +124,15 @@ namespace AngularApi.Controllers
             return NoContent();
         }
 
-        [Authorize(Policy = "UserPolicy")]
+        [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpDelete("{patientId}/appointments/{appointmentId}")]
         public async Task<IActionResult> DeleteAppointment(string patientId, int appointmentId)
         {
+            if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
+            {
+                return Forbid();
+            }
+
             var appointment = await _context.Appointments
                 .FirstOrDefaultAsync(a => a.Id == appointmentId && a.PatientId == patientId);
             if (appointment == null) return NotFound();
@@ -112,10 +143,15 @@ namespace AngularApi.Controllers
             return NoContent();
         }
 
-        [Authorize(Policy = "UserPolicy")]
+        [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePatient(string id, [FromBody] PatientDTO model)
         {
+            if (!_ownershipValidator.CanAccessPatientResource(User, id))
+            {
+                return Forbid();
+            }
+
             var patient = await _context.Patients.FindAsync(id);
             if (patient == null) return NotFound();
 

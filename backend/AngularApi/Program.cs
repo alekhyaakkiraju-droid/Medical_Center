@@ -24,6 +24,8 @@ namespace WebApiDemo
                 options.AddPolicy("AdminPolicy", policy => policy.RequireRole("admin"));
                 options.AddPolicy("DoctorPolicy", policy => policy.RequireRole("doctor"));
                 options.AddPolicy("UserPolicy", policy => policy.RequireRole("user"));
+                options.AddPolicy("DoctorOrAdminPolicy", policy => policy.RequireRole("doctor", "admin"));
+                options.AddPolicy("UserOrAdminPolicy", policy => policy.RequireRole("user", "admin"));
             });
 
             var app = builder.Build();

@@ -19,12 +19,20 @@ namespace AngularApi.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly EmailTemplateService _emailTemplateService;
         private readonly IEmailService _emailService;
-        public AppointmentsController(MedicalCenterDbContext context, UserManager<AppUser> userManager, IEmailService emailService, EmailTemplateService emailTemplateService)
+        private readonly IOwnershipValidator _ownershipValidator;
+
+        public AppointmentsController(
+            MedicalCenterDbContext context,
+            UserManager<AppUser> userManager,
+            IEmailService emailService,
+            EmailTemplateService emailTemplateService,
+            IOwnershipValidator ownershipValidator)
         {
             _userManager = userManager;
             _context = context;
             _emailService = emailService;
             _emailTemplateService = emailTemplateService;
+            _ownershipValidator = ownershipValidator;
         }
 
         //public AppointmentsController(MedicalCenterDbContext context, UserManager<AppUser> userManager, IEmailService emailService)
@@ -221,10 +229,15 @@ namespace AngularApi.Controllers
             return NoContent();
         }
 
-        [Authorize(Policy = "UserPolicy")]
+        [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpGet("patient/{patientId}")]
         public async Task<IActionResult> GetAppointmentsByPatient(string patientId)
         {
+            if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
+            {
+                return Forbid();
+            }
+
             var appointments = await _context.Appointments
                 .Include(a => a.AppointmentStatus)
                 .Where(a => a.PatientId == patientId)
@@ -287,20 +300,30 @@ namespace AngularApi.Controllers
             return Ok(appointments);
         }
 
-        [Authorize(Policy = "UserPolicy")]
+        [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpGet("patient/{patientId}/status/{status}")]
         public async Task<IActionResult> GetAppointmentsByPatientAndStatus(string patientId, AppointmentStatusEnum status)
         {
+            if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
+            {
+                return Forbid();
+            }
+
             var appointments = await _context.Appointments
                 .Where(a => a.PatientId == patientId && a.AppointmentStatus!.Status == status)
                 .ToListAsync();
             return Ok(appointments);
         }
 
-        [Authorize(Policy = "UserPolicy")]
+        [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpGet("patient/{patientId}/history")]
         public async Task<IActionResult> GetAppointmentHistoryByPatient(string patientId)
         {
+            if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
+            {
+                return Forbid();
+            }
+
             var appointments = await _context.Appointments
                 .Where(a => a.PatientId == patientId)
                 .OrderByDescending(a => a.ProbableStartTime)
