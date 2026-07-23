@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AngularApi.DTO;
 using AngularApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -24,9 +25,15 @@ namespace AngularApi.Controllers
 
         // GET: api/AppointmentStatus
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AppointmentStatus>>> GetAppointmentStatus()
+        public async Task<ActionResult<IEnumerable<AppointmentStatusListItemDTO>>> GetAppointmentStatus()
         {
-            return await _context.AppointmentStatus.ToListAsync();
+            return await _context.AppointmentStatus
+                .Select(s => new AppointmentStatusListItemDTO
+                {
+                    Id = s.Id,
+                    Status = s.Status
+                })
+                .ToListAsync();
         }
 
         // GET: api/AppointmentStatus/5

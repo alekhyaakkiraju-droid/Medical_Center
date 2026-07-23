@@ -1,4 +1,5 @@
 ﻿using AngularApi.Controllers;
+using AngularApi.DTO;
 using AngularApi.Models;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -44,7 +45,7 @@ namespace AngularApi.Tests.Controllers
 
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var reviews = okResult.Value.Should().BeAssignableTo<List<PatientReview>>().Subject;
+            var reviews = okResult.Value.Should().BeAssignableTo<List<ReviewDTO>>().Subject;
             reviews.Should().HaveCount(2);
             reviews[0].Patient.Should().NotBeNull();
             reviews[0].Patient.Name.Should().Be("John Doe");

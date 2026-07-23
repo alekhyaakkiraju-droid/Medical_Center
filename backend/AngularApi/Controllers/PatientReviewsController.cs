@@ -1,4 +1,5 @@
-﻿using AngularApi.Models;
+﻿using AngularApi.DTO;
+using AngularApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,18 +20,38 @@ namespace AngularApi.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PatientReview>>> GetPatientReviews()
+        public async Task<ActionResult<IEnumerable<ReviewDTO>>> GetPatientReviews()
         {
-            var reviews = await _context.PatientReviews.Include(i => i.Patient).ToListAsync();
+            var reviews = await _context.PatientReviews
+                .Select(r => new ReviewDTO
+                {
+                    Id = r.Id,
+                    PatientId = r.PatientId,
+                    DoctorId = r.DoctorId,
+                    IsReviewAnonymous = r.IsReviewAnonymous,
+                    WaitTimeRating = r.WaitTimeRating,
+                    BedsideMannerRating = r.BedsideMannerRating,
+                    OverallRating = r.OverallRating,
+                    Review = r.Review,
+                    IsDoctorRecommended = r.IsDoctorRecommended,
+                    ReviewDate = r.ReviewDate
+                })
+                .ToListAsync();
             return Ok(reviews);
         }
 
         [HttpGet("unique-patients")]
-        public async Task<ActionResult<IEnumerable<Patient>>> GetUniquePatients()
+        public async Task<ActionResult<IEnumerable<PatientDTO>>> GetUniquePatients()
         {
             var uniquePatients = await _context.PatientReviews
-                .Include(i => i.Patient)
-                .Select(pr => pr.Patient)
+                .Where(pr => pr.Patient != null)
+                .Select(pr => new PatientDTO
+                {
+                    PatientId = pr.Patient!.Id,
+                    Name = pr.Patient.UserName,
+                    Email = pr.Patient.Email,
+                    Image = pr.Patient.Image
+                })
                 .Distinct()
                 .ToListAsync();
 

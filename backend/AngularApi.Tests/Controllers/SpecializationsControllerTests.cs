@@ -1,4 +1,5 @@
 ﻿using AngularApi.Controllers;
+using AngularApi.DTO;
 using AngularApi.Models;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -47,13 +48,10 @@ namespace AngularApi.Tests.Controllers
             var result = await _controller.GetSpecializations();
 
             // Assert
-            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var specializations = okResult.Value.Should().BeAssignableTo<List<Specialization>>().Subject;
+            var specializations = result.Value.Should().BeAssignableTo<List<SpecializationListItemDTO>>().Subject;
             specializations.Should().HaveCount(2);
             specializations[0].SpecializationName.Should().Be("Cardiology");
-            specializations[0].Services.Should().HaveCount(1);
             specializations[1].SpecializationName.Should().Be("Neurology");
-            specializations[1].Services.Should().BeNullOrEmpty();
         }
 
         [Fact]

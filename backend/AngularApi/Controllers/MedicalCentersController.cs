@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AngularApi.DTO;
 using AngularApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -24,9 +25,22 @@ namespace AngularApi.Controllers
 
         // GET: api/MedicalCenters
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MedicalCenter>>> GetMedicalCenter()
+        public async Task<ActionResult<IEnumerable<MedicalCenterListItemDTO>>> GetMedicalCenter()
         {
-            return await _context.MedicalCenter.ToListAsync();
+            return await _context.MedicalCenter
+                .Select(m => new MedicalCenterListItemDTO
+                {
+                    Id = m.Id,
+                    HospitalAffiliationId = m.HospitalAffiliationId,
+                    TimeSlotPerClientInMin = m.TimeSlotPerClientInMin,
+                    FirstConsultationFee = m.FirstConsultationFee,
+                    FollowupConsultationFee = m.FollowupConsultationFee,
+                    StreetAddress = m.StreetAddress,
+                    City = m.City,
+                    State = m.State,
+                    Zip = m.Zip
+                })
+                .ToListAsync();
         }
 
         // GET: api/MedicalCenters/5

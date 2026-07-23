@@ -126,9 +126,9 @@ namespace AngularApi.Tests.Controllers
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var bookings = okResult.Value.Should().BeAssignableTo<List<Appointment>>().Subject;
+            var bookings = okResult.Value.Should().BeAssignableTo<List<BookingDTO>>().Subject;
             bookings.Should().HaveCount(1);
-            bookings[0].Id.Should().Be(1);
+            bookings[0].AppointmentId.Should().Be(1);
         }
 
         [Fact]
@@ -147,9 +147,9 @@ namespace AngularApi.Tests.Controllers
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var bookings = okResult.Value.Should().BeAssignableTo<List<Appointment>>().Subject;
+            var bookings = okResult.Value.Should().BeAssignableTo<List<BookingDTO>>().Subject;
             bookings.Should().HaveCount(1);
-            bookings[0].Id.Should().Be(2);
+            bookings[0].AppointmentId.Should().Be(2);
         }
 
         [Fact]
@@ -169,9 +169,9 @@ namespace AngularApi.Tests.Controllers
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var bookings = okResult.Value.Should().BeAssignableTo<List<Appointment>>().Subject;
+            var bookings = okResult.Value.Should().BeAssignableTo<List<BookingDTO>>().Subject;
             bookings.Should().HaveCount(1);
-            bookings[0].Id.Should().Be(1);
+            bookings[0].AppointmentId.Should().Be(1);
         }
 
         [Fact]
@@ -191,9 +191,9 @@ namespace AngularApi.Tests.Controllers
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var bookings = okResult.Value.Should().BeAssignableTo<List<Appointment>>().Subject;
+            var bookings = okResult.Value.Should().BeAssignableTo<List<BookingDTO>>().Subject;
             bookings.Should().HaveCount(1);
-            bookings[0].Id.Should().Be(1);
+            bookings[0].AppointmentId.Should().Be(1);
         }
 
         [Fact]
@@ -213,9 +213,9 @@ namespace AngularApi.Tests.Controllers
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var bookings = okResult.Value.Should().BeAssignableTo<List<Appointment>>().Subject;
+            var bookings = okResult.Value.Should().BeAssignableTo<List<BookingDTO>>().Subject;
             bookings.Should().HaveCount(1);
-            bookings[0].Id.Should().Be(1);
+            bookings[0].AppointmentId.Should().Be(1);
         }
 
         [Fact]
@@ -234,7 +234,7 @@ namespace AngularApi.Tests.Controllers
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var reviews = okResult.Value.Should().BeAssignableTo<List<PatientReview>>().Subject;
+            var reviews = okResult.Value.Should().BeAssignableTo<List<ReviewDTO>>().Subject;
             reviews.Should().HaveCount(2);
         }
 
@@ -274,7 +274,7 @@ namespace AngularApi.Tests.Controllers
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var qualifications = okResult.Value.Should().BeAssignableTo<List<DoctorQualification>>().Subject;
+            var qualifications = okResult.Value.Should().BeAssignableTo<List<DoctorQualificationDTO>>().Subject;
             qualifications.Should().HaveCount(2);
         }
 
@@ -294,7 +294,7 @@ namespace AngularApi.Tests.Controllers
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var specializations = okResult.Value.Should().BeAssignableTo<List<DoctorSpecialization>>().Subject;
+            var specializations = okResult.Value.Should().BeAssignableTo<List<string>>().Subject;
             specializations.Should().HaveCount(2);
         }
 
