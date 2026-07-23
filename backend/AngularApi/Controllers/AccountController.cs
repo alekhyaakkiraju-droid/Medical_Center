@@ -97,7 +97,7 @@ namespace AngularApi.Controllers
 
                     try
                     {
-                        _emailService.SendEmail(message);
+                        await _emailService.SendEmailAsync(message);
                         return Ok(new { message = "Account created successfully. Please check your email to confirm your account." });
                     }
                     catch (Exception ex)
@@ -243,7 +243,7 @@ namespace AngularApi.Controllers
 
                 try
                 {
-                    _emailService.SendEmail(message);
+                    await _emailService.SendEmailAsync(message);
                     return Ok(new Response("Success", $"Password reset link sent to {user.Email}. Please check your email."));
                 }
                 catch (Exception ex)

@@ -19,6 +19,7 @@ namespace AngularApi.Services
         {
             services.Configure<AuthCookieOptions>(configuration.GetSection(AuthCookieOptions.SectionName));
             services.Configure<AppointmentSettings>(configuration.GetSection(AppointmentSettings.SectionName));
+            services.Configure<SmtpSettings>(configuration.GetSection(SmtpSettings.SectionName));
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>(); // should be addTrasient

@@ -241,8 +241,8 @@ namespace AngularApi.Tests.Controllers
             var user = new AppUser { Id = "patient1", UserName = "Patient1", Email = "patient1@example.com" };
             _userManagerMock.Setup(x => x.FindByIdAsync("patient1")).ReturnsAsync(user);
             _emailServiceMock
-                .Setup(x => x.SendEmail(It.IsAny<Message>()))
-                .Throws(new InvalidOperationException("SMTP unavailable"));
+                .Setup(x => x.SendEmailAsync(It.IsAny<Message>()))
+                .ThrowsAsync(new InvalidOperationException("SMTP unavailable"));
 
             var appointment = new Appointment { DoctorId = "doctor-id", AppointmentTakenDate = DateTime.UtcNow };
 

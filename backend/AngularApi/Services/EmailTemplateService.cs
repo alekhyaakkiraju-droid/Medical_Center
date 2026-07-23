@@ -1,8 +1,11 @@
-﻿namespace AngularApi.Services
+﻿using System.Collections.Concurrent;
+
+namespace AngularApi.Services
 {
     public class EmailTemplateService
     {
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ConcurrentDictionary<string, string> _templateCache = new();
 
         public EmailTemplateService(IWebHostEnvironment webHostEnvironment)
         {
@@ -11,27 +14,30 @@
 
         public string GetConfirmationEmail(string userName, string confirmationLink)
         {
-            var templatePath = Path.Combine(_webHostEnvironment.WebRootPath, "EmailTemplates", "ConfirmationEmail.html");
-            var emailTemplate = File.ReadAllText(templatePath);
+            var emailTemplate = LoadTemplate("ConfirmationEmail.html");
 
-            var emailBody = emailTemplate
+            return emailTemplate
                 .Replace("{{UserName}}", userName)
-                 .Replace("{{ConfirmationLink}}", confirmationLink);
-
-            return emailBody;
+                .Replace("{{ConfirmationLink}}", confirmationLink);
         }
-        public string GetAppointmentConfirmationEamil(string patientName, string DoctorName, string date)
+
+        public string GetAppointmentConfirmationEmail(string patientName, string doctorName, string date)
         {
-            var templatePath = Path.Combine(_webHostEnvironment.WebRootPath, "EmailTemplates", "ConfirmAppointment.html");
-            var emailTemplate = File.ReadAllText(templatePath);
+            var emailTemplate = LoadTemplate("ConfirmAppointment.html");
 
-            var emailBody = emailTemplate
+            return emailTemplate
                 .Replace("{{patientName}}", patientName)
-                 .Replace("{{DoctorName}}", DoctorName)
-                  .Replace("{{date}}", date);
+                .Replace("{{DoctorName}}", doctorName)
+                .Replace("{{date}}", date);
+        }
 
-
-            return emailBody;
+        private string LoadTemplate(string templateFileName)
+        {
+            return _templateCache.GetOrAdd(templateFileName, fileName =>
+            {
+                var templatePath = Path.Combine(_webHostEnvironment.WebRootPath, "EmailTemplates", fileName);
+                return File.ReadAllText(templatePath);
+            });
         }
     }
 }
