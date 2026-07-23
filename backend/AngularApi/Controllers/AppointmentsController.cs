@@ -45,42 +45,16 @@ namespace AngularApi.Controllers
 
         [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointments()
+        public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointments()
         {
-            return await _context.Appointments.Include(i => i.Patient).ToListAsync();
+            return await _context.Appointments.SelectAppointmentDto().ToListAsync();
         }
 
         [Authorize(Policy = "AdminPolicy")]
         [HttpGet("GetAllAppointments")]
         public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAllAppointments()
         {
-            var appointments = await _context.Appointments
-                .Include(a => a.Doctor)
-                    .ThenInclude(d => d.DoctorSpecializations)!
-                        .ThenInclude(ds => ds.Specialization)
-                .Include(a => a.Patient)
-                .ToListAsync();
-
-            var appointmentDtos = appointments.Select(appointment => new AppointmentDTO
-            {
-                AppointmentId = appointment.Id,
-                AppointmentDate = appointment.AppointmentTakenDate,
-                Doctor = new DoctorDTO
-                {
-                    Name = appointment.DoctorName,
-                    Specializations = appointment.Doctor?.DoctorSpecializations
-                        .Select(ds => ds.Specialization?.SpecializationName)
-                        .ToList() ?? new List<string>()
-                },
-                Patient = new PatientDTO
-                {
-                    PatientId = appointment.PatientId.ToString(),
-                    Name = appointment.Patient?.UserName,
-                    Email = appointment.Patient?.Email,
-                }
-            }).ToList();
-
-            return Ok(appointmentDtos);
+            return await _context.Appointments.SelectAppointmentDto().ToListAsync();
         }
 
 
@@ -239,17 +213,8 @@ namespace AngularApi.Controllers
             }
 
             var appointments = await _context.Appointments
-                .Include(a => a.AppointmentStatus)
                 .Where(a => a.PatientId == patientId)
-                .Select(a => new
-                {
-                    a.Id,
-                    a.PatientId,
-                    a.DoctorName,
-                    a.ProbableStartTime,
-                    a.ActualEndTime,
-                    AppointmentStatus = a.AppointmentStatus != null ? a.AppointmentStatus.Status.ToString() : null
-                })
+                .SelectAppointmentDto()
                 .ToListAsync();
 
             return Ok(appointments);
@@ -261,7 +226,8 @@ namespace AngularApi.Controllers
         public async Task<IActionResult> GetAppointmentsByDate(DateTime date)
         {
             var appointments = await _context.Appointments
-                .Where(a => a.ProbableStartTime.Value.Date == date.Date)
+                .Where(a => a.ProbableStartTime!.Value.Date == date.Date)
+                .SelectAppointmentDto()
                 .ToListAsync();
             return Ok(appointments);
         }
@@ -272,6 +238,7 @@ namespace AngularApi.Controllers
         {
             var appointments = await _context.Appointments
                 .Where(a => a.AppointmentStatus!.Status == status)
+                .SelectAppointmentDto()
                 .ToListAsync();
             return Ok(appointments);
         }
@@ -283,6 +250,7 @@ namespace AngularApi.Controllers
             var today = DateTime.Today;
             var appointments = await _context.Appointments
                 .Where(a => a.ProbableStartTime!.Value.Date == today)
+                .SelectAppointmentDto()
                 .ToListAsync();
             return Ok(appointments);
         }
@@ -296,6 +264,7 @@ namespace AngularApi.Controllers
             var appointments = await _context.Appointments
                 .Where(a => a.ProbableStartTime > now)
                 .OrderBy(a => a.ProbableStartTime)
+                .SelectAppointmentDto()
                 .ToListAsync();
             return Ok(appointments);
         }
@@ -311,6 +280,7 @@ namespace AngularApi.Controllers
 
             var appointments = await _context.Appointments
                 .Where(a => a.PatientId == patientId && a.AppointmentStatus!.Status == status)
+                .SelectAppointmentDto()
                 .ToListAsync();
             return Ok(appointments);
         }
@@ -327,6 +297,7 @@ namespace AngularApi.Controllers
             var appointments = await _context.Appointments
                 .Where(a => a.PatientId == patientId)
                 .OrderByDescending(a => a.ProbableStartTime)
+                .SelectAppointmentDto()
                 .ToListAsync();
             return Ok(appointments);
         }

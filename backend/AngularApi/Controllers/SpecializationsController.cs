@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using AngularApi.DTO;
 using AngularApi.Models;
 
 namespace AngularApi.Controllers
@@ -25,13 +26,18 @@ namespace AngularApi.Controllers
         
         [AllowAnonymous]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Specialization>>> GetSpecializations()
+        public async Task<ActionResult<IEnumerable<SpecializationListItemDTO>>> GetSpecializations()
         {
-            var specializations = await _context.Specializations
-                .Include(s => s.Services)
+            return await _context.Specializations
+                .Select(s => new SpecializationListItemDTO
+                {
+                    Id = s.Id,
+                    SpecializationName = s.SpecializationName,
+                    SpecializationImage = s.SpecializationImage,
+                    Description = s.Description,
+                    IsActive = s.IsActive
+                })
                 .ToListAsync();
-
-            return Ok(specializations);
         }
     
 

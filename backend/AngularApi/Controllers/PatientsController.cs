@@ -26,7 +26,6 @@ namespace AngularApi.Controllers
         public async Task<IActionResult> GetAllPatientsWithReviews()
         {
             var patients = await _context.Patients
-                .Include(p => p.PatientReview)
                 .Select(p => new PatientDTO
                 {
                     PatientId = p.Id,
@@ -80,7 +79,7 @@ namespace AngularApi.Controllers
 
         [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpGet("{patientId}/appointments")]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetPatientAppointments(string patientId)
+        public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetPatientAppointments(string patientId)
         {
             if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
             {
@@ -89,6 +88,7 @@ namespace AngularApi.Controllers
 
             var appointments = await _context.Appointments
                 .Where(a => a.PatientId == patientId)
+                .SelectAppointmentDto()
                 .ToListAsync();
 
             return Ok(appointments);
@@ -96,7 +96,7 @@ namespace AngularApi.Controllers
 
         [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpGet("{patientId}/appointments/date-range")]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentsByDateRange(string patientId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointmentsByDateRange(string patientId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
             if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
             {
@@ -105,9 +105,8 @@ namespace AngularApi.Controllers
 
             var appointments = await _context.Appointments
                 .Where(a => a.PatientId == patientId && a.AppointmentTakenDate >= startDate && a.AppointmentTakenDate <= endDate)
+                .SelectAppointmentDto()
                 .ToListAsync();
-
-            if (appointments == null) return NotFound();
 
             return Ok(appointments);
         }

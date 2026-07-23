@@ -32,9 +32,9 @@ namespace AngularApi.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Doctor>>> GetDoctors()
+        public async Task<ActionResult<IEnumerable<DoctorDTO>>> GetDoctors()
         {
-            return await _context.Doctors.Include(i => i.DoctorSpecializations)!.ThenInclude(i => i.Specialization).ToListAsync();
+            return await _context.Doctors.SelectDoctorDto().ToListAsync();
         }
 
 
@@ -43,21 +43,7 @@ namespace AngularApi.Controllers
         [HttpGet("/api/DoctorsWithSpectialization")]
         public async Task<IActionResult> GetDoctorsWithSpectialization()
         {
-            var doctors = await _context.Doctors
-                .Include(d => d.DoctorSpecializations)!
-                .ThenInclude(ds => ds.Specialization)
-                .ToListAsync();
-
-            var doctorDTOs = doctors.Select(d => new DoctorDTO
-            {
-                Id = d.Id,
-                Name = d.Name,
-                Image = d.Image,
-                ProfessionalStatement = d.ProfessionalStatement,
-                PracticingFrom = d.PracticingFrom,
-                Specializations = d.DoctorSpecializations!.Select(ds => ds.Specialization!.SpecializationName).ToList()!
-            }).ToList();
-
+            var doctorDTOs = await _context.Doctors.SelectDoctorDto().ToListAsync();
             return Ok(doctorDTOs);
         }
 
@@ -140,13 +126,11 @@ namespace AngularApi.Controllers
 
             var result = await _retryPolicy.ExecuteAsync(async () =>
             {
-                var bookings = await _context.Appointments
-                .Include(a => a.Patient)
-                .Where(a => a.DoctorId == doctorId &&
-                            a.AppointmentStatus!.Status == AppointmentStatusEnum.Active)
-                .ToListAsync();
-
-                return bookings;
+                return await _context.Appointments
+                    .Where(a => a.DoctorId == doctorId &&
+                                a.AppointmentStatus!.Status == AppointmentStatusEnum.Active)
+                    .SelectBookingDto()
+                    .ToListAsync();
             });
             return Ok(result);
         }
@@ -160,8 +144,8 @@ namespace AngularApi.Controllers
             }
 
             var bookings = await _context.Appointments
-                .Include(i => i.AppointmentStatus)
                 .Where(a => a.DoctorId == doctorId && a.AppointmentStatus!.Status == status)
+                .SelectBookingDto()
                 .ToListAsync();
             return Ok(bookings);
         }
@@ -176,8 +160,8 @@ namespace AngularApi.Controllers
 
             var today = DateTime.Today;
             var bookings = await _context.Appointments
-                .Include(a => a.Patient)
                 .Where(a => a.DoctorId == doctorId && a.AppointmentTakenDate == today && a.AppointmentStatus!.Status == AppointmentStatusEnum.Active)
+                .SelectBookingDto()
                 .ToListAsync();
             return Ok(bookings);
         }
@@ -193,8 +177,8 @@ namespace AngularApi.Controllers
 
             var today = DateTime.Today;
             var bookings = await _context.Appointments
-                .Include(a => a.Patient)
                 .Where(a => a.DoctorId == doctorId && a.AppointmentTakenDate >= today && a.AppointmentStatus!.Status == AppointmentStatusEnum.Active)
+                .SelectBookingDto()
                 .ToListAsync();
             return Ok(bookings);
         }
@@ -211,11 +195,11 @@ namespace AngularApi.Controllers
             var thirtyDaysAgo = today.AddDays(-30);
 
             var bookings = await _context.Appointments
-                 .Include(a => a.Patient)
                 .Where(a => a.DoctorId == doctorId
                     && a.AppointmentTakenDate >= thirtyDaysAgo
                     && a.AppointmentTakenDate <= today
                     && a.AppointmentStatus!.Status == AppointmentStatusEnum.Active)
+                .SelectBookingDto()
                 .ToListAsync();
 
             return Ok(bookings);
@@ -231,8 +215,20 @@ namespace AngularApi.Controllers
             }
 
             var reviews = await _context.PatientReviews
-                .Include(i => i.Patient)
                 .Where(r => r.DoctorId == doctorId)
+                .Select(r => new ReviewDTO
+                {
+                    Id = r.Id,
+                    PatientId = r.PatientId,
+                    DoctorId = r.DoctorId,
+                    IsReviewAnonymous = r.IsReviewAnonymous,
+                    WaitTimeRating = r.WaitTimeRating,
+                    BedsideMannerRating = r.BedsideMannerRating,
+                    OverallRating = r.OverallRating,
+                    Review = r.Review,
+                    IsDoctorRecommended = r.IsDoctorRecommended,
+                    ReviewDate = r.ReviewDate
+                })
                 .ToListAsync();
             return Ok(reviews);
         }
@@ -263,6 +259,14 @@ namespace AngularApi.Controllers
 
             var qualifications = await _context.DoctorQualifications
                 .Where(q => q.DoctorId == doctorId)
+                .Select(q => new DoctorQualificationDTO
+                {
+                    Id = q.Id,
+                    DoctorId = q.DoctorId,
+                    QualificationName = q.QualificationName,
+                    InstituteName = q.InstituteName,
+                    ProcurementYear = q.ProcurementYear
+                })
                 .ToListAsync();
             return Ok(qualifications);
         }
@@ -276,8 +280,9 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            var specializations = await _context.DoctorSpecialization.Include(i => i.Specialization)
+            var specializations = await _context.DoctorSpecialization
                 .Where(s => s.DoctorId == doctorId)
+                .Select(s => s.Specialization!.SpecializationName!)
                 .ToListAsync();
             return Ok(specializations);
         }

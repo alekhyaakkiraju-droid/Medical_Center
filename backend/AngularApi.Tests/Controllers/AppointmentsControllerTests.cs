@@ -98,8 +98,7 @@ namespace AngularApi.Tests.Controllers
             var result = await _controller.GetAllAppointments();
 
             // Assert
-            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var dtos = okResult.Value.Should().BeAssignableTo<List<AppointmentDTO>>().Subject;
+            var dtos = result.Value.Should().BeAssignableTo<List<AppointmentDTO>>().Subject;
             dtos.Should().HaveCount(1);
             dtos[0].Doctor.Specializations.Should().Contain("Cardiology");
             dtos[0].Patient.Name.Should().Be("Patient1");
@@ -228,7 +227,7 @@ namespace AngularApi.Tests.Controllers
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedAppointments = okResult.Value.Should().BeAssignableTo<IEnumerable<object>>().Subject;
+            var returnedAppointments = okResult.Value.Should().BeAssignableTo<List<AppointmentDTO>>().Subject;
             returnedAppointments.Should().HaveCount(2);
         }
 
@@ -249,9 +248,9 @@ namespace AngularApi.Tests.Controllers
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedAppointments = okResult.Value.Should().BeAssignableTo<List<Appointment>>().Subject;
+            var returnedAppointments = okResult.Value.Should().BeAssignableTo<List<AppointmentDTO>>().Subject;
             returnedAppointments.Should().HaveCount(1);
-            returnedAppointments[0].Id.Should().Be(1);
+            returnedAppointments[0].AppointmentId.Should().Be(1);
         }
 
         [Fact]

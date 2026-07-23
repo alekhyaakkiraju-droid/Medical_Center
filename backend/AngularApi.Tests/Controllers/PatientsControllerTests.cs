@@ -90,7 +90,7 @@ namespace AngularApi.Tests.Controllers
 
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var appointments = okResult.Value.Should().BeAssignableTo<List<Appointment>>().Subject;
+            var appointments = okResult.Value.Should().BeAssignableTo<List<AppointmentDTO>>().Subject;
             appointments.Should().HaveCount(2);
             appointments.All(a => a.PatientId == "patient1").Should().BeTrue();
         }
@@ -114,7 +114,7 @@ namespace AngularApi.Tests.Controllers
 
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var appointments = okResult.Value.Should().BeAssignableTo<List<Appointment>>().Subject;
+            var appointments = okResult.Value.Should().BeAssignableTo<List<AppointmentDTO>>().Subject;
             appointments.Should().HaveCount(2);
             appointments.All(a => a.AppointmentTakenDate >= startDate && a.AppointmentTakenDate <= endDate).Should().BeTrue();
         }
@@ -132,7 +132,7 @@ namespace AngularApi.Tests.Controllers
 
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var appointments = okResult.Value.Should().BeAssignableTo<List<Appointment>>().Subject;
+            var appointments = okResult.Value.Should().BeAssignableTo<List<AppointmentDTO>>().Subject;
             appointments.Should().BeEmpty();
         }
 
