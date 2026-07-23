@@ -1,10 +1,13 @@
 ﻿using AngularApi.Controllers;
 using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Services.impelementation;
+using AngularApi.Services.Interfaces;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace AngularApi.Tests.Controllers
 {
@@ -20,11 +23,18 @@ namespace AngularApi.Tests.Controllers
                 .Options;
             _context = new MedicalCenterDbContext(options);
 
-            _controller = new PatientsController(_context);
+            var ownershipValidator = new OwnershipValidator();
+            _controller = new PatientsController(_context, ownershipValidator);
 
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "patient1"),
+                new Claim(ClaimTypes.Role, "user"),
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
             _controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext()
+                HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) }
             };
         }
 
@@ -138,8 +148,7 @@ namespace AngularApi.Tests.Controllers
             var result = await _controller.UpdateReview("patient1", 1, review);
 
             // Assert
-            var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
-            badRequestResult.Value.Should().Be("Patient ID or Review ID mismatch.");
+            result.Should().BeOfType<ForbidResult>();
         }
 
         [Fact]

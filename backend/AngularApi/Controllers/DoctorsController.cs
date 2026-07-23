@@ -1,5 +1,6 @@
 ﻿using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,18 +11,24 @@ namespace AngularApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Policy = "DoctorPolicy")]
+    [Authorize(Policy = "DoctorOrAdminPolicy")]
     public class DoctorsController : ControllerBase
     {
         private readonly MedicalCenterDbContext _context;
         private readonly AsyncRetryPolicy _retryPolicy;
-        public DoctorsController(MedicalCenterDbContext context)
+        private readonly IOwnershipValidator _ownershipValidator;
+
+        public DoctorsController(MedicalCenterDbContext context, IOwnershipValidator ownershipValidator)
         {
             _context = context;
+            _ownershipValidator = ownershipValidator;
             _retryPolicy = Policy.Handle<Exception>()
                 .WaitAndRetryAsync(3, sleepDurationProvider =>
                 TimeSpan.FromMilliseconds(1000 * sleepDurationProvider));
         }
+
+        private bool IsDoctorAccessDenied(string doctorId) =>
+            !_ownershipValidator.CanAccessDoctorResource(User, doctorId);
 
 
         [HttpGet]
@@ -94,6 +101,11 @@ namespace AngularApi.Controllers
         [HttpGet("{doctorId}")]
         public async Task<ActionResult<Doctor>> GetDoctor(string doctorId)
         {
+            if (IsDoctorAccessDenied(doctorId))
+            {
+                return Forbid();
+            }
+
             var result = await _retryPolicy.ExecuteAsync(async () =>
             {
                 var doctor = await _context.Doctors.FindAsync(doctorId);
@@ -103,7 +115,7 @@ namespace AngularApi.Controllers
 
                 return doctor;
             });
-            return result != null ? Ok(result) : NotFound(result);
+            return result != null ? Ok(result) : NotFound();
         }
 
 
@@ -121,6 +133,11 @@ namespace AngularApi.Controllers
         [HttpGet("{doctorId}/bookings")]
         public async Task<IActionResult> GetBookings(string doctorId)
         {
+            if (IsDoctorAccessDenied(doctorId))
+            {
+                return Forbid();
+            }
+
             var result = await _retryPolicy.ExecuteAsync(async () =>
             {
                 var bookings = await _context.Appointments
@@ -137,6 +154,11 @@ namespace AngularApi.Controllers
         [HttpGet("{doctorId}/bookings/status/{status}")]
         public async Task<IActionResult> GetBookingsByStatus(string doctorId, AppointmentStatusEnum status)
         {
+            if (IsDoctorAccessDenied(doctorId))
+            {
+                return Forbid();
+            }
+
             var bookings = await _context.Appointments
                 .Include(i => i.AppointmentStatus)
                 .Where(a => a.DoctorId == doctorId && a.AppointmentStatus!.Status == status)
@@ -147,6 +169,11 @@ namespace AngularApi.Controllers
         [HttpGet("{doctorId}/bookings/today")]
         public async Task<IActionResult> GetTodaysBookings(string doctorId)
         {
+            if (IsDoctorAccessDenied(doctorId))
+            {
+                return Forbid();
+            }
+
             var today = DateTime.Today;
             var bookings = await _context.Appointments
                 .Include(a => a.Patient)
@@ -159,6 +186,11 @@ namespace AngularApi.Controllers
         [HttpGet("{doctorId}/bookings/UpComing")]
         public async Task<IActionResult> GetUpComingBookings(string doctorId)
         {
+            if (IsDoctorAccessDenied(doctorId))
+            {
+                return Forbid();
+            }
+
             var today = DateTime.Today;
             var bookings = await _context.Appointments
                 .Include(a => a.Patient)
@@ -170,6 +202,11 @@ namespace AngularApi.Controllers
         [HttpGet("{doctorId}/bookings/Last30Days")]
         public async Task<IActionResult> GetLast30DaysBookings(string doctorId)
         {
+            if (IsDoctorAccessDenied(doctorId))
+            {
+                return Forbid();
+            }
+
             var today = DateTime.Today;
             var thirtyDaysAgo = today.AddDays(-30);
 
@@ -188,6 +225,11 @@ namespace AngularApi.Controllers
         [HttpGet("{doctorId}/reviews")]
         public async Task<IActionResult> GetReviews(string doctorId)
         {
+            if (IsDoctorAccessDenied(doctorId))
+            {
+                return Forbid();
+            }
+
             var reviews = await _context.PatientReviews
                 .Include(i => i.Patient)
                 .Where(r => r.DoctorId == doctorId)
@@ -199,6 +241,11 @@ namespace AngularApi.Controllers
         [HttpGet("{doctorId}/rating")]
         public async Task<IActionResult> GetRating(string doctorId)
         {
+            if (IsDoctorAccessDenied(doctorId))
+            {
+                return Forbid();
+            }
+
             var rating = await _context.PatientReviews
                 .Where(r => r.DoctorId == doctorId)
                 .AverageAsync(r => r.OverallRating);
@@ -209,6 +256,11 @@ namespace AngularApi.Controllers
         [HttpGet("{doctorId}/qualifications")]
         public async Task<IActionResult> GetQualifications(string doctorId)
         {
+            if (IsDoctorAccessDenied(doctorId))
+            {
+                return Forbid();
+            }
+
             var qualifications = await _context.DoctorQualifications
                 .Where(q => q.DoctorId == doctorId)
                 .ToListAsync();
@@ -219,6 +271,11 @@ namespace AngularApi.Controllers
         [HttpGet("{doctorId}/specializations")]
         public async Task<IActionResult> GetSpecializations(string doctorId)
         {
+            if (IsDoctorAccessDenied(doctorId))
+            {
+                return Forbid();
+            }
+
             var specializations = await _context.DoctorSpecialization.Include(i => i.Specialization)
                 .Where(s => s.DoctorId == doctorId)
                 .ToListAsync();
@@ -238,6 +295,11 @@ namespace AngularApi.Controllers
         [HttpPut("{doctorId}")]
         public async Task<IActionResult> PutDoctor(string id, Doctor doctor)
         {
+            if (IsDoctorAccessDenied(id))
+            {
+                return Forbid();
+            }
+
             if (id != doctor.Id)
             {
                 return BadRequest();
@@ -298,6 +360,11 @@ namespace AngularApi.Controllers
         [HttpDelete("{doctorId}/appointments/{appointmentId}")]
         public async Task<IActionResult> DeleteAppointment(string doctorId, int appointmentId)
         {
+            if (IsDoctorAccessDenied(doctorId))
+            {
+                return Forbid();
+            }
+
             var appointment = await _context.Appointments
                                              .Include(a => a.AppointmentStatus)
                                              .Where(a => a.DoctorId == doctorId && a.Id == appointmentId)

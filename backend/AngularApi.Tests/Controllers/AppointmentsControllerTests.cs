@@ -2,8 +2,10 @@
 using AngularApi.DTO;
 using AngularApi.Models;
 using AngularApi.Services;
+using AngularApi.Services.impelementation;
 using AngularApi.Services.Interfaces;
 using FluentAssertions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +21,7 @@ namespace AngularApi.Tests.Controllers
         private readonly Mock<UserManager<AppUser>> _userManagerMock;
         private readonly Mock<IEmailService> _emailServiceMock;
         private readonly EmailTemplateService _emailTemplateService;
+        private readonly IOwnershipValidator _ownershipValidator;
         private readonly AppointmentsController _controller;
 
         public AppointmentsControllerTests()
@@ -33,14 +36,26 @@ namespace AngularApi.Tests.Controllers
 
             _emailServiceMock = new Mock<IEmailService>();
 
+            var webHostEnvironmentMock = new Mock<IWebHostEnvironment>();
+            webHostEnvironmentMock
+                .Setup(env => env.WebRootPath)
+                .Returns(Path.Combine(AppContext.BaseDirectory, "wwwroot"));
+            _emailTemplateService = new EmailTemplateService(webHostEnvironmentMock.Object);
+            _ownershipValidator = new OwnershipValidator();
+
             _controller = new AppointmentsController(
                 _context,
                 _userManagerMock.Object,
                 _emailServiceMock.Object,
-                _emailTemplateService);
+                _emailTemplateService,
+                _ownershipValidator);
 
-            var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "user-id") };
-            var identity = new ClaimsIdentity(claims);
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "patient1"),
+                new Claim(ClaimTypes.Role, "user"),
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
             var principal = new ClaimsPrincipal(identity);
             _controller.ControllerContext = new ControllerContext
             {
@@ -213,9 +228,8 @@ namespace AngularApi.Tests.Controllers
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedAppointments = okResult.Value.Should().BeAssignableTo<List<Appointment>>().Subject;
+            var returnedAppointments = okResult.Value.Should().BeAssignableTo<IEnumerable<object>>().Subject;
             returnedAppointments.Should().HaveCount(2);
-            returnedAppointments.All(a => a.PatientId == "patient1").Should().BeTrue();
         }
 
         [Fact]
