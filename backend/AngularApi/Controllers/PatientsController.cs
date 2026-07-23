@@ -33,7 +33,19 @@ namespace AngularApi.Controllers
                     Name = p.Name,
                     Email = p.Email,
                     Image = p.Image,
-                    Reviews = p.PatientReview
+                    Reviews = p.PatientReview.Select(r => new ReviewDTO
+                    {
+                        Id = r.Id,
+                        PatientId = r.PatientId,
+                        DoctorId = r.DoctorId,
+                        IsReviewAnonymous = r.IsReviewAnonymous,
+                        WaitTimeRating = r.WaitTimeRating,
+                        BedsideMannerRating = r.BedsideMannerRating,
+                        OverallRating = r.OverallRating,
+                        Review = r.Review,
+                        IsDoctorRecommended = r.IsDoctorRecommended,
+                        ReviewDate = r.ReviewDate
+                    }).ToList()
                 })
                 .ToListAsync();
 

@@ -1,5 +1,8 @@
 using AngularApi.Filters;
 using AngularApi.Services;
+using AngularApi.Validators;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +32,8 @@ namespace WebApiDemo
             {
                 options.Filters.AddService<ValidateAntiforgeryForMutatingRequestsFilter>();
             });
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddValidatorsFromAssemblyContaining<RegisterUserDTOValidator>();
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerServices();
