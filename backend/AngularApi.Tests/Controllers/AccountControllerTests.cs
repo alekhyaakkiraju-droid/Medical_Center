@@ -325,5 +325,40 @@ namespace AngularApi.Tests.Controllers
             okResult.Value.Should().BeEquivalentTo(new { message = "Logged out successfully" });
             _authCookieServiceMock.Verify(x => x.ClearAuthCookies(), Times.Once);
         }
+
+        [Fact]
+        public void ResetPasswordGet_ValidToken_RedirectsToConfiguredFrontendUrl()
+        {
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["AppSettings:FrontendUrl"] = "https://app.example.com",
+                })
+                .Build();
+
+            var controller = new AccountController(
+                _userManagerMock.Object,
+                configuration,
+                _emailServiceMock.Object,
+                _emailTemplateService,
+                _jwtServiceMock.Object,
+                _googleServiceMock.Object,
+                _authCookieServiceMock.Object,
+                _antiforgeryMock.Object,
+                Microsoft.Extensions.Options.Options.Create(new AuthCookieOptions()));
+
+            var result = controller.ResetPassword("reset-token", "user@example.com");
+
+            var redirectResult = result.Should().BeOfType<RedirectResult>().Subject;
+            redirectResult.Url.Should().Be("https://app.example.com/auth/reset-password?token=reset-token&email=user@example.com");
+        }
+
+        [Fact]
+        public void ResetPasswordGet_MissingToken_ReturnsBadRequest()
+        {
+            var result = _controller.ResetPassword(string.Empty, "user@example.com");
+
+            result.Should().BeOfType<BadRequestObjectResult>();
+        }
     }
 }
