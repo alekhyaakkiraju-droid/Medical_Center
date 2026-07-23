@@ -10,5 +10,5 @@ public class AuthCookieOptions
 
     public string CookiePath { get; set; } = "/api";
 
-    public string FrontendLoginSuccessUrl { get; set; } = "http://localhost:4200/auth/login-success";
+    public string FrontendLoginSuccessUrl { get; set; } = string.Empty;
 }
