@@ -32,7 +32,7 @@
 								</span>
 								<div class="info-box-content">
 									<span class="info-box-text">{{ box.text }}</span>
-									<span class="info-box-number">{{ box.number }}</span>
+									<span class="info-box-number">{{ box.isCurrency ? (box.number | currency:'USD':'symbol':'1.0-0') : box.number }}</span>
 								</div>							
 							</div>							
 						</div>						
@@ -95,7 +95,7 @@
 											<tr>
 												<th>
 													<label class="rt-chkbox rt-chkbox-single rt-chkbox-outline">
-														<input type="checkbox" class="group-checkable"
+														<input type="checkbox" class="group-checkable" aria-label="Select all appointments"
 															data-set="#sample_1 .checkboxes" />
 														<span></span>
 													</label>
@@ -111,7 +111,7 @@
 											<tr *ngFor="let appointment of appointments" class="odd gradeX">
 												<td>
 													<label class="rt-chkbox rt-chkbox-single rt-chkbox-outline">
-														<input type="checkbox" class="checkboxes" value="1" />
+														<input type="checkbox" class="checkboxes" value="1" aria-label="Select appointment row" />
 														<span></span>
 													</label>
 												</td>
@@ -131,12 +131,12 @@
 														</button>
 														<ul class="dropdown-menu pull-left" role="menu">
 															<li>
-																<a (click)="openDeleteModal(appointment.appointmentId)"><i
+																<a href="javascript:;" aria-label="Delete appointment" (click)="openDeleteModal(appointment.appointmentId)"><i
 																		class="fa fa-trash-o"></i>
 																	Delete </a>
 															</li>
 															<li>
-																<a (click)="onEditeAppointment(appointment.appointmentId ,appointment.appointmentDate)" href="javascript:;"><i
+																<a href="javascript:;" aria-label="Edit appointment" (click)="onEditeAppointment(appointment.appointmentId ,appointment.appointmentDate)"><i
 																		class="fa fa-ban"></i>
 																	Edite </a>
 															</li>
@@ -236,10 +236,10 @@
 													</td>
 
 													<td>
-														<a href="javascript:void(0)" class="tblEditBtn">
+														<a href="javascript:void(0)" class="tblEditBtn" aria-label="Edit patient record">
 															<i class="fa fa-pencil"></i>
 														</a>
-														<a href="javascript:void(0)" class="tblDelBtn">
+														<a href="javascript:void(0)" class="tblDelBtn" aria-label="Delete patient record">
 															<i class="fa fa-trash-o"></i>
 														</a>
 													</td>
@@ -272,13 +272,11 @@
 		<h2 class="text-xl text-dark mb-4">Edit Appointment</h2>
 
 		<!-- Date Input -->
-		<label class="block text-sm font-medium text-dark mb-2">Appointment
-			Date</label>
-		<input type="date" [(ngModel)]="appointmentDate" class="w-full px-3 py-2 border  text-dark rounded-lg">
+		<label for="edit-appointment-date" class="block text-sm font-medium text-dark mb-2">Appointment Date</label>
+		<input id="edit-appointment-date" type="date" [(ngModel)]="appointmentDate" aria-label="Appointment date" class="w-full px-3 py-2 border  text-dark rounded-lg">
 
-		<label class="block text-sm font-medium text-dark my-2">Appointment
-			Time</label>
-		<input type="time" [(ngModel)]="appointmentTime" class="w-full px-3 py-2 border  text-dark rounded-lg">
+		<label for="edit-appointment-time" class="block text-sm font-medium text-dark my-2">Appointment Time</label>
+		<input id="edit-appointment-time" type="time" [(ngModel)]="appointmentTime" aria-label="Appointment time" class="w-full px-3 py-2 border  text-dark rounded-lg">
 
 		<!-- Modal Actions -->
 		<div class="flex justify-end mt-4">

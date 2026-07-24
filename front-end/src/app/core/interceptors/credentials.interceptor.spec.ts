@@ -1,8 +1,8 @@
 import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { credentialsInterceptor } from './interceptors/credentials.interceptor';
-import { CsrfTokenStore } from './csrf-token.store';
+import { credentialsInterceptor } from './credentials.interceptor';
+import { CsrfTokenStore } from '../csrf-token.store';
 
 describe('credentialsInterceptor', () => {
   let http: HttpClient;

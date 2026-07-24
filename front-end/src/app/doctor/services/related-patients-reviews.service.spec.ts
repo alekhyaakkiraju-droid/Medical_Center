@@ -1,6 +1,6 @@
 /* tslint:disable:no-unused-variable */
 
-import { TestBed, async, inject } from '@angular/core/testing';
+import { TestBed, waitForAsync, inject } from '@angular/core/testing';
 import { RelatedPatientsReviewsService } from './related-patients-reviews.service';
 
 describe('Service: PatientsReviews', () => {

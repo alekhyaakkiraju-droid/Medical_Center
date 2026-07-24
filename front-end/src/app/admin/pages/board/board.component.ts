@@ -157,6 +157,7 @@ export class BoardComponent implements OnInit, OnDestroy {
         iconClass: 'fas fa-dollar-sign',
         text: 'PrimeCare Earning',
         number: this.totalAmountEarning,
+        isCurrency: true,
       },
     ];
   }

@@ -28,7 +28,8 @@
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
-              "zone.js"
+              "zone.js",
+              "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
@@ -40,10 +41,9 @@
             ],
             "styles": [
               "src/styles.scss",
-               "node_modules/ngx-toastr/toastr.css",
-               "node_modules/bootstrap/dist/css/bootstrap.min.css",
-               "node_modules/flowbite/dist/flowbite.min.css"
-              
+              "node_modules/ngx-toastr/toastr.css",
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "node_modules/flowbite/dist/flowbite.min.css"
             ],
             "scripts": [
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
@@ -59,17 +59,17 @@
           "configurations": {
             "production": {
               "budgets": [
-              {
-                "type": "initial",
-                "maximumWarning": "5mb",
-                "maximumError": "10mb"
-              },
-              {
-                "type": "anyComponentStyle",
-                "maximumWarning": "30kb",
-                "maximumError": "40kb"
-              }
-            ],
+                {
+                  "type": "initial",
+                  "maximumWarning": "5mb",
+                  "maximumError": "10mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "30kb",
+                  "maximumError": "40kb"
+                }
+              ],
               "outputHashing": "all"
             },
             "development": {
@@ -100,7 +100,8 @@
           "options": {
             "polyfills": [
               "zone.js",
-              "zone.js/testing"
+              "zone.js/testing",
+              "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
@@ -112,14 +113,20 @@
             ],
             "styles": [
               "src/styles.scss",
-               "node_modules/bootstrap/dist/css/bootstrap.min.css"
-              
+              "node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
             "scripts": [
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
-            ]
+            ],
+            "browsers": [
+              "ChromeHeadless"
+            ],
+            "karmaConfig": "karma.conf.js"
           }
         }
+      },
+      "i18n": {
+        "sourceLocale": "en"
       }
     }
   },

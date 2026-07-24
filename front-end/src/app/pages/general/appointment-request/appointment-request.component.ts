@@ -27,6 +27,7 @@ export class AppointmentRequestComponent implements OnInit, OnDestroy {
   showAppointments: boolean = false;
   userAppointments: any[] = [];
   isLoading: boolean = false;
+  readonly appointmentFee = 30;
   
   constructor(
     private specializationService: SpecializationService,
@@ -171,7 +172,7 @@ export class AppointmentRequestComponent implements OnInit, OnDestroy {
           appointmentTakenDate: this.date?.value,
           paymentStatus: 'complete'
         };
-        this.toastr.info('The total cost for your appointment is $30. Secure your booking now!', 'Payment Details', {
+        this.toastr.info(`The total cost for your appointment is ${this.appointmentFee.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}. Secure your booking now!`, 'Payment Details', {
           positionClass: 'toast-bottom-left'
         });
         this.showModal = true;
