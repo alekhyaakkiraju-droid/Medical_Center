@@ -30,6 +30,9 @@ namespace AngularApi.Services
             services.AddScoped<IAuthCookieService, AuthCookieService>();
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             services.AddScoped<IAuditService, AuditService>();
+            services.AddScoped<IAppointmentService, AppointmentService>();
+            services.AddScoped<IDoctorService, DoctorService>();
+            services.AddScoped<IPatientService, PatientService>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
@@ -113,8 +116,23 @@ namespace AngularApi.Services
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
-                    Title = "Medical Center",
-                    Description = "ASP.NET Core Web API"
+                    Title = "Medical Center API",
+                    Description =
+                        "REST API for the Medical Center healthcare platform. " +
+                        "Manages patient and doctor profiles, appointment scheduling, payments, " +
+                        "reviews, and administrative operations. " +
+                        "Browser clients authenticate via HttpOnly JWT cookies; " +
+                        "programmatic clients may use Bearer tokens in the Authorization header. " +
+                        "Mutating requests require the X-XSRF-TOKEN antiforgery header when using cookies.",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Medical Center Engineering",
+                        Email = "engineering@medicalcenter.example"
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "See repository LICENSE"
+                    }
                 });
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -124,7 +142,20 @@ namespace AngularApi.Services
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "JWT Authorization header using the Bearer scheme."
+                    Description =
+                        "JWT Bearer authentication for API clients and tooling. " +
+                        "Obtain a token via POST /api/Account/login or use a refresh token flow. " +
+                        "Example: Authorization: Bearer {your JWT token}"
+                });
+
+                c.AddSecurityDefinition("AuthCookie", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.ApiKey,
+                    In = ParameterLocation.Cookie,
+                    Name = "MedCenter.Auth",
+                    Description =
+                        "HttpOnly JWT cookie used by the Angular SPA (default name: MedCenter.Auth). " +
+                        "Set automatically on login; include cookies and X-XSRF-TOKEN for mutating requests."
                 });
 
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -139,8 +170,28 @@ namespace AngularApi.Services
                             }
                         },
                         Array.Empty<string>()
+                    },
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "AuthCookie"
+                            }
+                        },
+                        Array.Empty<string>()
                     }
                 });
+
+                c.TagActionsBy(api =>
+                {
+                    var controller = api.ActionDescriptor.RouteValues.TryGetValue("controller", out var name)
+                        ? name
+                        : "Other";
+                    return [controller ?? "Other"];
+                });
+                c.DocInclusionPredicate((_, _) => true);
             });
         }
         public static async Task EnsureRolesCreatedAsync(this RoleManager<IdentityRole> roleManager)

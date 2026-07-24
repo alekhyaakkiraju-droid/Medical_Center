@@ -25,7 +25,8 @@ namespace AngularApi.Tests.Controllers
             _context = new MedicalCenterDbContext(_options);
 
             var ownershipValidator = new OwnershipValidator();
-            _controller = new DoctorsController(_context, ownershipValidator);
+            var doctorService = new DoctorService(_context);
+            _controller = new DoctorsController(doctorService, ownershipValidator);
 
             var claims = new[]
             {

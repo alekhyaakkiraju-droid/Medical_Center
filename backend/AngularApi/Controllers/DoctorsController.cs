@@ -3,9 +3,6 @@ using AngularApi.Models;
 using AngularApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Polly;
-using Polly.Retry;
 
 namespace AngularApi.Controllers
 {
@@ -14,74 +11,30 @@ namespace AngularApi.Controllers
     [Authorize(Policy = "DoctorOrAdminPolicy")]
     public class DoctorsController : ControllerBase
     {
-        private readonly MedicalCenterDbContext _context;
-        private readonly AsyncRetryPolicy _retryPolicy;
+        private readonly IDoctorService _doctorService;
         private readonly IOwnershipValidator _ownershipValidator;
 
-        public DoctorsController(MedicalCenterDbContext context, IOwnershipValidator ownershipValidator)
+        public DoctorsController(IDoctorService doctorService, IOwnershipValidator ownershipValidator)
         {
-            _context = context;
+            _doctorService = doctorService;
             _ownershipValidator = ownershipValidator;
-            _retryPolicy = Policy.Handle<Exception>()
-                .WaitAndRetryAsync(3, sleepDurationProvider =>
-                TimeSpan.FromMilliseconds(1000 * sleepDurationProvider));
         }
 
         private bool IsDoctorAccessDenied(string doctorId) =>
             !_ownershipValidator.CanAccessDoctorResource(User, doctorId);
 
-
         [HttpGet]
         public async Task<ActionResult<PagedResult<DoctorDTO>>> GetDoctors([FromQuery] PaginationParameters pagination)
         {
-            return await _context.Doctors.SelectDoctorDto().ToPagedResultAsync(pagination);
+            return await _doctorService.GetDoctorsAsync(pagination);
         }
-
-
 
         [AllowAnonymous]
         [HttpGet("/api/DoctorsWithSpectialization")]
         public async Task<ActionResult<PagedResult<DoctorDTO>>> GetDoctorsWithSpectialization([FromQuery] PaginationParameters pagination)
         {
-            return await _context.Doctors.SelectDoctorDto().ToPagedResultAsync(pagination);
+            return await _doctorService.GetDoctorsWithSpecializationAsync(pagination);
         }
-
-
-        //[HttpGet("{doctorId}")]
-        //public async Task<ActionResult<Doctor>> GetDoctor(string doctorId)
-        //{
-        //    var maxRetries = 3;
-        //    var leftRetries = maxRetries;
-
-
-        //    while (leftRetries > 0)
-        //    {
-        //        try
-        //        {
-        //            var doctor = await _context.Doctors.FindAsync(doctorId);
-
-        //            if (doctor == null)
-        //                return NotFound($"Doctor with ID {doctorId} not found.");
-
-        //            return Ok(doctor);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            leftRetries--;
-
-        //            Console.WriteLine($"Attempt failed. Retries left: {leftRetries}. Error: {ex.Message}");
-
-        //            if (leftRetries == 0)
-        //            {
-        //                return StatusCode(500, "Internal server error while retrieving doctor data.");
-        //            }
-
-        //            await Task.Delay(1000);
-        //        }
-        //    }
-
-        //    return StatusCode(500, "An unexpected error occurred.");
-        //}
 
         [HttpGet("{doctorId}")]
         public async Task<ActionResult<Doctor>> GetDoctor(string doctorId)
@@ -91,29 +44,17 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            var result = await _retryPolicy.ExecuteAsync(async () =>
-            {
-                var doctor = await _context.Doctors.FindAsync(doctorId);
-
-                if (doctor == null)
-                    return null;
-
-                return doctor;
-            });
-            return result != null ? Ok(result) : NotFound();
+            var doctor = await _doctorService.GetDoctorByIdAsync(doctorId);
+            return doctor != null ? Ok(doctor) : NotFound();
         }
-
 
         [Authorize(Policy = "AdminPolicy")]
         [HttpPost]
         public async Task<ActionResult<Doctor>> PostDoctor(Doctor doctor)
         {
-            _context.Doctors.Add(doctor);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetDoctor", new { id = doctor.Id }, doctor);
+            var createdDoctor = await _doctorService.CreateDoctorAsync(doctor);
+            return CreatedAtAction("GetDoctor", new { id = createdDoctor.Id }, createdDoctor);
         }
-
 
         [HttpGet("{doctorId}/bookings")]
         public async Task<IActionResult> GetBookings(string doctorId, [FromQuery] PaginationParameters pagination)
@@ -123,14 +64,7 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            var result = await _retryPolicy.ExecuteAsync(async () =>
-            {
-                return await _context.Appointments
-                    .Where(a => a.DoctorId == doctorId &&
-                                a.AppointmentStatus!.Status == AppointmentStatusEnum.Active)
-                    .SelectBookingDto()
-                    .ToPagedResultAsync(pagination);
-            });
+            var result = await _doctorService.GetBookingsAsync(doctorId, pagination);
             return Ok(result);
         }
 
@@ -142,10 +76,7 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            var bookings = await _context.Appointments
-                .Where(a => a.DoctorId == doctorId && a.AppointmentStatus!.Status == status)
-                .SelectBookingDto()
-                .ToPagedResultAsync(pagination);
+            var bookings = await _doctorService.GetBookingsByStatusAsync(doctorId, status, pagination);
             return Ok(bookings);
         }
 
@@ -157,14 +88,9 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            var today = DateTime.Today;
-            var bookings = await _context.Appointments
-                .Where(a => a.DoctorId == doctorId && a.AppointmentTakenDate == today && a.AppointmentStatus!.Status == AppointmentStatusEnum.Active)
-                .SelectBookingDto()
-                .ToPagedResultAsync(pagination);
+            var bookings = await _doctorService.GetTodaysBookingsAsync(doctorId, pagination);
             return Ok(bookings);
         }
-
 
         [HttpGet("{doctorId}/bookings/UpComing")]
         public async Task<IActionResult> GetUpComingBookings(string doctorId, [FromQuery] PaginationParameters pagination)
@@ -174,11 +100,7 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            var today = DateTime.Today;
-            var bookings = await _context.Appointments
-                .Where(a => a.DoctorId == doctorId && a.AppointmentTakenDate >= today && a.AppointmentStatus!.Status == AppointmentStatusEnum.Active)
-                .SelectBookingDto()
-                .ToPagedResultAsync(pagination);
+            var bookings = await _doctorService.GetUpcomingBookingsAsync(doctorId, pagination);
             return Ok(bookings);
         }
 
@@ -190,20 +112,9 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            var today = DateTime.Today;
-            var thirtyDaysAgo = today.AddDays(-30);
-
-            var bookings = await _context.Appointments
-                .Where(a => a.DoctorId == doctorId
-                    && a.AppointmentTakenDate >= thirtyDaysAgo
-                    && a.AppointmentTakenDate <= today
-                    && a.AppointmentStatus!.Status == AppointmentStatusEnum.Active)
-                .SelectBookingDto()
-                .ToPagedResultAsync(pagination);
-
+            var bookings = await _doctorService.GetLast30DaysBookingsAsync(doctorId, pagination);
             return Ok(bookings);
         }
-
 
         [HttpGet("{doctorId}/reviews")]
         public async Task<IActionResult> GetReviews(string doctorId, [FromQuery] PaginationParameters pagination)
@@ -213,25 +124,9 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            var reviews = await _context.PatientReviews
-                .Where(r => r.DoctorId == doctorId)
-                .Select(r => new ReviewDTO
-                {
-                    Id = r.Id,
-                    PatientId = r.PatientId,
-                    DoctorId = r.DoctorId,
-                    IsReviewAnonymous = r.IsReviewAnonymous,
-                    WaitTimeRating = r.WaitTimeRating,
-                    BedsideMannerRating = r.BedsideMannerRating,
-                    OverallRating = r.OverallRating,
-                    Review = r.Review,
-                    IsDoctorRecommended = r.IsDoctorRecommended,
-                    ReviewDate = r.ReviewDate
-                })
-                .ToPagedResultAsync(pagination);
+            var reviews = await _doctorService.GetReviewsAsync(doctorId, pagination);
             return Ok(reviews);
         }
-
 
         [HttpGet("{doctorId}/rating")]
         public async Task<IActionResult> GetRating(string doctorId)
@@ -241,12 +136,9 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            var rating = await _context.PatientReviews
-                .Where(r => r.DoctorId == doctorId)
-                .AverageAsync(r => r.OverallRating);
+            var rating = await _doctorService.GetRatingAsync(doctorId);
             return Ok(rating);
         }
-
 
         [HttpGet("{doctorId}/qualifications")]
         public async Task<IActionResult> GetQualifications(string doctorId, [FromQuery] PaginationParameters pagination)
@@ -256,20 +148,9 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            var qualifications = await _context.DoctorQualifications
-                .Where(q => q.DoctorId == doctorId)
-                .Select(q => new DoctorQualificationDTO
-                {
-                    Id = q.Id,
-                    DoctorId = q.DoctorId,
-                    QualificationName = q.QualificationName,
-                    InstituteName = q.InstituteName,
-                    ProcurementYear = q.ProcurementYear
-                })
-                .ToPagedResultAsync(pagination);
+            var qualifications = await _doctorService.GetQualificationsAsync(doctorId, pagination);
             return Ok(qualifications);
         }
-
 
         [HttpGet("{doctorId}/specializations")]
         public async Task<IActionResult> GetSpecializations(string doctorId, [FromQuery] PaginationParameters pagination)
@@ -279,22 +160,9 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            var specializations = await _context.DoctorSpecialization
-                .Where(s => s.DoctorId == doctorId)
-                .Select(s => s.Specialization!.SpecializationName!)
-                .ToPagedResultAsync(pagination);
+            var specializations = await _doctorService.GetSpecializationsAsync(doctorId, pagination);
             return Ok(specializations);
         }
-
-
-        //[HttpGet("{doctorId}/schedules")]
-        //public async Task<IActionResult> GetSchedules(int doctorId)
-        //{
-        //    var schedules = await _context.Schedules
-        //        .Where(s => s.Id == doctorId)
-        //        .ToListAsync();
-        //    return Ok(schedules);
-        //}
 
         [HttpPut("{doctorId}")]
         public async Task<IActionResult> PutDoctor(string id, Doctor doctor)
@@ -309,56 +177,23 @@ namespace AngularApi.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(doctor).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DoctorExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var updated = await _doctorService.UpdateDoctorAsync(id, doctor);
+            return updated ? NoContent() : NotFound();
         }
-
 
         [HttpPut("bookings/{bookingId}")]
         public async Task<IActionResult> UpdateBooking(int bookingId, [FromBody] Appointment updatedBooking)
         {
-            var booking = await _context.Appointments.FindAsync(bookingId);
-            if (booking == null) return NotFound();
-
-            // Update fields
-            booking.AppointmentStatus = updatedBooking.AppointmentStatus;
-            booking.AppointmentTakenDate = updatedBooking.AppointmentTakenDate;
-
-            await _context.SaveChangesAsync();
-            return NoContent();
+            var updated = await _doctorService.UpdateBookingAsync(bookingId, updatedBooking);
+            return updated ? NoContent() : NotFound();
         }
 
         [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{doctorId}")]
         public async Task<IActionResult> DeleteDoctor(string id)
         {
-            var doctor = await _context.Doctors.FindAsync(id);
-            if (doctor == null)
-            {
-                return NotFound();
-            }
-
-            _context.Doctors.Remove(doctor);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            var deleted = await _doctorService.DeleteDoctorAsync(id);
+            return deleted ? NoContent() : NotFound();
         }
 
         [HttpDelete("{doctorId}/appointments/{appointmentId}")]
@@ -369,25 +204,10 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            var appointment = await _context.Appointments
-                                             .Include(a => a.AppointmentStatus)
-                                             .Where(a => a.DoctorId == doctorId && a.Id == appointmentId)
-                                             .FirstOrDefaultAsync();
-
-            if (appointment == null)
-            {
-                return NotFound(new { message = "Appointment not found" });
-            }
-            appointment.AppointmentStatusId = (int)AppointmentStatusEnum.Canceled;
-            //_context.Appointments.Remove(appointment);
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
-
-
-        private bool DoctorExists(string id)
-        {
-            return _context.Doctors.Any(e => e.Id == id);
+            var canceled = await _doctorService.CancelDoctorAppointmentAsync(doctorId, appointmentId);
+            return canceled
+                ? NoContent()
+                : NotFound(new { message = "Appointment not found" });
         }
     }
 }
