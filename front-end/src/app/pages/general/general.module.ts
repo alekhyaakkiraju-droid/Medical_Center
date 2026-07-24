@@ -15,8 +15,8 @@ import { TeamComponent } from './team/team.component';
 import { FaqComponent } from './faq/faq.component';
 import { AppointmentRequestComponent } from './appointment-request/appointment-request.component';
 import { DoctorcsComponent } from './doctorcs/doctorcs.component';
-import { DeleteModalComponent } from '../../doctor/pages/delete-modal/delete-modal.component';
 import { CollectedShotsComponent } from './collected-shots/collected-shots.component';
+import { SharedModule } from '../../shared/shared.module';
 import { PaymentComponent } from './Payment/Payment.component';
 
 
@@ -40,8 +40,8 @@ const routes: Routes = [
     RouterModule.forChild(routes),
     ReactiveFormsModule,
     RouterModule,
-    FormsModule 
-    
+    FormsModule,
+    SharedModule,
   ],
   declarations: [
     GeneralComponent,
@@ -58,9 +58,6 @@ const routes: Routes = [
     DoctorcsComponent,
     FaqComponent,
     AppointmentRequestComponent,
-    DeleteModalComponent,
-    PaymentComponent
   ],
-  exports: [DeleteModalComponent]
 })
 export class GeneralModule { }
