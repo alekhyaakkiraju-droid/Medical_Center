@@ -39,18 +39,44 @@ namespace AngularApi.Models
                 entity.ToTable("AuditLogs");
                 entity.HasKey(log => log.Id);
             });
+
+            modelBuilder.Entity<Appointment>()
+                .HasIndex(a => new { a.DoctorId, a.AppointmentTakenDate });
+
+            modelBuilder.Entity<Appointment>()
+                .HasIndex(a => new { a.PatientId, a.AppointmentTakenDate });
+
+            modelBuilder.Entity<PatientReview>()
+                .HasIndex(r => r.DoctorId);
         }
 
         public override int SaveChanges()
         {
+            ApplyAuditTimestamps();
             EnforceAuditLogAppendOnly();
             return base.SaveChanges();
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+            ApplyAuditTimestamps();
             EnforceAuditLogAppendOnly();
             return await base.SaveChangesAsync(cancellationToken);
+        }
+
+        private void ApplyAuditTimestamps()
+        {
+            foreach (var entry in ChangeTracker.Entries<IAuditableEntity>())
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.CreatedAt = DateTime.UtcNow;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    entry.Entity.UpdatedAt = DateTime.UtcNow;
+                }
+            }
         }
 
         private void EnforceAuditLogAppendOnly()
