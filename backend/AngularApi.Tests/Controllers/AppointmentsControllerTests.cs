@@ -1,4 +1,4 @@
-﻿using AngularApi.Controllers;
+using AngularApi.Controllers;
 using AngularApi.DTO;
 using AngularApi.Models;
 using AngularApi.Options;
@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Moq;
 using System.Security.Claims;
 
@@ -20,6 +19,7 @@ namespace AngularApi.Tests.Controllers
     public class AppointmentsControllerTests : IDisposable
     {
         private readonly MedicalCenterDbContext _context;
+        private readonly Mock<IAppointmentService> _appointmentServiceMock;
         private readonly Mock<UserManager<AppUser>> _userManagerMock;
         private readonly Mock<IEmailService> _emailServiceMock;
         private readonly EmailTemplateService _emailTemplateService;
@@ -44,15 +44,9 @@ namespace AngularApi.Tests.Controllers
                 .Returns(Path.Combine(AppContext.BaseDirectory, "wwwroot"));
             _emailTemplateService = new EmailTemplateService(webHostEnvironmentMock.Object);
             _ownershipValidator = new OwnershipValidator();
-            var appointmentSettings = Microsoft.Extensions.Options.Options.Create(new AppointmentSettings { DefaultFee = 30, DefaultCenterId = 2 });
+            _appointmentServiceMock = new Mock<IAppointmentService>();
 
-            _controller = new AppointmentsController(
-                _context,
-                _userManagerMock.Object,
-                _emailServiceMock.Object,
-                _emailTemplateService,
-                _ownershipValidator,
-                appointmentSettings);
+            _controller = CreateController(_appointmentServiceMock.Object);
 
             var claims = new[]
             {
@@ -72,97 +66,98 @@ namespace AngularApi.Tests.Controllers
             _controller.ControllerContext.HttpContext.RequestServices = serviceProviderMock.Object;
         }
 
-
+        private AppointmentsController CreateController(IAppointmentService appointmentService) =>
+            new(
+                appointmentService,
+                _userManagerMock.Object,
+                _emailServiceMock.Object,
+                _emailTemplateService,
+                _ownershipValidator);
 
         [Fact]
         public async Task GetAllAppointments_ReturnsAppointmentDtos()
         {
-            // Arrange
-            var doctor = new Doctor
+            var expected = new PagedResult<AppointmentDTO>
             {
-                Id = "doctor1",
-                Name = "Dr. Smith",
-                DoctorSpecializations = new List<DoctorSpecialization>
-                {
-                    new DoctorSpecialization { Specialization = new Specialization { SpecializationName = "Cardiology" } }
-                }
+                Items =
+                [
+                    new AppointmentDTO
+                    {
+                        AppointmentId = 1,
+                        Doctor = new DoctorDTO { Specializations = ["Cardiology"] },
+                        Patient = new PatientDTO { Name = "Patient1" }
+                    }
+                ],
+                TotalCount = 1,
+                CurrentPage = 1,
+                PageSize = 10,
+                PageCount = 1
             };
-            _context.Doctors.Add(doctor);
-            _context.Appointments.Add(new Appointment
-            {
-                Id = 1,
-                AppointmentTakenDate = DateTime.Now,
-                DoctorName = "Dr. Smith",
-                DoctorId = "doctor1",
-                Patient = new Patient { Id = "patient1", UserName = "Patient1", Email = "patient1@example.com" }
-            });
-            await _context.SaveChangesAsync();
+            _appointmentServiceMock
+                .Setup(s => s.GetAllAppointmentsAsync(It.IsAny<PaginationParameters>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(expected);
 
-            // Act
             var result = await _controller.GetAllAppointments(new PaginationParameters());
 
-            // Assert
             var paged = result.Value.Should().BeAssignableTo<PagedResult<AppointmentDTO>>().Subject;
             paged.Items.Should().HaveCount(1);
             paged.Items[0].Doctor.Specializations.Should().Contain("Cardiology");
             paged.Items[0].Patient.Name.Should().Be("Patient1");
         }
 
-
         [Fact]
         public async Task GetAppointment_NonExistingId_ReturnsNotFound()
         {
+            _appointmentServiceMock
+                .Setup(s => s.GetAppointmentByIdAsync(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync((Appointment?)null);
 
-            // Act
             var result = await _controller.GetAppointment(1);
 
-            // Assert
             result.Result.Should().BeOfType<NotFoundResult>();
         }
 
         [Fact]
         public async Task UpdateAppointment_ValidInput_UpdatesAppointment()
         {
-            // Arrange
             var appointment = new Appointment { Id = 1, AppointmentTakenDate = DateTime.Now };
-            _context.Appointments.Add(appointment);
-            await _context.SaveChangesAsync();
             var appointmentDto = new UpdateAppointmentDTO { Id = 1, AppointmentTakenDate = DateTime.Now.AddDays(1) };
 
-            // Act
+            _appointmentServiceMock
+                .Setup(s => s.GetAppointmentByIdAsync(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(appointment);
+            _appointmentServiceMock
+                .Setup(s => s.UpdateAppointmentAsync(1, appointmentDto, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
+
             var result = await _controller.UpdateAppointment(1, appointmentDto);
 
-            // Assert
             result.Should().BeOfType<NoContentResult>();
-            var updatedAppointment = await _context.Appointments.FindAsync(1);
-            updatedAppointment.AppointmentTakenDate.Should().Be(appointmentDto.AppointmentTakenDate);
+            _appointmentServiceMock.Verify(s => s.UpdateAppointmentAsync(1, appointmentDto, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
         public async Task UpdateAppointment_IdMismatch_ReturnsBadRequest()
         {
-            // Arrange
             var appointmentDto = new UpdateAppointmentDTO { Id = 2 };
 
-            // Act
             var result = await _controller.UpdateAppointment(1, appointmentDto);
 
-            // Assert
             var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
             badRequestResult.Value.Should().Be("Appointment ID mismatch.");
         }
 
-
         [Fact]
         public async Task PostAppointment_InvalidDoctorId_ReturnsBadRequest()
         {
-            // Arrange
+            _userManagerMock.Setup(x => x.FindByIdAsync("patient1")).ReturnsAsync(new AppUser { Id = "patient1", UserName = "Patient1", Email = "patient1@example.com" });
             var appointment = new Appointment { Id = 1, DoctorId = "invalid-doctor" };
+            _appointmentServiceMock
+                .Setup(s => s.CreateAppointmentAsync(appointment, "patient1", It.IsAny<CancellationToken>()))
+                .ReturnsAsync((null, "Invalid DoctorId"));
 
-            // Act
             var result = await _controller.PostAppointment(appointment);
 
-            // Assert
             var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
             badRequestResult.Value.Should().Be("Invalid DoctorId");
         }
@@ -170,7 +165,11 @@ namespace AngularApi.Tests.Controllers
         [Fact]
         public async Task PostAppointment_MissingDoctorId_ReturnsBadRequest()
         {
+            _userManagerMock.Setup(x => x.FindByIdAsync("patient1")).ReturnsAsync(new AppUser { Id = "patient1", UserName = "Patient1", Email = "patient1@example.com" });
             var appointment = new Appointment { Id = 1 };
+            _appointmentServiceMock
+                .Setup(s => s.CreateAppointmentAsync(appointment, "patient1", It.IsAny<CancellationToken>()))
+                .ReturnsAsync((null, "DoctorId is required"));
 
             var result = await _controller.PostAppointment(appointment);
 
@@ -181,17 +180,11 @@ namespace AngularApi.Tests.Controllers
         [Fact]
         public async Task PostAppointment_UserNotFound_ReturnsNotFound()
         {
-            // Arrange
             var appointment = new Appointment { Id = 1, DoctorId = "doctor-id" };
-            var doctor = new Doctor { Id = "doctor-id", Name = "Dr. Smith" };
-            _context.Doctors.Add(doctor);
-            await _context.SaveChangesAsync();
-            _userManagerMock.Setup(x => x.FindByIdAsync("user-id")).ReturnsAsync((AppUser)null);
+            _userManagerMock.Setup(x => x.FindByIdAsync("patient1")).ReturnsAsync((AppUser?)null);
 
-            // Act
             var result = await _controller.PostAppointment(appointment);
 
-            // Assert
             var notFoundResult = result.Result.Should().BeOfType<NotFoundObjectResult>().Subject;
             notFoundResult.Value.Should().Be("User not found");
         }
@@ -199,104 +192,106 @@ namespace AngularApi.Tests.Controllers
         [Fact]
         public async Task PostAppointment_ValidInput_UsesConfigurationAndDoctorId()
         {
-            var doctor = new Doctor { Id = "doctor-id", Name = "Dr. Smith" };
-            _context.Doctors.Add(doctor);
-            await _context.SaveChangesAsync();
-
             var user = new AppUser { Id = "patient1", UserName = "Patient1", Email = "patient1@example.com" };
             _userManagerMock.Setup(x => x.FindByIdAsync("patient1")).ReturnsAsync(user);
 
-            var settings = Microsoft.Extensions.Options.Options.Create(new AppointmentSettings { DefaultFee = 55, DefaultCenterId = 9 });
-            var controller = new AppointmentsController(
-                _context,
-                _userManagerMock.Object,
-                _emailServiceMock.Object,
-                _emailTemplateService,
-                _ownershipValidator,
-                settings)
+            var createdAppointment = new Appointment
             {
-                ControllerContext = _controller.ControllerContext
+                Id = 1,
+                DoctorId = "doctor-id",
+                DoctorName = "Dr. Smith",
+                MedicalCenterId = 9,
+                Amount = 55,
+                AppointmentStatusId = (int)AppointmentStatusEnum.Active,
+                AppointmentTakenDate = DateTime.UtcNow
             };
-
             var appointment = new Appointment { DoctorId = "doctor-id", AppointmentTakenDate = DateTime.UtcNow };
+            _appointmentServiceMock
+                .Setup(s => s.CreateAppointmentAsync(appointment, "patient1", It.IsAny<CancellationToken>()))
+                .ReturnsAsync((createdAppointment, null));
 
-            var result = await controller.PostAppointment(appointment);
+            var result = await _controller.PostAppointment(appointment);
 
             var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
-            var createdAppointment = createdResult.Value.Should().BeAssignableTo<Appointment>().Subject;
-            createdAppointment.DoctorId.Should().Be("doctor-id");
-            createdAppointment.DoctorName.Should().Be("Dr. Smith");
-            createdAppointment.MedicalCenterId.Should().Be(9);
-            createdAppointment.Amount.Should().Be(55);
-            createdAppointment.AppointmentStatusId.Should().Be((int)AppointmentStatusEnum.Active);
+            var returnedAppointment = createdResult.Value.Should().BeAssignableTo<Appointment>().Subject;
+            returnedAppointment.DoctorId.Should().Be("doctor-id");
+            returnedAppointment.DoctorName.Should().Be("Dr. Smith");
+            returnedAppointment.MedicalCenterId.Should().Be(9);
+            returnedAppointment.Amount.Should().Be(55);
+            returnedAppointment.AppointmentStatusId.Should().Be((int)AppointmentStatusEnum.Active);
         }
 
         [Fact]
         public async Task PostAppointment_EmailFailure_StillCreatesAppointment()
         {
-            var doctor = new Doctor { Id = "doctor-id", Name = "Dr. Smith" };
-            _context.Doctors.Add(doctor);
-            await _context.SaveChangesAsync();
-
             var user = new AppUser { Id = "patient1", UserName = "Patient1", Email = "patient1@example.com" };
             _userManagerMock.Setup(x => x.FindByIdAsync("patient1")).ReturnsAsync(user);
             _emailServiceMock
                 .Setup(x => x.SendEmailAsync(It.IsAny<Message>()))
                 .ThrowsAsync(new InvalidOperationException("SMTP unavailable"));
 
+            var createdAppointment = new Appointment
+            {
+                Id = 1,
+                DoctorId = "doctor-id",
+                DoctorName = "Dr. Smith",
+                AppointmentTakenDate = DateTime.UtcNow
+            };
             var appointment = new Appointment { DoctorId = "doctor-id", AppointmentTakenDate = DateTime.UtcNow };
+            _appointmentServiceMock
+                .Setup(s => s.CreateAppointmentAsync(appointment, "patient1", It.IsAny<CancellationToken>()))
+                .ReturnsAsync((createdAppointment, null));
 
             var result = await _controller.PostAppointment(appointment);
 
             result.Result.Should().BeOfType<CreatedAtActionResult>();
-            (await _context.Appointments.CountAsync()).Should().Be(1);
         }
 
         [Fact]
         public async Task DeleteAppointment_ExistingId_DeletesAppointment()
         {
-            // Arrange
-            var appointment = new Appointment { Id = 1 };
-            _context.Appointments.Add(appointment);
-            await _context.SaveChangesAsync();
+            _appointmentServiceMock
+                .Setup(s => s.DeleteAppointmentAsync(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
 
-            // Act
             var result = await _controller.DeleteAppointment(1);
 
-            // Assert
             result.Should().BeOfType<NoContentResult>();
-            var deletedAppointment = await _context.Appointments.FindAsync(1);
-            deletedAppointment.Should().BeNull();
         }
 
         [Fact]
         public async Task DeleteAppointment_NonExistingId_ReturnsNotFound()
         {
+            _appointmentServiceMock
+                .Setup(s => s.DeleteAppointmentAsync(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(false);
 
-
-            // Act
             var result = await _controller.DeleteAppointment(1);
 
-            // Assert
             result.Should().BeOfType<NotFoundResult>();
         }
 
         [Fact]
         public async Task GetAppointmentsByPatient_ReturnsPatientAppointments()
         {
-            // Arrange
-            _context.Appointments.AddRange(new List<Appointment>
+            var expected = new PagedResult<AppointmentDTO>
             {
-                new Appointment { Id = 1, PatientId = "patient1" },
-                new Appointment { Id = 2, PatientId = "patient1" },
-                new Appointment { Id = 3, PatientId = "patient2" }
-            });
-            await _context.SaveChangesAsync();
+                Items =
+                [
+                    new AppointmentDTO { AppointmentId = 1, Patient = new PatientDTO { PatientId = "patient1" } },
+                    new AppointmentDTO { AppointmentId = 2, Patient = new PatientDTO { PatientId = "patient1" } }
+                ],
+                TotalCount = 2,
+                CurrentPage = 1,
+                PageSize = 10,
+                PageCount = 1
+            };
+            _appointmentServiceMock
+                .Setup(s => s.GetAppointmentsByPatientAsync("patient1", It.IsAny<PaginationParameters>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(expected);
 
-            // Act
             var result = await _controller.GetAppointmentsByPatient("patient1", new PaginationParameters());
 
-            // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
             var paged = okResult.Value.Should().BeAssignableTo<PagedResult<AppointmentDTO>>().Subject;
             paged.Items.Should().HaveCount(2);
@@ -305,19 +300,20 @@ namespace AngularApi.Tests.Controllers
         [Fact]
         public async Task GetTodaysAppointments_ReturnsTodaysAppointments()
         {
-            // Arrange
-            var today = DateTime.Today;
-            _context.Appointments.AddRange(new List<Appointment>
+            var expected = new PagedResult<AppointmentDTO>
             {
-                new Appointment { Id = 1, ProbableStartTime = today },
-                new Appointment { Id = 2, ProbableStartTime = today.AddDays(1) }
-            });
-            await _context.SaveChangesAsync();
+                Items = [new AppointmentDTO { AppointmentId = 1 }],
+                TotalCount = 1,
+                CurrentPage = 1,
+                PageSize = 10,
+                PageCount = 1
+            };
+            _appointmentServiceMock
+                .Setup(s => s.GetTodaysAppointmentsAsync(It.IsAny<PaginationParameters>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(expected);
 
-            // Act
             var result = await _controller.GetTodaysAppointments(new PaginationParameters());
 
-            // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
             var paged = okResult.Value.Should().BeAssignableTo<PagedResult<AppointmentDTO>>().Subject;
             paged.Items.Should().HaveCount(1);
@@ -327,19 +323,41 @@ namespace AngularApi.Tests.Controllers
         [Fact]
         public async Task GetTotalEarnings_ReturnsSumOfAmounts()
         {
-            // Arrange
-            _context.Appointments.AddRange(new List<Appointment>
-            {
-                new Appointment { Id = 1, Amount = 30 },
-                new Appointment { Id = 2, Amount = 50 }
-            });
-            await _context.SaveChangesAsync();
+            _appointmentServiceMock
+                .Setup(s => s.GetTotalEarningsAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(80m);
 
-            // Act
             var result = await _controller.GetPatientTotalEarnings();
 
-            // Assert
-            var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+            result.Should().BeOfType<OkObjectResult>();
+        }
+
+        [Fact]
+        public async Task GetAppointments_WithRealService_ReturnsPagedResults()
+        {
+            var appointmentService = new AppointmentService(
+                _context,
+                Microsoft.Extensions.Options.Options.Create(new AppointmentSettings { DefaultFee = 30, DefaultCenterId = 2 }));
+            var controller = CreateController(appointmentService);
+            controller.ControllerContext = _controller.ControllerContext;
+
+            for (var i = 1; i <= 5; i++)
+            {
+                _context.Appointments.Add(new Appointment
+                {
+                    Id = i,
+                    DoctorName = "Dr Smith",
+                    PatientId = $"patient{i}",
+                    AppointmentTakenDate = DateTime.UtcNow.AddDays(i)
+                });
+            }
+            await _context.SaveChangesAsync();
+
+            var result = await controller.GetAppointments(new PaginationParameters { Page = 1, PageSize = 3 });
+
+            var paged = result.Value.Should().BeOfType<PagedResult<AppointmentDTO>>().Subject;
+            paged.Items.Should().HaveCount(3);
+            paged.TotalCount.Should().Be(5);
         }
 
         public void Dispose()

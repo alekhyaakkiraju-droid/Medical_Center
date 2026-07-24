@@ -3,7 +3,6 @@ using AngularApi.Models;
 using AngularApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace AngularApi.Controllers
 {
@@ -12,45 +11,22 @@ namespace AngularApi.Controllers
     [Authorize]
     public class PatientsController : ControllerBase
     {
-
-        private readonly MedicalCenterDbContext _context;
+        private readonly IPatientService _patientService;
         private readonly IOwnershipValidator _ownershipValidator;
 
-        public PatientsController(MedicalCenterDbContext context, IOwnershipValidator ownershipValidator)
+        public PatientsController(IPatientService patientService, IOwnershipValidator ownershipValidator)
         {
-            _context = context;
+            _patientService = patientService;
             _ownershipValidator = ownershipValidator;
         }
+
         [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
         public async Task<IActionResult> GetAllPatientsWithReviews([FromQuery] PaginationParameters pagination)
         {
-            var patients = await _context.Patients
-                .Select(p => new PatientDTO
-                {
-                    PatientId = p.Id,
-                    Name = p.Name,
-                    Email = p.Email,
-                    Image = p.Image,
-                    Reviews = p.PatientReview.Select(r => new ReviewDTO
-                    {
-                        Id = r.Id,
-                        PatientId = r.PatientId,
-                        DoctorId = r.DoctorId,
-                        IsReviewAnonymous = r.IsReviewAnonymous,
-                        WaitTimeRating = r.WaitTimeRating,
-                        BedsideMannerRating = r.BedsideMannerRating,
-                        OverallRating = r.OverallRating,
-                        Review = r.Review,
-                        IsDoctorRecommended = r.IsDoctorRecommended,
-                        ReviewDate = r.ReviewDate
-                    }).ToList()
-                })
-                .ToPagedResultAsync(pagination);
-
+            var patients = await _patientService.GetAllPatientsWithReviewsAsync(pagination);
             return Ok(patients);
         }
-
 
         [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpGet("{id}")]
@@ -61,18 +37,11 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            var patient = await _context.Patients
-                .Where(p => p.Id == id)
-                .Select(p => new PatientDTO
-                {
-                    PatientId = p.Id,
-                    Name = p.Name,
-                    Email = p.Email,
-                    Image = p.Image
-                })
-                .FirstOrDefaultAsync();
-
-            if (patient == null) return NotFound();
+            var patient = await _patientService.GetPatientByIdAsync(id);
+            if (patient == null)
+            {
+                return NotFound();
+            }
 
             return Ok(patient);
         }
@@ -86,10 +55,7 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            return await _context.Appointments
-                .Where(a => a.PatientId == patientId)
-                .SelectAppointmentDto()
-                .ToPagedResultAsync(pagination);
+            return await _patientService.GetPatientAppointmentsAsync(patientId, pagination);
         }
 
         [Authorize(Policy = "UserOrAdminPolicy")]
@@ -101,12 +67,8 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            return await _context.Appointments
-                .Where(a => a.PatientId == patientId && a.AppointmentTakenDate >= startDate && a.AppointmentTakenDate <= endDate)
-                .SelectAppointmentDto()
-                .ToPagedResultAsync(pagination);
+            return await _patientService.GetAppointmentsByDateRangeAsync(patientId, startDate, endDate, pagination);
         }
-
 
         [Authorize(Policy = "UserOrAdminPolicy")]
         [HttpPut("{patientId}/reviews/{reviewId}")]
@@ -125,9 +87,7 @@ namespace AngularApi.Controllers
                 return BadRequest("Patient ID or Review ID mismatch.");
             }
 
-            _context.Entry(review).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
+            await _patientService.UpdateReviewAsync(review);
             return NoContent();
         }
 
@@ -140,14 +100,8 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            var appointment = await _context.Appointments
-                .FirstOrDefaultAsync(a => a.Id == appointmentId && a.PatientId == patientId);
-            if (appointment == null) return NotFound();
-
-            _context.Appointments.Remove(appointment);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            var deleted = await _patientService.DeletePatientAppointmentAsync(patientId, appointmentId);
+            return deleted ? NoContent() : NotFound();
         }
 
         [Authorize(Policy = "UserOrAdminPolicy")]
@@ -159,31 +113,16 @@ namespace AngularApi.Controllers
                 return Forbid();
             }
 
-            var patient = await _context.Patients.FindAsync(id);
-            if (patient == null) return NotFound();
-
-            patient.Name = model.Name;
-            patient.Email = model.Email;
-            patient.Image = model.Image;
-
-            _context.Patients.Update(patient);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            var updated = await _patientService.UpdatePatientAsync(id, model);
+            return updated ? NoContent() : NotFound();
         }
-
 
         [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePatient(string id)
         {
-            var patient = await _context.Patients.FindAsync(id);
-            if (patient == null) return NotFound();
-
-            _context.Patients.Remove(patient);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            var deleted = await _patientService.DeletePatientAsync(id);
+            return deleted ? NoContent() : NotFound();
         }
     }
 }
