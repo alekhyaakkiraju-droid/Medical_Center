@@ -21,6 +21,7 @@ namespace AngularApi.Models
         public DbSet<MedicalCenter> MedicalCenter { get; set; }
         public DbSet<PatientReview> PatientReviews { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -32,6 +33,40 @@ namespace AngularApi.Models
 
             modelBuilder.Entity<Patient>()
               .ToTable("Patients");
+
+            modelBuilder.Entity<AuditLog>(entity =>
+            {
+                entity.ToTable("AuditLogs");
+                entity.HasKey(log => log.Id);
+            });
+        }
+
+        public override int SaveChanges()
+        {
+            EnforceAuditLogAppendOnly();
+            return base.SaveChanges();
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            EnforceAuditLogAppendOnly();
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+
+        private void EnforceAuditLogAppendOnly()
+        {
+            foreach (var entry in ChangeTracker.Entries<AuditLog>())
+            {
+                if (entry.State is EntityState.Modified or EntityState.Deleted)
+                {
+                    throw new InvalidOperationException("AuditLog records are append-only.");
+                }
+
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.Timestamp = DateTime.UtcNow;
+                }
+            }
         }
 
     }

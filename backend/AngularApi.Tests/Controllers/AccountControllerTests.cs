@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using System.Security.Claims;
@@ -28,6 +29,8 @@ namespace AngularApi.Tests.Controllers
         private readonly Mock<IGoogleService> _googleServiceMock;
         private readonly Mock<IAuthCookieService> _authCookieServiceMock;
         private readonly Mock<IAntiforgery> _antiforgeryMock;
+        private readonly Mock<IAuditService> _auditServiceMock;
+        private readonly Mock<ILogger<AccountController>> _loggerMock;
         private readonly EmailTemplateService _emailTemplateService;
         private readonly AccountController _controller;
 
@@ -42,6 +45,8 @@ namespace AngularApi.Tests.Controllers
             _googleServiceMock = new Mock<IGoogleService>();
             _authCookieServiceMock = new Mock<IAuthCookieService>();
             _antiforgeryMock = new Mock<IAntiforgery>();
+            _auditServiceMock = new Mock<IAuditService>();
+            _loggerMock = new Mock<ILogger<AccountController>>();
 
             var webHostEnvironmentMock = new Mock<IWebHostEnvironment>();
             webHostEnvironmentMock
@@ -58,7 +63,9 @@ namespace AngularApi.Tests.Controllers
                 _googleServiceMock.Object,
                 _authCookieServiceMock.Object,
                 _antiforgeryMock.Object,
-                Microsoft.Extensions.Options.Options.Create(new AuthCookieOptions()));
+                Microsoft.Extensions.Options.Options.Create(new AuthCookieOptions()),
+                _auditServiceMock.Object,
+                _loggerMock.Object);
 
             _controller.ControllerContext = new ControllerContext
             {
@@ -317,9 +324,9 @@ namespace AngularApi.Tests.Controllers
         }
 
         [Fact]
-        public void Logout_ClearsAuthCookies()
+        public async Task Logout_ClearsAuthCookies()
         {
-            var result = _controller.Logout();
+            var result = await _controller.Logout();
 
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
             okResult.Value.Should().BeEquivalentTo(new { message = "Logged out successfully" });

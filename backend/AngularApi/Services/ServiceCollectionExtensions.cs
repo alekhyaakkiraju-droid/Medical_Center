@@ -29,6 +29,7 @@ namespace AngularApi.Services
             services.AddScoped<IOwnershipValidator, OwnershipValidator>();
             services.AddScoped<IAuthCookieService, AuthCookieService>();
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+            services.AddScoped<IAuditService, AuditService>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 

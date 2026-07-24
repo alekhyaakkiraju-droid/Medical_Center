@@ -1,4 +1,6 @@
 using AngularApi.Filters;
+using AngularApi.Logging;
+using AngularApi.Middleware;
 using AngularApi.Services;
 using AngularApi.Validators;
 using FluentValidation;
@@ -6,6 +8,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace WebApiDemo
 {
@@ -14,6 +17,7 @@ namespace WebApiDemo
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.ConfigureSerilog();
 
             builder.Services.AddAntiforgery(options =>
             {
@@ -73,11 +77,13 @@ namespace WebApiDemo
             }
 
             app.UseResponseCompression();
+            app.UseMiddleware<CorrelationIdMiddleware>();
             app.UseRateLimiter();
             app.UseStaticFiles();
             app.UseCors("MyPolicy");
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseMiddleware<AuditMiddleware>();
             app.MapControllers();
             app.Run();
         }
