@@ -1,0 +1,114 @@
+# Forge Shipping pipeline for Medical Center (WO-024)
+# Engine: opsera (Forge custom). Triggers on main pushes and pull requests.
+name: Medical Center CI/CD
+engine: opsera
+webhook_enabled: true
+webhook_branch: main
+
+triggers:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+variables:
+  REPO_FULL_NAME:
+    value: alekhyaakkiraju-droid/Medical_Center
+  DOTNET_VERSION:
+    value: "8.0"
+  NODE_VERSION:
+    value: "22"
+
+steps:
+  # --- Security scans (parallel source-level) ---
+  - name: Secret Detection
+    variantId: scan:gitleaks
+    config:
+      scanCommand: gitleaks detect --source . --report-format json --no-git
+      failOnBreach: fail
+      severityThreshold: high
+
+  - name: SAST Scan
+    variantId: scan:semgrep
+    config:
+      scanCommand: semgrep scan --config auto --error --severity ERROR .
+      failOnBreach: fail
+      severityThreshold: critical
+
+  - name: NPM Dependency Audit
+    variantId: test:generic
+    config:
+      testCommand: cd front-end && npm ci --ignore-scripts && npm audit --audit-level=critical
+
+  # --- Build ---
+  - name: Backend Build
+    variantId: build:dotnet
+    config:
+      repoFullName: alekhyaakkiraju-droid/Medical_Center
+      branch: main
+      dotnetVersion: "8.0"
+      buildCommand: dotnet build backend/AngularApi/AngularApi.csproj -c Release
+
+  - name: Frontend Build
+    variantId: build:node
+    config:
+      repoFullName: alekhyaakkiraju-droid/Medical_Center
+      branch: main
+      nodeVersion: "22"
+      buildCommand: cd front-end && npm ci --ignore-scripts && ./node_modules/.bin/ng build --configuration production
+
+  # --- Tests ---
+  - name: Backend Unit Tests
+    variantId: test:generic
+    config:
+      testCommand: dotnet test backend/AngularApi.Tests/AngularApi.Tests.csproj -c Release
+
+  - name: Frontend Unit Tests
+    variantId: test:generic
+    config:
+      testCommand: cd front-end && npm ci --ignore-scripts && npm run test -- --watch=false --browsers=ChromeHeadless
+
+  # --- Docker images (all 3 services) ---
+  - name: Docker API Image
+    variantId: build:docker
+    config:
+      repoFullName: alekhyaakkiraju-droid/Medical_Center
+      branch: main
+      dockerfile: backend/AngularApi/Dockerfile
+      imageName: medical-center-api
+
+  - name: Docker YARP Image
+    variantId: build:docker
+    config:
+      repoFullName: alekhyaakkiraju-droid/Medical_Center
+      branch: main
+      dockerfile: backend/YARPReverseProxy/Dockerfile
+      imageName: medical-center-yarp
+
+  - name: Docker Frontend Image
+    variantId: build:docker
+    config:
+      repoFullName: alekhyaakkiraju-droid/Medical_Center
+      branch: main
+      dockerfile: front-end/Dockerfile
+      imageName: medical-center-frontend
+
+  - name: Container Vulnerability Scan
+    variantId: scan:grype
+    config:
+      failOnBreach: fail
+      severityThreshold: critical
+
+  # --- Staging deploy verification (post-deploy smoke tests) ---
+  - name: Staging Smoke Tests
+    variantId: test:generic
+    config:
+      testCommand: ./scripts/smoke-tests.sh
+
+environments:
+  dev:
+    description: Development — build and test only
+    steps: [Secret Detection, SAST Scan, NPM Dependency Audit, Backend Build, Frontend Build, Backend Unit Tests, Frontend Unit Tests]
+  staging:
+    description: Staging — full build, scan, docker, smoke tests
+    steps: all
