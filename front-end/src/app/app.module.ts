@@ -12,9 +12,7 @@ import { HttpClientModule, provideHttpClient, withFetch, withInterceptors } from
 import { credentialsInterceptor } from './core/interceptors/credentials.interceptor';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { DoctorModule } from './doctor/doctor.module';
-import { provideToastr, ToastrModule } from 'ngx-toastr'; 
-import { AdminModule } from './admin/admin.module';
+import { provideToastr, ToastrModule } from 'ngx-toastr';
 
 @NgModule({
   declarations: [
@@ -27,9 +25,7 @@ import { AdminModule } from './admin/admin.module';
     AppRoutingModule,
     RouterModule ,
     AuthModule,
-    GeneralModule,  
-    AdminModule,
-    DoctorModule,
+    GeneralModule,
     BrowserModule,
     FormsModule,
     HttpClientModule,
