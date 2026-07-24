@@ -25,14 +25,16 @@ public class AppointmentsPaginationControllerTests : IDisposable
             .Options;
         _context = new MedicalCenterDbContext(options);
         var ownershipValidator = new OwnershipValidator();
+        var appointmentService = new AppointmentService(
+            _context,
+            Microsoft.Extensions.Options.Options.Create(new AppointmentSettings()));
 
         _controller = new AppointmentsController(
-            _context,
+            appointmentService,
             null!,
             null!,
             null!,
-            ownershipValidator,
-            Microsoft.Extensions.Options.Options.Create(new AppointmentSettings()));
+            ownershipValidator);
 
         var claims = new[]
         {
