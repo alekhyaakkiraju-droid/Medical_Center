@@ -46,6 +46,7 @@ namespace WebApiDemo
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerServices();
             builder.Services.AddAuthRateLimiting();
+            builder.Services.AddHealthChecks();
             builder.Services.AddApplicationServices(builder.Configuration);
             builder.Services.AddAuthenticationServices(builder.Configuration);
             builder.Services.AddAuthorization(options =>
@@ -85,6 +86,7 @@ namespace WebApiDemo
             app.UseAuthorization();
             app.UseMiddleware<AuditMiddleware>();
             app.MapControllers();
+            app.MapHealthChecks("/health").AllowAnonymous();
             app.Run();
         }
     }
