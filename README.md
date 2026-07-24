@@ -91,3 +91,84 @@ pre-commit run --all-files
 To verify the hook blocks secrets, create a temporary file containing a test pattern such as `"password": "realpassword123"` in a JSON object and attempt to commit it — the hook should fail.
 
 Enable [GitHub secret scanning](https://docs.github.com/en/code-security/secret-scanning/about-secret-scanning) on the repository in GitHub Settings → Code security and analysis.
+
+## Architecture Overview
+
+Medical Center follows a **modular monolith** backend with a separate Angular frontend and YARP reverse proxy for containerized deployments.
+
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────────┐     ┌────────────┐
+│   Browser   │────▶│ YARP Proxy   │────▶│  AngularApi     │────▶│ SQL Server │
+│  (Angular)  │     │  (port 8080) │     │  (.NET 8 REST)  │     │            │
+└─────────────┘     └──────────────┘     └─────────────────┘     └────────────┘
+                           │
+                           └──▶ Angular static UI (port 8081)
+```
+
+| Component | Path | Role |
+|-----------|------|------|
+| API | `backend/AngularApi` | REST API, Identity, JWT cookies, EF Core |
+| Frontend | `front-end` | Angular 18 SPA (NgModules) |
+| Reverse proxy | `backend/YARPReverseProxy` | Routes `/api/*` to API, UI to frontend |
+| Database | SQL Server | Persistent storage via EF Core migrations |
+
+Key architectural decisions are documented in [docs/adr/](docs/adr/).
+
+### Authentication
+
+- HttpOnly JWT cookies for browser sessions (`MedCenter.Auth`)
+- Bearer tokens for programmatic API access
+- Google OAuth, refresh token rotation, antiforgery on mutating requests
+
+See [ADR-002](docs/adr/002-jwt-cookie-migration.md) for details.
+
+## Setup (Quick Reference)
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full contributor setup. Summary:
+
+```bash
+# Backend
+cd backend/AngularApi && dotnet restore && dotnet ef database update && dotnet run
+
+# Frontend
+cd front-end && npm ci && npm start
+
+# Full stack (Docker)
+docker compose up --build
+```
+
+Environment variables for Docker Compose: `MSSQL_SA_PASSWORD`, `JWT_SECRET`, `JWT_VALID_ISSUER`, `JWT_VALID_AUDIENCE`, and optional Google/SMTP settings.
+
+## Deployment
+
+### Docker Compose (local / staging-like)
+
+```bash
+docker compose up --build -d
+```
+
+- YARP entry point: `http://localhost:8080`
+- Frontend direct: `http://localhost:8081`
+- Health checks: `/health` on API and YARP
+
+### CI/CD (Forge Shipping)
+
+The `.forge/pipeline.yaml` pipeline runs on push/PR to `main`:
+
+1. Security scans (Gitleaks, Semgrep, npm audit)
+2. .NET and Angular builds
+3. Backend and frontend unit tests
+4. Docker image build (API, YARP, frontend) + Grype scan
+5. Staging smoke tests (`scripts/smoke-tests.sh`)
+
+See [ADR-005](docs/adr/005-forge-shipping-cicd.md) and [CONTRIBUTING.md](CONTRIBUTING.md#pull-request-process).
+
+## Compliance Documentation
+
+- [Data classification](docs/compliance/data-classification.md) — entity tier mapping
+- [HIPAA checklist](docs/compliance/hipaa-checklist.md) — control status
+- [Data subject rights](docs/compliance/data-subject-rights.md) — 30-day SLA procedures
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
