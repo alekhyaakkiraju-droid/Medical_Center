@@ -8,7 +8,7 @@ public class DockerfileConfigurationTests
         Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", ".."));
 
     [Theory]
-    [InlineData("front-end/Dockerfile", "node:22-alpine", "HEALTHCHECK", "USER nginx", "ng build --configuration production")]
+    [InlineData("front-end/Dockerfile", "node:22-alpine", "HEALTHCHECK", "USER nginx", "ng build --configuration production", "npm ci --ignore-scripts")]
     [InlineData("backend/AngularApi/Dockerfile", "mcr.microsoft.com/dotnet/aspnet:8.0", "HEALTHCHECK", "USER $APP_UID", "/health")]
     [InlineData("backend/YARPReverseProxy/Dockerfile", "mcr.microsoft.com/dotnet/aspnet:8.0", "HEALTHCHECK", "USER $APP_UID", "${BUILD_CONFIGURATION}")]
     public void Dockerfiles_ContainProductionRequirements(string relativePath, params string[] requiredSnippets)

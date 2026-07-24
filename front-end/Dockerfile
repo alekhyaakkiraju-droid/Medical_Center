@@ -3,11 +3,11 @@ FROM node:22-alpine AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 COPY . .
 
-RUN npx ng build --configuration production
+RUN ./node_modules/.bin/ng build --configuration production
 
 FROM nginx:1-alpine-slim
 
