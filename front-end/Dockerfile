@@ -7,6 +7,9 @@ RUN npm ci --ignore-scripts
 
 COPY . .
 
+ARG API_BASE_URL=http://localhost:8080/api
+RUN sed -i "s|http://localhost:5004/api|${API_BASE_URL}|g" src/environments/environment.ts src/environments/environment.development.ts
+
 RUN ./node_modules/.bin/ng build --configuration production
 
 FROM nginx:1-alpine-slim
