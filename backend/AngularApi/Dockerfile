@@ -1,20 +1,29 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+
+COPY AngularApi.csproj ./
+RUN dotnet restore AngularApi.csproj
+
+COPY . ./
+RUN dotnet publish AngularApi.csproj -c ${BUILD_CONFIGURATION} -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
-COPY . .
 
-RUN dotnet restore
+ENV ASPNETCORE_URLS=http://+:8080
 
-RUN dotnet build -c Release -o /app/build
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN dotnet publish -c Release -o /app/publish
+COPY --from=build /app/publish .
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
-WORKDIR /app
-COPY --from=0 /app/publish .
+EXPOSE 8080
 
-EXPOSE 80
-CMD ["dotnet", "AngularApi.dll"]
+USER $APP_UID
 
+HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
 
-# the image name is  mvc-test-docker
-# docker run -d --name TestDocker-app -p 8004:8080 mvc-test-docker     -> this was the issue :8080  not 80 
+ENTRYPOINT ["dotnet", "AngularApi.dll"]

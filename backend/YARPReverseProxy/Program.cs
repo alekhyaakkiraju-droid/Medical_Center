@@ -24,5 +24,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapReverseProxy();
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health").AllowAnonymous();
 app.Run();
