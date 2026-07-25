@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AngularApi.DTO;
+using AngularApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AngularApi.Models;
 
 namespace AngularApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "AdminPolicy")]
     public class MedicalCenterDoctorAvailabilitiesController : ControllerBase
     {
         private readonly MedicalCenterDbContext _context;
@@ -22,9 +25,20 @@ namespace AngularApi.Controllers
 
         // GET: api/MedicalCenterDoctorAvailabilities
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MedicalCenterDoctorAvailability>>> GetMedicalCenterDoctorAvailability()
+        public async Task<ActionResult<PagedResult<MedicalCenterDoctorAvailabilityDTO>>> GetMedicalCenterDoctorAvailability([FromQuery] PaginationParameters pagination)
         {
-            return await _context.MedicalCenterDoctorAvailability.ToListAsync();
+            return await _context.MedicalCenterDoctorAvailability
+                .Select(a => new MedicalCenterDoctorAvailabilityDTO
+                {
+                    Id = a.Id,
+                    MedicalCenterId = a.MedicalCenterId,
+                    DayOfWeek = a.DayOfWeek,
+                    StartTime = a.StartTime,
+                    EndTime = a.EndTime,
+                    IsAvailable = a.IsAvailable,
+                    ReasonOfUnavailability = a.ReasonOfUnavailability
+                })
+                .ToPagedResultAsync(pagination);
         }
 
         // GET: api/MedicalCenterDoctorAvailabilities/5

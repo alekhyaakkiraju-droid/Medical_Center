@@ -8,6 +8,8 @@ package-lock.json
 /src/assets/*.json
 /src/assets/images/
 *.tsbuildinfo
+front-end/src/app/api/generated/api.ts
+openapi/swagger.json
 
 # Visual Studio files
 .vs/
@@ -34,6 +36,17 @@ wwwroot/js/
 appsettings*.json
 appsettings.*.json
 appsettings.json
+
+# Secrets and local environment files
+.env
+.env.*
+!.env.example
+*.env
+docker-compose.override.yml
+credentials.json
+secrets.json
+**/local.settings.json
+**/launchSettings.json
 
 # Windows
 Thumbs.db

@@ -7,7 +7,7 @@ import { AuthServiceService } from '../../auth/auth-services/auth-service.servic
 import { ToastrService } from 'ngx-toastr';
 import { ChangePasswordService } from '../services/change-password.service';
 import { ProfileService } from '../services/Profile.service';
-import { Profile } from '../../models/profile';
+import { Profile, ProfileDetails } from '../../models';
 
 @Component({
   selector: 'app-user-profile',
@@ -94,7 +94,7 @@ this.reload.initializeLoader();
   }
 
 
-  profileData: Profile = {
+  profileData: ProfileDetails = {
     email: '',
     userName: '',
     phoneNumber: '',
@@ -143,7 +143,7 @@ this.reload.initializeLoader();
     this.profileService.updateProfileDetails(profileInfo).subscribe({
       next: (response) => {
         console.log('Profile updated successfully:', response);
-        this.toastr.success('Error fetching profile details.');
+        this.toastr.success('Profile updated successfully.');
 
       },
       error: (error) => {
@@ -153,18 +153,6 @@ this.reload.initializeLoader();
       }
     });
   }
-
-  selectedImage: File | null = null;
-    onImageChange(event: Event) {
-    const target = event.target as HTMLInputElement;
-    if (target.files && target.files.length > 0) {
-      this.selectedImage = target.files[0];
-      console.log('Selected image:', this.selectedImage);
-      this.profileData.personalImgUrl = '/img/'+this.selectedImage.name;
-    }
-  }
-
-
 
 
 
@@ -192,7 +180,7 @@ this.reload.initializeLoader();
           this.errorMessage = error.error?.description || 'An unexpected error occurred.';
           this.successMessage = '';
           console.error("Error:", this.errorMessage);
-          this.toastr.success(`Error updating password: ${this.errorMessage}`);
+          this.toastr.error(`Error updating password: ${this.errorMessage}`);
 
         },
       });

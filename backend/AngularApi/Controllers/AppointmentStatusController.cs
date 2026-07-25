@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AngularApi.DTO;
+using AngularApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AngularApi.Models;
 
 namespace AngularApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "AdminPolicy")]
     public class AppointmentStatusController : ControllerBase
     {
         private readonly MedicalCenterDbContext _context;
@@ -22,9 +25,15 @@ namespace AngularApi.Controllers
 
         // GET: api/AppointmentStatus
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AppointmentStatus>>> GetAppointmentStatus()
+        public async Task<ActionResult<PagedResult<AppointmentStatusListItemDTO>>> GetAppointmentStatus([FromQuery] PaginationParameters pagination)
         {
-            return await _context.AppointmentStatus.ToListAsync();
+            return await _context.AppointmentStatus
+                .Select(s => new AppointmentStatusListItemDTO
+                {
+                    Id = s.Id,
+                    Status = s.Status
+                })
+                .ToPagedResultAsync(pagination);
         }
 
         // GET: api/AppointmentStatus/5

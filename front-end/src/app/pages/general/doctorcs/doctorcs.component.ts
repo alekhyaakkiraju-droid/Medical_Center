@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DoctorService } from '../services/doctor.service';
-import { Doctor } from '../../models/doctor';
+import { Doctor } from '../../models';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -26,9 +26,9 @@ export class DoctorcsComponent implements OnInit, OnDestroy {
   }
   loadDoctor() {
     this.doctorSubscription = this.doctorService.getAllDoctors().subscribe(
-      (doctorFetched: Doctor[]) => {
-        if (doctorFetched) {
-          this.doctorsData = doctorFetched;
+      (result) => {
+        if (result?.items) {
+          this.doctorsData = result.items;
           console.log('Fetched doctorsData :', this.doctorsData, this.doctorsData.length);
         } else {
           console.log('No doctorsData');

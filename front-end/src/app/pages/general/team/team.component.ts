@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { DoctorService } from '../services/doctor.service';
-import { Doctor } from '../../models/doctor';
+import { Doctor } from '../../models';
 import { ReloadService } from '../../../shared/service/reload.service';
 import { TEAM_TABS } from '../../models/teamTabs ';
 import { Subscription } from 'rxjs';
@@ -30,9 +30,9 @@ export class TeamComponent implements OnInit, OnDestroy {
   }
   loadDoctor() {
     const doctorSub =  this.doctorService.getAllDoctors().subscribe(
-      (doctorFetched: Doctor[]) => {
-        if (doctorFetched) {
-          this.doctorsData = doctorFetched;
+      (result) => {
+        if (result?.items) {
+          this.doctorsData = result.items;
           console.log('Fetched doctorsData :',this.doctorsData , this.doctorsData.length);
         } else {
           console.log('No  doctorsData');

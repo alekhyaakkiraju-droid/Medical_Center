@@ -1,4 +1,5 @@
 ﻿using AngularApi.Controllers;
+using AngularApi.DTO;
 using AngularApi.Models;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -44,16 +45,13 @@ namespace AngularApi.Tests.Controllers
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetSpecializations();
+            var result = await _controller.GetSpecializations(new PaginationParameters());
 
             // Assert
-            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            var specializations = okResult.Value.Should().BeAssignableTo<List<Specialization>>().Subject;
-            specializations.Should().HaveCount(2);
-            specializations[0].SpecializationName.Should().Be("Cardiology");
-            specializations[0].Services.Should().HaveCount(1);
-            specializations[1].SpecializationName.Should().Be("Neurology");
-            specializations[1].Services.Should().BeNullOrEmpty();
+            var paged = result.Value.Should().BeAssignableTo<PagedResult<SpecializationListItemDTO>>().Subject;
+            paged.Items.Should().HaveCount(2);
+            paged.Items[0].SpecializationName.Should().Be("Cardiology");
+            paged.Items[1].SpecializationName.Should().Be("Neurology");
         }
 
         [Fact]

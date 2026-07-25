@@ -105,20 +105,16 @@ export class LoginComponent implements OnInit, AfterViewInit{
   //-----------------------------Login-----------------------------------
   onSubmit() {
     const { email, password } = this.loginForm.value;
-      console.log("login val : " + email, password);
-    if (this.loginForm.valid) {         
-      const loginSub =   this.authService.login(email, password).subscribe(
-        (response: any) => {          
+    if (this.loginForm.valid) {
+      const loginSub = this.authService.login(email, password).subscribe(
+        () => {
           this.onLoginSuccess();
           if (this.authService.isRole('admin')) {
-            this.router.navigate(['admin/dashboard']);  
-            console.log("admin");
+            this.router.navigate(['admin/dashboard']);
           } else if (this.authService.isRole('doctor')) {
-            this.router.navigate(['doctor/doctor-appointments']);  
-            console.log("admin");          
-          }else {
-            this.router.navigate(['/pages/home']);  
-            console.log("user");
+            this.router.navigate(['doctor/doctor-appointments']);
+          } else {
+            this.router.navigate(['/pages/home']);
           }
         },
         (error: any) => {
@@ -129,6 +125,10 @@ export class LoginComponent implements OnInit, AfterViewInit{
       );
       this.subscriptions.push(loginSub);
     }
+  }
+
+  loginWithGoogle(): void {
+    window.location.href = this.authService.googleloginUrl;
   }
 
 // ------------------------------Forget password-------------------------------------

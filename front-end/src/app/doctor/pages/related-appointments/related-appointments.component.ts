@@ -1,14 +1,12 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ReloadService } from '../../../shared/service/reload.service';
-import { DoctorService } from '../../../pages/general/services/doctor.service';
 import { DoctorAppointmentsService } from '../../services/doctor-appointments.service';
 import { AuthServiceService } from '../../../pages/auth/auth-services/auth-service.service';
-import { FlowbiteService } from '../../../shared/service/Flowbite.service';
-import * as Flowbite from 'flowbite';
 import { SearchService } from '../../services/search.service';
 import { ToastrService } from 'ngx-toastr';
 import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
 import { Subscription } from 'rxjs';
+import { Booking } from '../../../pages/models';
 
 
 @Component({
@@ -20,26 +18,27 @@ export class RelatedAppointmentsComponent implements OnInit, OnDestroy {
 
   @ViewChild(DeleteModalComponent) deleteModal!: DeleteModalComponent;
 
-  private subscriptions: Subscription[] = []; // Track subscriptions
+  private subscriptions: Subscription[] = [];
   
   constructor(
     private reload: ReloadService,
     private doctorService: DoctorAppointmentsService,
     private authService: AuthServiceService,
-    private flowbiteService: FlowbiteService,
     private toaster: ToastrService,
     private searchService: SearchService
   ) { }
 
   doctorId: string = '';
-  allBookings: any[] = [];
-  todayBookings: any[] = [];
-  upComingBookings: any[] = [];
-  last30DaysBookings: any[] = [];
-  tempBookings: any[] = [];
+  allBookings: Booking[] = [];
+  displayBookings: Booking[] = [];
   errorMessage: string = '';
   selectedAppointmentId!: number;
   selectedFilter: string = '1';
+  isDropdownOpen = false;
+  currentPage = 1;
+  pageSize = 10;
+  totalCount = 0;
+  pageCount = 0;
 
   filters = [
     { id: '1', label: 'All days' },
@@ -54,36 +53,23 @@ export class RelatedAppointmentsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.setDoctorId();
-    this.getAllBookings();
-    this.getTodayBookings();
-    this.getUpComingBookings();
-    this.getLast30DaysBookings();
-    this.loadFlowbite();
+    this.loadBookings();
+  }
+
+  toggleDropdown(): void {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  closeDropdown(): void {
+    this.isDropdownOpen = false;
   }
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
-    console.log("Component destroyed, subscriptions unsubscribed.");
   }
-
-  loadFlowbite(): void {
-    if (typeof Flowbite !== 'undefined') {
-      const dropdownButton = document.getElementById('dropdownRadioButton');
-      const dropdownMenu = document.getElementById('dropdownRadio');
-
-      if (dropdownButton && dropdownMenu) {
-        dropdownButton.addEventListener('click', () => {
-          dropdownMenu.classList.toggle('hidden');
-        });
-      }
-    }
-  }
-
-
 
   setDoctorId(): void {
     const id = this.authService.getNameIdentifier();
-    console.log("id", id);
     if (id) {
       this.doctorId = id;
     } else {
@@ -91,50 +77,11 @@ export class RelatedAppointmentsComponent implements OnInit, OnDestroy {
     }
   }
 
-  getAllBookings(): void {
-    const sub = this.doctorService.getAllDoctorBookings(this.doctorId).subscribe({
-      next: (data) => {
-        this.allBookings = data;
-        this.filterBookingsByDropDownList();
-      },
-      error: (error) => {
-        console.error(error);
-      }
-    });
-    this.subscriptions.push(sub);
-  }
-
-  getTodayBookings(): void {
-    const sub = this.doctorService.getTodayDoctorBookings(this.doctorId).subscribe({
-      next: (data) => {
-        this.todayBookings = data;
-        this.filterBookingsByDropDownList();
-      },
-      error: (error) => {
-        console.error(error);
-      }
-    });
-    this.subscriptions.push(sub);
-  }
-
-  getUpComingBookings(): void {
-    const sub = this.doctorService.getUpCommingDoctorBookings(this.doctorId).subscribe({
-      next: (data) => {
-        this.upComingBookings = data;
-        this.filterBookingsByDropDownList();
-      },
-      error: (error) => {
-        console.error(error);
-      }
-    });
-    this.subscriptions.push(sub);
-  }
-
-  getLast30DaysBookings(): void {
-    const sub = this.doctorService.getLast30DaysDoctorBookings(this.doctorId).subscribe({
-      next: (data) => {
-        this.last30DaysBookings = data;
-        this.filterBookingsByDropDownList();
+  loadBookings(): void {
+    const sub = this.doctorService.getAllDoctorBookings(this.doctorId, 1, 100).subscribe({
+      next: (response) => {
+        this.allBookings = response.items;
+        this.applyFiltersAndPagination();
       },
       error: (error) => {
         console.error(error);
@@ -147,7 +94,7 @@ export class RelatedAppointmentsComponent implements OnInit, OnDestroy {
     const sub = this.doctorService.deleteBooking(this.doctorId, appointmentId).subscribe(
       () => {
         this.toaster.success("Appointment deleted successfully");
-        this.getAllBookings();
+        this.loadBookings();
       },
       (error) => {
         console.error('Error deleting appointment', error);
@@ -164,7 +111,9 @@ export class RelatedAppointmentsComponent implements OnInit, OnDestroy {
 
   onFilterChange(selected: string): void {
     this.selectedFilter = selected;
-    this.filterBookingsByDropDownList();
+    this.currentPage = 1;
+    this.closeDropdown();
+    this.applyFiltersAndPagination();
   }
 
   getSelectedLabel(): string {
@@ -172,37 +121,68 @@ export class RelatedAppointmentsComponent implements OnInit, OnDestroy {
     return selectedFilterObject ? selectedFilterObject.label : 'Select Filter';
   }
 
-  filterBookingsByDropDownList(): void {
+  applyFiltersAndPagination(): void {
+    let filtered = [...this.allBookings];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     switch (this.selectedFilter) {
       case '2':
-        this.tempBookings = this.todayBookings;
+        filtered = filtered.filter(booking => this.isSameDay(booking.appointmentTakenDate, today));
         break;
       case '3':
-        this.tempBookings = this.upComingBookings;
+        filtered = filtered.filter(booking => {
+          const date = booking.appointmentTakenDate ? new Date(booking.appointmentTakenDate) : null;
+          return date ? date >= today : false;
+        });
         break;
-      case '4':
-        this.tempBookings = this.last30DaysBookings;
+      case '4': {
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        filtered = filtered.filter(booking => {
+          const date = booking.appointmentTakenDate ? new Date(booking.appointmentTakenDate) : null;
+          return date ? date >= thirtyDaysAgo && date <= today : false;
+        });
         break;
-      case '1':
-        this.tempBookings = this.allBookings;
-        break;
+      }
     }
+
+    if (this.searchItem?.trim()) {
+      const query = this.searchItem.toLowerCase().trim();
+      filtered = filtered.filter(booking =>
+        booking.patientName?.toLowerCase().includes(query)
+      );
+    }
+
+    this.totalCount = filtered.length;
+    this.pageCount = this.totalCount === 0 ? 0 : Math.ceil(this.totalCount / this.pageSize);
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.displayBookings = filtered.slice(start, start + this.pageSize);
   }
 
   searchItem!: string;
-  search(event: any) {
+  search(event: Event) {
     const query = this.searchItem.toLowerCase().trim();
     this.searchService.setSearchTerm(query);
-    this.filterBookingsBySearch(query);
+    this.currentPage = 1;
+    this.applyFiltersAndPagination();
   }
 
-  filterBookingsBySearch(query: string) {
-    if (!query) {
-      this.getAllBookings();
-    } else {
-      this.tempBookings = this.tempBookings.filter(booking =>
-        booking.patient.name.toLowerCase().includes(query.toLowerCase())
-      );
+  goToPage(page: number): void {
+    if (page < 1 || (this.pageCount > 0 && page > this.pageCount)) {
+      return;
     }
+    this.currentPage = page;
+    this.applyFiltersAndPagination();
+  }
+
+  private isSameDay(value: string | null | undefined, comparison: Date): boolean {
+    if (!value) {
+      return false;
+    }
+    const date = new Date(value);
+    return date.getFullYear() === comparison.getFullYear()
+      && date.getMonth() === comparison.getMonth()
+      && date.getDate() === comparison.getDate();
   }
 }

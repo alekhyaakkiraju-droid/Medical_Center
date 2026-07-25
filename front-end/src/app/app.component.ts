@@ -1,31 +1,46 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { ReloadService } from './shared/service/reload.service';
-import { Router } from '@angular/router';
-import { initFlowbite } from 'flowbite';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit, AfterViewInit {
   title = 'MedicalCenter';
+  showHeaderAndNavbar = true;
 
-  showHeaderAndNavbar: boolean = true;
-  constructor(private router: Router ,
-    private reload : ReloadService
-  ) { }
+  constructor(
+    private router: Router,
+    private reload: ReloadService
+  ) {}
 
-
-  ngAfterViewInit(): void {   
-    this.reload.initializeLoader();
+  ngAfterViewInit(): void {
+    this.hideRoutePreloader();
   }
-  
-  ngOnInit(): void {
-    initFlowbite();  
 
-    this.router.events.subscribe(() => {
-      this.showHeaderAndNavbar = !this.router.url.includes('/admin')  &&!this.router.url.includes('/doctor')  && !this.router.url.includes('/error') && !this.router.url.includes('/auth');
+  ngOnInit(): void {
+    this.updateChromeVisibility(this.router.url);
+
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+    ).subscribe((event) => {
+      this.updateChromeVisibility(event.urlAfterRedirects);
+      setTimeout(() => this.hideRoutePreloader(), 0);
     });
   }
-  
+
+  private updateChromeVisibility(url: string): void {
+    this.showHeaderAndNavbar =
+      !url.includes('/admin') &&
+      !url.includes('/doctor') &&
+      !url.includes('/error') &&
+      !url.includes('/auth');
+  }
+
+  private hideRoutePreloader(): void {
+    this.reload.initializeLoader();
+  }
 }

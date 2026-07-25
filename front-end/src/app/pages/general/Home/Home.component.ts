@@ -1,7 +1,6 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { ReloadService } from '../../../shared/service/reload.service';
 import { SpecializationService } from '../services/specialization.service';
-import { PatientService } from '../../../admin/services/patient.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -12,35 +11,40 @@ import { Subscription } from 'rxjs';
 export class HomeComponent implements  OnInit , AfterViewInit {
 
   private subscriptions: Subscription[] = [];
-  patients: any[] = []; 
+  patients: any[] = [
+    {
+      name: 'Sarah Johnson',
+      image: 'images/testimonials/1.jpg',
+      reviews: [{ review: 'Excellent care and a smooth appointment experience.' }]
+    },
+    {
+      name: 'Michael Chen',
+      image: 'images/testimonials/2.jpg',
+      reviews: [{ review: 'Professional staff and modern facilities.' }]
+    }
+  ];
   specializations: any[] = [];
 
-  constructor(private reload : ReloadService , 
-              private patientService: PatientService,
-              private specializationService :SpecializationService) { }
+  constructor(
+    private reload: ReloadService,
+    private specializationService: SpecializationService
+  ) { }
 
   ngAfterViewInit(): void {   
     this.reload.initializeLoader();
   }
 
   ngOnInit(): void {
-
-    this.subscriptions.push(  this.patientService.getAllPatient().subscribe(data => {
-      this.patients = data.slice(0, 2);
-      console.log("getAllPatient ",this.patients[0].reviews[0].review);
-    }),
-
-    this.specializationService.getSpecializations().subscribe(
-      (data) => {
-        this.specializations = data.slice(0,6);
-        console.log("specializations ",this.specializations);
-      },
-      (error) => {
-        console.error('Error fetching specializations', error);
-      }
-    )
-  );
-
+    this.subscriptions.push(
+      this.specializationService.getSpecializations().subscribe(
+        (data) => {
+          this.specializations = data.items.slice(0, 6);
+        },
+        (error) => {
+          console.error('Error fetching specializations', error);
+        }
+      )
+    );
   }
 
   ngOnDestroy(): void {

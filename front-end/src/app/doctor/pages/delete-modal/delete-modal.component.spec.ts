@@ -1,28 +1,37 @@
-/* tslint:disable:no-unused-variable */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { DebugElement } from '@angular/core';
-
+import { TestBed } from '@angular/core/testing';
 import { DeleteModalComponent } from './delete-modal.component';
 
 describe('DeleteModalComponent', () => {
   let component: DeleteModalComponent;
-  let fixture: ComponentFixture<DeleteModalComponent>;
-
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ DeleteModalComponent ]
-    })
-    .compileComponents();
-  }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(DeleteModalComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    TestBed.configureTestingModule({
+      declarations: [DeleteModalComponent]
+    });
+    component = TestBed.createComponent(DeleteModalComponent).componentInstance;
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('shows and hides using Angular state instead of Flowbite JS', () => {
+    expect(component.isVisible).toBeFalse();
+
+    component.showModal();
+    expect(component.isVisible).toBeTrue();
+
+    component.onCancel();
+    expect(component.isVisible).toBeFalse();
+  });
+
+  it('emits confirm with the selected item id', () => {
+    component.itemId = 42;
+    component.showModal();
+
+    let confirmedId: number | undefined;
+    component.confirm.subscribe((id) => {
+      confirmedId = id;
+    });
+
+    component.onConfirm();
+    expect(confirmedId).toBe(42);
+    expect(component.isVisible).toBeFalse();
   });
 });

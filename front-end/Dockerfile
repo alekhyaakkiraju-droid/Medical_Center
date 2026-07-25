@@ -1,32 +1,26 @@
-# Stage 1: Build Angular App
-FROM node:18-alpine AS build
+FROM node:22-alpine AS build
 
 WORKDIR /app
 
-# Copy package files first for better caching
-COPY package.json package-lock.json /app/
+COPY package.json package-lock.json ./
+RUN npm ci --ignore-scripts
 
-# Install dependencies
-RUN npm install --legacy-peer-deps
+COPY . .
 
-# Copy the rest of the code
-COPY . /app
+ARG API_BASE_URL=/api
+RUN sed -i "s|http://localhost:5004/api|${API_BASE_URL}|g" src/environments/environment.ts src/environments/environment.development.ts \
+    && find src -type f \( -name '*.ts' -o -name '*.html' \) -exec grep -l 'localhost:5004/api' {} + | xargs -r sed -i "s|http://localhost:5004/api|${API_BASE_URL}|g"
 
-# Build the Angular project 
-RUN npm run build --prod
+RUN ./node_modules/.bin/ng build --configuration production
 
-# Stage 2: Use Nginx to Serve the App
 FROM nginx:1-alpine-slim
 
-# Copy built Angular app to Nginx HTML directory      tttttttttthe issue was forgetting /browser at the end of the path  
-COPY --from=build /app/dist/medical-center/browser  /usr/share/nginx/html      
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist/medical-center/browser /usr/share/nginx/html
 
-# Expose port 80
 EXPOSE 80
 
-# Start Nginx
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD wget -q --spider http://127.0.0.1/ || exit 1
+
 CMD ["nginx", "-g", "daemon off;"]
-
-
-
-#the image name is my-angular-app:latest 

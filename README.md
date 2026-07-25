@@ -54,6 +54,7 @@ The  **Medical Center** full-stack web application is an innovative platform des
 - **OAuth 2.0**: Google login integration with secure token exchange.
 - **Email Verification**: Ensures only verified users can access the system.
 - **Password Policies**: Enforced strong password rules and secure password storage using hashing algorithms.
+- **Pre-commit Secret Scanning**: Gitleaks runs on every commit via pre-commit hooks to block credential leaks before they reach the repository.
 
 ## Getting Started
 
@@ -70,3 +71,127 @@ To run this project locally, ensure the following tools are installed:
 ```bash
 git clone https://github.com/mostafasharaby/Medical-Center.git
 cd Medical-Center
+```
+
+#### Install Pre-commit Secret Scanning
+
+Install [pre-commit](https://pre-commit.com/) and enable the repository hooks before committing:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+Hooks scan staged files with [Gitleaks](https://github.com/gitleaks/gitleaks) using `.gitleaks.toml`. To run manually:
+
+```bash
+pre-commit run --all-files
+```
+
+To verify the hook blocks secrets, create a temporary file containing a test pattern such as `"password": "realpassword123"` in a JSON object and attempt to commit it — the hook should fail.
+
+Enable [GitHub secret scanning](https://docs.github.com/en/code-security/secret-scanning/about-secret-scanning) on the repository in GitHub Settings → Code security and analysis.
+
+## Architecture Overview
+
+Medical Center follows a **modular monolith** backend with a separate Angular frontend and YARP reverse proxy for containerized deployments.
+
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────────┐     ┌────────────┐
+│   Browser   │────▶│ YARP Proxy   │────▶│  AngularApi     │────▶│ SQL Server │
+│  (Angular)  │     │  (port 8080) │     │  (.NET 8 REST)  │     │            │
+└─────────────┘     └──────────────┘     └─────────────────┘     └────────────┘
+                           │
+                           └──▶ Angular static UI (port 8081)
+```
+
+| Component | Path | Role |
+|-----------|------|------|
+| API | `backend/AngularApi` | REST API, Identity, JWT cookies, EF Core |
+| Frontend | `front-end` | Angular 18 SPA (NgModules) |
+| Reverse proxy | `backend/YARPReverseProxy` | Routes `/api/*` to API, UI to frontend |
+| Database | SQL Server | Persistent storage via EF Core migrations |
+
+Key architectural decisions are documented in [docs/adr/](docs/adr/).
+
+### Authentication
+
+- HttpOnly JWT cookies for browser sessions (`MedCenter.Auth`)
+- Bearer tokens for programmatic API access
+- Google OAuth, refresh token rotation, antiforgery on mutating requests
+
+See [ADR-002](docs/adr/002-jwt-cookie-migration.md) for details.
+
+## Setup (Quick Reference)
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full contributor setup. Summary:
+
+```bash
+# Backend
+cd backend/AngularApi && dotnet restore && dotnet ef database update && dotnet run
+
+# Frontend
+cd front-end && npm ci && npm start
+
+# Full stack (Docker)
+cp .env.example .env   # adjust MSSQL_SA_PASSWORD, JWT_SECRET if needed
+docker compose up --build
+```
+
+After first startup, apply migrations once:
+
+```bash
+export PATH="$PATH:$HOME/.dotnet/tools"
+cd backend/AngularApi
+dotnet ef database update --project AngularApi.csproj \
+  --connection "Server=localhost,1433;Database=MedicalCenter;User Id=sa;Password=<MSSQL_SA_PASSWORD>;TrustServerCertificate=True;Encrypt=False"
+```
+
+**Local URLs (default `.env`):**
+
+| Service | URL |
+|---------|-----|
+| Frontend (use this) | http://localhost:8081 |
+| API via frontend proxy | http://localhost:8081/api/... |
+| YARP direct (optional) | http://localhost:8080 |
+
+The frontend nginx container proxies `/api` to YARP so the browser uses a single origin (`connect-src 'self'`).
+
+Environment variables for Docker Compose: `MSSQL_SA_PASSWORD`, `JWT_SECRET`, `JWT_VALID_ISSUER`, `JWT_VALID_AUDIENCE`, `API_PUBLIC_URL=/api`, and optional Google/SMTP settings.
+
+See [docs/phase-1-manifest.md](docs/phase-1-manifest.md) for Phase 1 WO traceability.
+
+## Deployment
+
+### Docker Compose (local / staging-like)
+
+```bash
+docker compose up --build -d
+```
+
+- **Frontend entry point:** `http://localhost:8081` (recommended)
+- **API via frontend proxy:** `http://localhost:8081/api/...`
+- YARP direct: `http://localhost:8080` (optional)
+- Health checks: `/health` on API and YARP
+
+### CI/CD (Forge Shipping)
+
+The `.forge/pipeline.yaml` pipeline runs on push/PR to `main`:
+
+1. Security scans (Gitleaks, Semgrep, npm audit)
+2. .NET and Angular builds
+3. Backend and frontend unit tests
+4. Docker image build (API, YARP, frontend) + Grype scan
+5. Staging smoke tests (`scripts/smoke-tests.sh`)
+
+See [ADR-005](docs/adr/005-forge-shipping-cicd.md) and [CONTRIBUTING.md](CONTRIBUTING.md#pull-request-process).
+
+## Compliance Documentation
+
+- [Data classification](docs/compliance/data-classification.md) — entity tier mapping
+- [HIPAA checklist](docs/compliance/hipaa-checklist.md) — control status
+- [Data subject rights](docs/compliance/data-subject-rights.md) — 30-day SLA procedures
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.

@@ -1,7 +1,10 @@
 ﻿namespace AngularApi.Models
 {
-    public class Doctor : AppUser
+    public class Doctor : AppUser, IAuditableEntity
     {
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public string? CreatedBy { get; set; }
         public string? Name { get; set; } = string.Empty;
         public string? Image { get; set; } = string.Empty;
         public string ?ProfessionalStatement { get; set; } = string.Empty;

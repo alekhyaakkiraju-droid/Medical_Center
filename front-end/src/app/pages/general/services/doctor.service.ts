@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { AuthServiceService } from '../../auth/auth-services/auth-service.service';
 import { HandleErrorsService } from '../../../shared/service/handle-errors.service';
 import { BehaviorSubject, catchError, Observable, tap } from 'rxjs';
-import { Doctor } from '../../models/doctor';
+import { Doctor, PagedResult } from '../../models';
 
 @Injectable({
   providedIn: 'root'
@@ -18,16 +18,23 @@ private apiUrl = `${environment.api}/DoctorsWithSpectialization`;
               private handeErrorService :HandleErrorsService) {}
 
 
-public doctorsSubject = new BehaviorSubject<any[]>([]);
+public doctorsSubject = new BehaviorSubject<Doctor[]>([]);
 cartItems$ = this.doctorsSubject.asObservable();
 
+  private buildParams(page = 1, pageSize = 100): HttpParams {
+    return new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+  }
 
-  getAllDoctors(): Observable<Doctor[]> {
-    const headers = this.authService.getHeaders();  
-    return this.http.get<Doctor[]>(this.apiUrl, { headers }).pipe(
-      tap((doctors: Doctor[]) => {
-        this.doctorsSubject.next(doctors);
-        console.log('Doctors fetched from API:', doctors.length);
+  getAllDoctors(page = 1, pageSize = 100): Observable<PagedResult<Doctor>> {
+    return this.http.get<PagedResult<Doctor>>(
+      this.apiUrl,
+      { ...this.authService.getHttpOptions(), params: this.buildParams(page, pageSize) }
+    ).pipe(
+      tap((result: PagedResult<Doctor>) => {
+        this.doctorsSubject.next(result.items);
+        console.log('Doctors fetched from API:', result.items.length);
       }),
       catchError(this.handeErrorService.handleError)
     );

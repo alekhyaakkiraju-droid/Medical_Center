@@ -1,4 +1,6 @@
-﻿using AngularApi.Models;
+﻿using AngularApi.DTO;
+using AngularApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,6 +8,7 @@ namespace AngularApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "AdminPolicy")]
     public class PatientReviewsController : ControllerBase
     {
         private readonly MedicalCenterDbContext _context;
@@ -17,22 +20,39 @@ namespace AngularApi.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PatientReview>>> GetPatientReviews()
+        public async Task<ActionResult<PagedResult<ReviewDTO>>> GetPatientReviews([FromQuery] PaginationParameters pagination)
         {
-            var reviews = await _context.PatientReviews.Include(i => i.Patient).ToListAsync();
-            return Ok(reviews);
+            return await _context.PatientReviews
+                .Select(r => new ReviewDTO
+                {
+                    Id = r.Id,
+                    PatientId = r.PatientId,
+                    DoctorId = r.DoctorId,
+                    IsReviewAnonymous = r.IsReviewAnonymous,
+                    WaitTimeRating = r.WaitTimeRating,
+                    BedsideMannerRating = r.BedsideMannerRating,
+                    OverallRating = r.OverallRating,
+                    Review = r.Review,
+                    IsDoctorRecommended = r.IsDoctorRecommended,
+                    ReviewDate = r.ReviewDate
+                })
+                .ToPagedResultAsync(pagination);
         }
 
         [HttpGet("unique-patients")]
-        public async Task<ActionResult<IEnumerable<Patient>>> GetUniquePatients()
+        public async Task<ActionResult<PagedResult<PatientDTO>>> GetUniquePatients([FromQuery] PaginationParameters pagination)
         {
-            var uniquePatients = await _context.PatientReviews
-                .Include(i => i.Patient)
-                .Select(pr => pr.Patient)
+            return await _context.PatientReviews
+                .Where(pr => pr.Patient != null)
+                .Select(pr => new PatientDTO
+                {
+                    PatientId = pr.Patient!.Id,
+                    Name = pr.Patient.UserName,
+                    Email = pr.Patient.Email,
+                    Image = pr.Patient.Image
+                })
                 .Distinct()
-                .ToListAsync();
-
-            return Ok(uniquePatients);
+                .ToPagedResultAsync(pagination);
         }
 
         [HttpGet("{id}")]

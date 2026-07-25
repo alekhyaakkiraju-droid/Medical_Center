@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 import { MENU } from '../../menu';
 import { PatientService } from '../../services/patient.service';
 import { ToastrService } from 'ngx-toastr';
-import { Doctor } from '../../../pages/models/doctor';
+import { Doctor } from '../../../pages/models';
 import { AppointmentService } from '../../../pages/general/services/appointment.service';
 import { DoctorService } from '../../../pages/general/services/doctor.service';
 import { ReloadService } from '../../../shared/service/reload.service';
@@ -22,6 +22,10 @@ import * as XLSX from 'xlsx';
 export class BoardComponent implements OnInit, OnDestroy {
 
   appointments: any[] = [];
+  currentPage = 1;
+  pageSize = 20;
+  pageCount = 0;
+  totalCount = 0;
   infoBoxes: any[] = [];
   doctorsData: Doctor[] = [];
   numOfAppointments: number = 0;
@@ -55,11 +59,14 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.getTotalEarning();
   }
 
-  loadAppointments(): void {
-    const appointmentSub = this.appointmentService.getAppointments().subscribe(
+  loadAppointments(page = 1): void {
+    const appointmentSub = this.appointmentService.getAppointments(page, this.pageSize).subscribe(
       (data) => {
-        this.appointments = data;
-        this.numOfAppointments = this.appointments.length;
+        this.appointments = data.items;
+        this.currentPage = data.currentPage;
+        this.pageCount = data.pageCount;
+        this.totalCount = data.totalCount;
+        this.numOfAppointments = data.totalCount;
         this.optimizeWidget();
         this.setBadgeForAppointments();
       },
@@ -70,12 +77,19 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.subscriptions.push(appointmentSub);
   }
 
+  goToAppointmentPage(page: number): void {
+    if (page < 1 || (this.pageCount > 0 && page > this.pageCount)) {
+      return;
+    }
+    this.loadAppointments(page);
+  }
+
   loadDoctor(): void {
     const doctorSub = this.doctorService.getAllDoctors().subscribe(
-      (doctorFetched: Doctor[]) => {
-        if (doctorFetched) {
-          this.doctorsData = doctorFetched;
-          this.numOfDoctors = this.doctorsData.length;
+      (result) => {
+        if (result?.items) {
+          this.doctorsData = result.items;
+          this.numOfDoctors = result.totalCount;
         }
       },
       (error) => {
@@ -102,6 +116,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     const earningSub = this.totalEarningService.getTotalEarnings().subscribe({
       next: (data) => {
         this.totalAmountEarning = data.totalEarnings;
+        this.optimizeWidget();
       },
       error: (err) => {
         console.error('Error fetching total earnings:', err);
@@ -124,32 +139,25 @@ export class BoardComponent implements OnInit, OnDestroy {
         iconClass: 'fas fa-users',
         text: 'Appointments',
         number: this.numOfAppointments,
-        progress: 45,
-        description: '45% Increase in 28 Days',
       },
       {
         bgClass: 'bg-orange',
         iconClass: 'fas fa-user',
         text: 'New Patients',
         number: this.numOfPatients,
-        progress: 40,
-        description: '40% Increase in 28 Days',
       },
       {
         bgClass: 'bg-purple',
         iconClass: 'fas fa-syringe',
         text: 'Doctors',
         number: this.numOfDoctors,
-        progress: 85,
-        description: '85% Increase in 28 Days',
       },
       {
         bgClass: 'bg-success',
         iconClass: 'fas fa-dollar-sign',
         text: 'PrimeCare Earning',
         number: this.totalAmountEarning,
-        progress: 50,
-        description: '50% Increase in 28 Days',
+        isCurrency: true,
       },
     ];
   }
@@ -175,26 +183,19 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.subscriptions.push(deleteSub);
   }
 
-  @ViewChild('editModal', { static: false }) editModal!: ElementRef;
   appointmentDate: string = '';
   appointmentTime: string = '';
+  showEditModal = false;
 
   onEditeAppointment(id: number, appointmentDate: string): void {
     this.selectedAppointmentId = id;
     this.appointmentDate = appointmentDate.split('T')[0];
     this.appointmentTime = appointmentDate.split('T')[1]?.substring(0, 5) || '';
-
-    const modalElement = document.getElementById('editModal');
-    if (modalElement) {
-      modalElement.classList.remove('hidden');
-    }
+    this.showEditModal = true;
   }
 
   closeModal(): void {
-    const modalElement = document.getElementById('editModal');
-    if (modalElement) {
-      modalElement.classList.add('hidden');
-    }
+    this.showEditModal = false;
   }
 
   saveAppointment(): void {
@@ -211,6 +212,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     const editSub = this.appointmentService.editeBooking(this.selectedAppointmentId, updatedAppointment).subscribe({
       next: () => {
         this.toaster.success("Appointment Updated successfully");
+        this.closeModal();
         this.loadAppointments();
       },
       error: (err) => {
@@ -229,7 +231,12 @@ export class BoardComponent implements OnInit, OnDestroy {
 
     autoTable(doc,{
       head:[["Patient Name","Assigned Doctor","Date","Time"]],
-      body:this.appointments .map(i => [i.patient.name , i.doctor.name , i.appointmentDate , i.appointmentDate])
+      body:this.appointments.map(i => [
+        i.patient?.name,
+        i.doctor?.name,
+        i.appointmentDate,
+        i.appointmentTime ?? ''
+      ])
     })
     doc.save("table.pdf")
   }

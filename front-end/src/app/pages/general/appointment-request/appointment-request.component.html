@@ -14,6 +14,7 @@
             <input
               type="text"
               formControlName="name"
+              aria-label="Full name"
               class="form-control main"
               placeholder="Name"
               [ngClass]="{ 'is-invalid': name?.invalid && name?.touched }"
@@ -33,6 +34,7 @@
             <input
               type="email"
               formControlName="email"
+              aria-label="Email address"
               class="form-control main"
               placeholder="Email"
               [ngClass]="{ 'is-invalid': email?.invalid && email?.touched }"
@@ -50,6 +52,7 @@
             <input
               type="text"
               formControlName="phone"
+              aria-label="Phone number"
               class="form-control main"
               placeholder="Phone"
               [ngClass]="{ 'is-invalid': phone?.invalid && phone?.touched }"
@@ -69,6 +72,7 @@
             <input
               type="date"
               formControlName="date"
+              aria-label="Preferred appointment date"
               class="form-control main"
               placeholder="Date"
               id="datepicker"
@@ -86,6 +90,7 @@
           <div class="form-group">
             <select
               formControlName="department"
+              aria-label="Department"
               [(ngModel)]="selectedDepartment"
               (change)="filterDoctorsByDepartment()"
               class="form-control main"
@@ -109,11 +114,12 @@
           <div class="form-group">
             <select
               formControlName="doctor"
+              aria-label="Doctor"
               class="form-control main"
               [ngClass]="{ 'is-invalid': doctor?.invalid && doctor?.touched }"
             >
               <option value="">Select Doctor</option>
-              <option *ngFor="let x of filteredDoctors" [value]="x.name">
+              <option *ngFor="let x of filteredDoctors" [value]="x.id">
                 {{ x.name }}
               </option>
             </select>
@@ -128,6 +134,7 @@
           <div class="form-group">
             <textarea
               formControlName="message"
+              aria-label="Appointment message"
               class="form-control main"
               placeholder="Your Message"
               [ngClass]="{ 'is-invalid': message?.invalid && message?.touched }"
@@ -146,7 +153,7 @@
           <div class="form-group text-center ">
             <button  
               type="submit"
-              class="btn-style-one"data-toggle="popover" title="Special Offer!" data-content="Book now for $30.00 before prices change. Don't miss out!"
+              class="btn-style-one" [attr.data-content]="'Book now for ' + (appointmentFee | currency:'USD':'symbol':'1.2-2') + ' before prices change. Don\'t miss out!'" data-toggle="popover" title="Special Offer!"
               [disabled]="appointmentForm.invalid">            
               Submit Now
             </button>
@@ -160,7 +167,7 @@
 <div class="contact-area style-two">
   <div class="section-title">
     <div class="text-right mb-3">
-      <button type="button" class="btn-style-one" (click)="toggleAppointmentsTable()">
+      <button type="button" class="btn-style-one" (click)="toggleAppointmentsTable()" [attr.aria-expanded]="showAppointments">
         {{ showAppointments ? 'Hide My Appointments' : 'Show My Appointments' }}
       </button>
     </div>

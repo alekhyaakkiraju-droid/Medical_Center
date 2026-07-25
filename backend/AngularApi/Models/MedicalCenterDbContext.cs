@@ -20,6 +20,8 @@ namespace AngularApi.Models
         public DbSet<MedicalCenterDoctorAvailability> MedicalCenterDoctorAvailability { get; set; }       
         public DbSet<MedicalCenter> MedicalCenter { get; set; }
         public DbSet<PatientReview> PatientReviews { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -31,6 +33,66 @@ namespace AngularApi.Models
 
             modelBuilder.Entity<Patient>()
               .ToTable("Patients");
+
+            modelBuilder.Entity<AuditLog>(entity =>
+            {
+                entity.ToTable("AuditLogs");
+                entity.HasKey(log => log.Id);
+            });
+
+            modelBuilder.Entity<Appointment>()
+                .HasIndex(a => new { a.DoctorId, a.AppointmentTakenDate });
+
+            modelBuilder.Entity<Appointment>()
+                .HasIndex(a => new { a.PatientId, a.AppointmentTakenDate });
+
+            modelBuilder.Entity<PatientReview>()
+                .HasIndex(r => r.DoctorId);
+        }
+
+        public override int SaveChanges()
+        {
+            ApplyAuditTimestamps();
+            EnforceAuditLogAppendOnly();
+            return base.SaveChanges();
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            ApplyAuditTimestamps();
+            EnforceAuditLogAppendOnly();
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+
+        private void ApplyAuditTimestamps()
+        {
+            foreach (var entry in ChangeTracker.Entries<IAuditableEntity>())
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.CreatedAt = DateTime.UtcNow;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    entry.Entity.UpdatedAt = DateTime.UtcNow;
+                }
+            }
+        }
+
+        private void EnforceAuditLogAppendOnly()
+        {
+            foreach (var entry in ChangeTracker.Entries<AuditLog>())
+            {
+                if (entry.State is EntityState.Modified or EntityState.Deleted)
+                {
+                    throw new InvalidOperationException("AuditLog records are append-only.");
+                }
+
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.Timestamp = DateTime.UtcNow;
+                }
+            }
         }
 
     }

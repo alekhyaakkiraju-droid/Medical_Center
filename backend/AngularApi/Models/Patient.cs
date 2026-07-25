@@ -3,8 +3,11 @@ using System.Text.Json.Serialization;
 
 namespace AngularApi.Models
 {
-    public class Patient : AppUser
+    public class Patient : AppUser, IAuditableEntity
     {
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public string? CreatedBy { get; set; }
         public string? Name { get; set; }
         public string? Image { get; set; }
         public string? Address { get; set; }

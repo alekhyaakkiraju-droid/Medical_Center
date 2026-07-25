@@ -1,14 +1,20 @@
 ﻿using AngularApi.Controllers;
 using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Options;
 using AngularApi.Services;
 using AngularApi.Services.Interfaces;
+using AngularApi.Tests.TestData;
 using FluentAssertions;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using System.Security.Claims;
 
@@ -21,7 +27,11 @@ namespace AngularApi.Tests.Controllers
         private readonly Mock<IEmailService> _emailServiceMock;
         private readonly Mock<IJwtService> _jwtServiceMock;
         private readonly Mock<IGoogleService> _googleServiceMock;
-        private readonly Mock<EmailTemplateService> _emailTemplateService;
+        private readonly Mock<IAuthCookieService> _authCookieServiceMock;
+        private readonly Mock<IAntiforgery> _antiforgeryMock;
+        private readonly Mock<IAuditService> _auditServiceMock;
+        private readonly Mock<ILogger<AccountController>> _loggerMock;
+        private readonly EmailTemplateService _emailTemplateService;
         private readonly AccountController _controller;
 
         public AccountControllerTests()
@@ -33,15 +43,34 @@ namespace AngularApi.Tests.Controllers
             _emailServiceMock = new Mock<IEmailService>();
             _jwtServiceMock = new Mock<IJwtService>();
             _googleServiceMock = new Mock<IGoogleService>();
-            _emailTemplateService = new Mock<EmailTemplateService>();
+            _authCookieServiceMock = new Mock<IAuthCookieService>();
+            _antiforgeryMock = new Mock<IAntiforgery>();
+            _auditServiceMock = new Mock<IAuditService>();
+            _loggerMock = new Mock<ILogger<AccountController>>();
+
+            var webHostEnvironmentMock = new Mock<IWebHostEnvironment>();
+            webHostEnvironmentMock
+                .Setup(env => env.WebRootPath)
+                .Returns(Path.Combine(AppContext.BaseDirectory, "wwwroot"));
+            _emailTemplateService = new EmailTemplateService(webHostEnvironmentMock.Object);
 
             _controller = new AccountController(
                 _userManagerMock.Object,
                 _configurationMock.Object,
                 _emailServiceMock.Object,
-                _emailTemplateService.Object,
+                _emailTemplateService,
                 _jwtServiceMock.Object,
-                _googleServiceMock.Object);
+                _googleServiceMock.Object,
+                _authCookieServiceMock.Object,
+                _antiforgeryMock.Object,
+                Microsoft.Extensions.Options.Options.Create(new AuthCookieOptions()),
+                _auditServiceMock.Object,
+                _loggerMock.Object);
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext(),
+            };
         }
 
 
@@ -87,16 +116,16 @@ namespace AngularApi.Tests.Controllers
             // Arrange
             var loginDto = new LogInUserDTO
             {
-                Email = "ramyy@gmail.com",
-                Password = "0133asdASD*"
+                Email = SeedData.TestUserEmail,
+                Password = SeedData.TestUserPassword
             };
-            var user = new AppUser { Email = loginDto.Email };
+            var user = new AppUser { Email = loginDto.Email, Id = "user-1", UserName = "test-user" };
             _userManagerMock.Setup(x => x.FindByEmailAsync(loginDto.Email))
                 .ReturnsAsync(user);
             _userManagerMock.Setup(x => x.CheckPasswordAsync(user, loginDto.Password))
                 .ReturnsAsync(true);
-            _jwtServiceMock.Setup(x => x.GenerateJwtToken(user))
-                .Returns("jwt-token");
+            _authCookieServiceMock.Setup(x => x.IssueAuthCookiesAsync(user, default))
+                .ReturnsAsync(new AuthCookieIssueResult(DateTime.UtcNow.AddDays(1)));
 
             // Act
             var result = await _controller.Login(loginDto);
@@ -105,8 +134,9 @@ namespace AngularApi.Tests.Controllers
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
             okResult.Value.Should().BeEquivalentTo(new
             {
-                token = "jwt-token"
-            });
+                expiration = DateTime.UtcNow.AddDays(1)
+            }, options => options.Using<DateTime>(ctx =>
+                ctx.Subject.Should().BeCloseTo(ctx.Expectation, TimeSpan.FromMinutes(1))).WhenTypeIs<DateTime>());
         }
 
         [Fact]
@@ -132,14 +162,14 @@ namespace AngularApi.Tests.Controllers
         public async Task ForgotPassword_ValidEmail_SendsResetLink()
         {
             // Arrange
-            var forgotPasswordDto = new ForgotPasswordDTO { Email = "ramyy@gmail.com" };
+            var forgotPasswordDto = new ForgotPasswordDTO { Email = SeedData.TestUserEmail };
             var user = new AppUser { Email = forgotPasswordDto.Email };
 
             _userManagerMock.Setup(x => x.FindByEmailAsync(forgotPasswordDto.Email))
                 .ReturnsAsync(user);
             _userManagerMock.Setup(x => x.GeneratePasswordResetTokenAsync(user))
                 .ReturnsAsync("reset-token");
-            _emailServiceMock.Setup(x => x.SendEmail(It.IsAny<Message>()));
+            _emailServiceMock.Setup(x => x.SendEmailAsync(It.IsAny<Message>())).Returns(Task.CompletedTask);
 
             var httpContext = new DefaultHttpContext();
             httpContext.Request.Scheme = "https";
@@ -163,7 +193,7 @@ namespace AngularApi.Tests.Controllers
 
             var expectedResponse = new Response(
                 "Success",
-                "Password reset link sent to ramyy@gmail.com. Please check your email."
+                $"Password reset link sent to {SeedData.TestUserEmail}. Please check your email."
             );
 
             okResult.Value.Should().BeEquivalentTo(expectedResponse);
@@ -256,6 +286,51 @@ namespace AngularApi.Tests.Controllers
             user.Email.Should().Be(updateProfileDto.Email);
             user.Address.Should().Be(updateProfileDto.Address);
             user.PhoneNumber.Should().Be(updateProfileDto.PhoneNumber);
+        }
+
+        [Fact]
+        public async Task GetCurrentUserProfile_AuthenticatedUser_ReturnsProfileWithRoles()
+        {
+            var user = new AppUser
+            {
+                Id = "user-id",
+                Email = SeedData.TestUserEmail,
+                UserName = "test-user",
+            };
+
+            _userManagerMock.Setup(x => x.FindByIdAsync("user-id"))
+                .ReturnsAsync(user);
+            _userManagerMock.Setup(x => x.GetRolesAsync(user))
+                .ReturnsAsync(new List<string> { "user" });
+
+            var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "user-id") };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = principal }
+            };
+
+            var result = await _controller.GetCurrentUserProfile();
+
+            var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+            okResult.Value.Should().BeEquivalentTo(new
+            {
+                userId = "user-id",
+                email = SeedData.TestUserEmail,
+                userName = "test-user",
+                roles = new[] { "user" },
+            });
+        }
+
+        [Fact]
+        public async Task Logout_ClearsAuthCookies()
+        {
+            var result = await _controller.Logout();
+
+            var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+            okResult.Value.Should().BeEquivalentTo(new { message = "Logged out successfully" });
+            _authCookieServiceMock.Verify(x => x.ClearAuthCookies(), Times.Once);
         }
     }
 }

@@ -14,9 +14,7 @@ private apiUrl = `${environment.api}/Account/change-password`;
 constructor(private http: HttpClient , private authService:AuthServiceService) {}
 
 changePassword(model: any): Observable<any> {
-  return this.http.post(`${this.apiUrl}`, model,{
-    headers: this.authService.getHeaders()
-  });
+  return this.http.post(`${this.apiUrl}`, model, this.authService.getHttpOptions());
 }
 
 }

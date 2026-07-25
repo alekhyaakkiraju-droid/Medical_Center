@@ -1,10 +1,14 @@
 ﻿using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Options;
 using AngularApi.Services;
 using AngularApi.Services.Interfaces;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
 using System.Net;
 using System.Security.Claims;
 using Response = AngularApi.Services.Response;
@@ -14,14 +18,13 @@ namespace AngularApi.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class AccountController : ControllerBase
     {
 
         /// <summary>
-        ///    { "email": "mustafasharaby18@gmail.com", "password": "0133asdASD*"}      
-        ///   { "email": "dodo@gmail.com", "password": "0133asdASD*"}   
-        ///   {"email": "admin@gmail.com", "password": "0133asdASD*"}
-        ///   works
+        /// Authenticates a user and issues an HttpOnly auth cookie.
+        /// Example request body: { "email": "user@example.com", "password": "YourSecurePassword123!" }
         /// </summary>
         private readonly UserManager<AppUser> _userManager;
         private readonly IConfiguration _Configuration;
@@ -30,8 +33,24 @@ namespace AngularApi.Controllers
         private readonly IJwtService _jwtService;
         private readonly IGoogleService _googleService;
         private readonly EmailTemplateService _emailTemplateService;
-        public AccountController(UserManager<AppUser> userManager, IConfiguration Configuration, IEmailService emailService,
-            EmailTemplateService emailTemplateService, IJwtService jwtService, IGoogleService googleService)
+        private readonly IAuthCookieService _authCookieService;
+        private readonly IAntiforgery _antiforgery;
+        private readonly AuthCookieOptions _authCookieOptions;
+        private readonly IAuditService _auditService;
+        private readonly ILogger<AccountController> _logger;
+
+        public AccountController(
+            UserManager<AppUser> userManager,
+            IConfiguration Configuration,
+            IEmailService emailService,
+            EmailTemplateService emailTemplateService,
+            IJwtService jwtService,
+            IGoogleService googleService,
+            IAuthCookieService authCookieService,
+            IAntiforgery antiforgery,
+            IOptions<AuthCookieOptions> authCookieOptions,
+            IAuditService auditService,
+            ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _Configuration = Configuration;
@@ -39,8 +58,11 @@ namespace AngularApi.Controllers
             _emailTemplateService = emailTemplateService;
             _jwtService = jwtService;
             _googleService = googleService;
-            // this._signInManager = _signInManager;
-
+            _authCookieService = authCookieService;
+            _antiforgery = antiforgery;
+            _authCookieOptions = authCookieOptions.Value;
+            _auditService = auditService;
+            _logger = logger;
         }
 
         //public AccountController(UserManager<AppUser> userManager, IConfiguration Configuration, IEmailService emailService,
@@ -55,6 +77,7 @@ namespace AngularApi.Controllers
 
         //}
         [AllowAnonymous]
+        [EnableRateLimiting(AuthRateLimitingExtensions.RegisterPolicy)]
         [HttpPost("register/user")]
         public async Task<IActionResult> Register(RegisterUserDTO registerUser)
         {
@@ -82,7 +105,7 @@ namespace AngularApi.Controllers
 
                     try
                     {
-                        _emailService.SendEmail(message);
+                        await _emailService.SendEmailAsync(message);
                         return Ok(new { message = "Account created successfully. Please check your email to confirm your account." });
                     }
                     catch (Exception ex)
@@ -97,6 +120,8 @@ namespace AngularApi.Controllers
         }
 
 
+        [Authorize(Policy = "AdminPolicy")]
+        [EnableRateLimiting(AuthRateLimitingExtensions.RegisterPolicy)]
         [HttpPost("Register/admin")]
         public async Task<IActionResult> RegisterWithAdmin(RegisterUserDTO registerUser)
         {
@@ -119,6 +144,8 @@ namespace AngularApi.Controllers
             return BadRequest(ModelState);
         }
 
+        [Authorize(Policy = "AdminPolicy")]
+        [EnableRateLimiting(AuthRateLimitingExtensions.RegisterPolicy)]
         [HttpPost("Register/doctor")]
         public async Task<IActionResult> RegisterWithDoctor(RegisterUserDTO registerUser)
         {
@@ -142,6 +169,7 @@ namespace AngularApi.Controllers
 
 
         [AllowAnonymous]
+        [EnableRateLimiting(AuthRateLimitingExtensions.LoginPolicy)]
         [HttpPost("login")]
         public async Task<IActionResult> Login(LogInUserDTO logInUser)
         {
@@ -156,14 +184,15 @@ namespace AngularApi.Controllers
                     var checkpass = await _userManager.CheckPasswordAsync(found, logInUser.Password);
                     if (checkpass)
                     {
-                        var tokenGenerated = _jwtService.GenerateJwtToken(found);
+                        var cookieResult = await _authCookieService.IssueAuthCookiesAsync(found);
+                        await _auditService.RecordAuthEventAsync("LoginSuccess", found.Email, true);
                         return Ok(new
                         {
-                            token = tokenGenerated,
-                            expiration = DateTime.Now.AddDays(1)
+                            expiration = cookieResult.ExpirationUtc
                         });
                     }
                 }
+                await _auditService.RecordAuthEventAsync("LoginFailure", logInUser.Email, false);
                 return Unauthorized();
             }
             return BadRequest(ModelState);
@@ -171,6 +200,7 @@ namespace AngularApi.Controllers
 
 
         [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
         [HttpGet("LoginWithGoogle")]
         public IActionResult LoginWithGoogle()
         {
@@ -180,13 +210,15 @@ namespace AngularApi.Controllers
 
 
         [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
         [HttpGet("GoogleLoginCallback")]
         public async Task<IActionResult> GoogleLoginCallback()
         {
             try
             {
-                var token = await _googleService.GoogleLoginCallbackAsync();
-                return Redirect($"http://localhost:4200/auth/login-success?token={token}");
+                var user = await _googleService.GoogleLoginCallbackAsync();
+                await _authCookieService.IssueAuthCookiesAsync(user);
+                return Redirect(_authCookieOptions.FrontendLoginSuccessUrl);
             }
             catch (UnauthorizedAccessException)
             {
@@ -199,6 +231,8 @@ namespace AngularApi.Controllers
         }
 
 
+        [AllowAnonymous]
+        [EnableRateLimiting(AuthRateLimitingExtensions.ForgotPasswordPolicy)]
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDTO forgotPasswordDto)
         {
@@ -223,12 +257,13 @@ namespace AngularApi.Controllers
 
                 try
                 {
-                    _emailService.SendEmail(message);
+                    await _emailService.SendEmailAsync(message);
+                    await _auditService.RecordAuthEventAsync("PasswordResetRequested", user.Email, true);
                     return Ok(new Response("Success", $"Password reset link sent to {user.Email}. Please check your email."));
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Failed to send email: {ex.Message}");
+                    _logger.LogError(ex, "Failed to send password reset email");
                     return StatusCode(StatusCodes.Status500InternalServerError, new Response("Error", "Failed to send email, please try again later."));
                 }
 
@@ -237,6 +272,8 @@ namespace AngularApi.Controllers
             return BadRequest(ModelState);
         }
 
+        [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
         [HttpGet("reset-password")]
         public IActionResult ResetPassword(string token, string email)
         {
@@ -252,6 +289,7 @@ namespace AngularApi.Controllers
 
 
 
+        [AllowAnonymous]
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDTO resetPasswordDto)
         {
@@ -268,10 +306,11 @@ namespace AngularApi.Controllers
 
                 if (result.Succeeded)
                 {
+                    await _auditService.RecordAuthEventAsync("PasswordResetCompleted", user.Email, true);
                     return Ok(new { message = "Password has been reset successfully." });
                 }
 
-                Console.WriteLine($"Errors: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                _logger.LogWarning("Password reset failed: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
                 return BadRequest(result.Errors.FirstOrDefault()?.Description);
             }
 
@@ -279,13 +318,43 @@ namespace AngularApi.Controllers
         }
 
         /// <summary>
-        ///    { "email": "mustafasharaby18@gmail.com", "password": "0133asdASD//"}      
-        ///   { "email": "ramyy@gmail.com", "password": "0133asdASD*"}      
-        ///   works
+        /// Changes the authenticated user's password.
+        /// Example request body: { "currentPassword": "OldPassword123!", "newPassword": "NewPassword123!" }
         /// </summary>
         /// 
 
+        [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
+        [HttpGet("antiforgery-token")]
+        public IActionResult GetAntiforgeryToken()
+        {
+            var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
+            return Ok(new { token = tokens.RequestToken });
+        }
 
+        [AllowAnonymous]
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            if (!Request.Cookies.TryGetValue(_authCookieOptions.AuthCookieName, out var jwtToken)
+                || !Request.Cookies.TryGetValue(_authCookieOptions.RefreshCookieName, out var refreshToken))
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                var cookieResult = await _authCookieService.RefreshAuthCookiesAsync(jwtToken, refreshToken);
+                return Ok(new { expiration = cookieResult.ExpirationUtc });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+        }
+
+
+        [Authorize(Policy = "UserPolicy")]
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto model)
         {
@@ -300,6 +369,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpPut("update-profile")]
         public async Task<IActionResult> UpdateProfile(UpdateProfileDto model)
         {
@@ -320,6 +390,7 @@ namespace AngularApi.Controllers
         }
 
         [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
@@ -334,6 +405,7 @@ namespace AngularApi.Controllers
             return Ok(new { Message = "Email confirmed successfully." });
         }
 
+        [AllowAnonymous]
         [HttpPost("resend-email-confirmation")]
         public async Task<IActionResult> ResendEmailConfirmation([FromBody] ResendEmailConfirmationDto model)
         {
@@ -350,6 +422,46 @@ namespace AngularApi.Controllers
         }
 
 
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUserProfile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            return Ok(new
+            {
+                userId = user.Id,
+                email = user.Email,
+                userName = user.UserName,
+                roles,
+            });
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var actor = User.FindFirstValue(ClaimTypes.Email)
+                ?? User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? "anonymous";
+            _authCookieService.ClearAuthCookies();
+            await _auditService.RecordAuthEventAsync("Logout", actor, true);
+            return Ok(new { message = "Logged out successfully" });
+        }
+
+        [Authorize(Policy = "UserPolicy")]
         [HttpGet("user-details")]
         public async Task<IActionResult> GetUserDetails()
         {
@@ -368,6 +480,7 @@ namespace AngularApi.Controllers
         }
 
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpDelete("delete")]
         public async Task<IActionResult> DeleteAccount()
         {

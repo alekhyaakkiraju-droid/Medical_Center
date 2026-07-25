@@ -19,9 +19,9 @@
         </div>
 
         <div class="mt-4">
-          <label class="text-gray-800 text-[15px] mb-2 block">User Name</label>
+          <label for="register-full-name" class="text-gray-800 text-[15px] mb-2 block">User Name</label>
           <div class="relative flex items-center">
-            <input name="username" type="text" required formControlName="fullName"
+            <input id="register-full-name" name="username" type="text" required formControlName="fullName" aria-label="Full name"
               class="w-full text-sm text-gray-800 bg-gray-100  px-4 py-3.5 rounded-md outline-blue-600"
               placeholder="Enter username" />            
           </div>
@@ -34,9 +34,9 @@
         </div>
 
         <div>
-          <label class="text-gray-800 text-[15px] mb-2 block">Email</label>
+          <label for="register-email" class="text-gray-800 text-[15px] mb-2 block">Email</label>
           <div class="relative flex items-center">
-            <input name="email" type="text" required  formControlName="email"
+            <input id="register-email" name="email" type="email" required formControlName="email" aria-label="Email address"
               class="w-full text-sm text-gray-800 bg-gray-100  px-4 py-3.5 rounded-md outline-blue-600"
               placeholder="Enter email" />
             <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" class="w-[18px] h-[18px] absolute right-4"
@@ -63,9 +63,9 @@
         </div>
 
         <div class="mt-4">
-          <label class="text-gray-800 text-[15px] mb-2 block">Password</label>
+          <label for="register-password" class="text-gray-800 text-[15px] mb-2 block">Password</label>
           <div class="relative flex items-center">
-            <input name="password" type="password" required formControlName="password"
+            <input id="register-password" name="password" type="password" required formControlName="password" aria-label="Password"
               class="w-full text-sm text-gray-800 bg-gray-100  px-4 py-3.5 rounded-md outline-blue-600"
               placeholder="Enter password" />
             <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb"
@@ -81,9 +81,9 @@
         </div>
 
         <div class="mt-4">
-          <label class="text-gray-800 text-[15px] mb-2 block">Confirm Password</label>
+          <label for="register-confirm-password" class="text-gray-800 text-[15px] mb-2 block">Confirm Password</label>
           <div class="relative flex items-center">
-            <input name="password" type="password" required formControlName="confirmPassword"
+            <input id="register-confirm-password" name="confirmPassword" type="password" required formControlName="confirmPassword" aria-label="Confirm password"
               class="w-full text-sm text-gray-800 bg-gray-100  px-4 py-3.5 rounded-md outline-blue-600"
               placeholder="Enter password" />
             <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb"
@@ -125,7 +125,7 @@
           <hr class="w-full border-gray-300" />
         </div>
 
-        <button type="button"
+        <button type="button" aria-label="Continue with Google"
           class="w-full flex items-center justify-center gap-4 py-3 px-6 text-sm tracking-wide text-gray-800 border border-gray-300 rounded-md bg-gray-50 hover:bg-gray-100 focus:outline-none">
           <i class="fab fa-google mr-2"></i> 
           Continue with google

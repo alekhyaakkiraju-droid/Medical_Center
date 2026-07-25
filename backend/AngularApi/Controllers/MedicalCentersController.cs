@@ -2,15 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AngularApi.DTO;
+using AngularApi.DTO;
+using AngularApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AngularApi.Models;
 
 namespace AngularApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "AdminPolicy")]
     public class MedicalCentersController : ControllerBase
     {
         private readonly MedicalCenterDbContext _context;
@@ -22,9 +26,22 @@ namespace AngularApi.Controllers
 
         // GET: api/MedicalCenters
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MedicalCenter>>> GetMedicalCenter()
+        public async Task<ActionResult<PagedResult<MedicalCenterListItemDTO>>> GetMedicalCenter([FromQuery] PaginationParameters pagination)
         {
-            return await _context.MedicalCenter.ToListAsync();
+            return await _context.MedicalCenter
+                .Select(m => new MedicalCenterListItemDTO
+                {
+                    Id = m.Id,
+                    HospitalAffiliationId = m.HospitalAffiliationId,
+                    TimeSlotPerClientInMin = m.TimeSlotPerClientInMin,
+                    FirstConsultationFee = m.FirstConsultationFee,
+                    FollowupConsultationFee = m.FollowupConsultationFee,
+                    StreetAddress = m.StreetAddress,
+                    City = m.City,
+                    State = m.State,
+                    Zip = m.Zip
+                })
+                .ToPagedResultAsync(pagination);
         }
 
         // GET: api/MedicalCenters/5

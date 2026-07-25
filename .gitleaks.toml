@@ -1,0 +1,35 @@
+title = "Medical Center secret scanning"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "jwt-secret-assignment"
+description = "JWT or signing secret hard-coded in source"
+regex = '''(?i)(jwt[_-]?secret|signing[_-]?key|secret[_-]?key)\s*[:=]\s*['"][^'"\s]{8,}['"]'''
+tags = ["secret", "jwt"]
+
+[[rules]]
+id = "connection-string-password"
+description = "Database connection string containing a password"
+regex = '''(?i)(Password|PWD)\s*=\s*[^;'"\s]{4,}'''
+tags = ["secret", "connection-string"]
+
+[[rules]]
+id = "json-email-password-pair"
+description = "JSON object containing email and password fields"
+regex = '''(?i)"email"\s*:\s*"[^"]+"\s*,\s*"password"\s*:\s*"[^"]+"'''
+tags = ["secret", "credentials"]
+
+[[rules]]
+id = "generic-api-key-assignment"
+description = "API key assignment in configuration or code"
+regex = '''(?i)(api[_-]?key|client[_-]?secret)\s*[:=]\s*['"]?[a-z0-9_\-]{16,}['"]?'''
+tags = ["secret", "api-key"]
+
+[allowlist]
+description = "Ignore test fixture placeholders and documentation examples"
+paths = [
+  '''backend/AngularApi.Tests/TestData/SeedData\.cs''',
+  '''README\.md''',
+]

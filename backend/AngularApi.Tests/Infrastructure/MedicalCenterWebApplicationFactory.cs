@@ -9,6 +9,8 @@ namespace AngularApi.Tests.Infrastructure;
 
 public class MedicalCenterWebApplicationFactory : WebApplicationFactory<Program>
 {
+    private readonly string _databaseName = $"MedicalCenterTests-{Guid.NewGuid()}";
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Development");
@@ -21,6 +23,9 @@ public class MedicalCenterWebApplicationFactory : WebApplicationFactory<Program>
                 ["Jwt:ValidIssuer"] = "test-issuer",
                 ["Jwt:ValidAudience"] = "test-audience",
                 ["Jwt:Secret"] = "ThisIsAVeryLongSecretKeyForTestingPurposes123!",
+                ["Jwt:AuthCookieName"] = "MedCenter.Auth",
+                ["Jwt:RefreshCookieName"] = "MedCenter.Refresh",
+                ["Jwt:CookiePath"] = "/api",
                 ["GoogleAuth:ClientId"] = "test-client-id",
                 ["GoogleAuth:ClientSecret"] = "test-client-secret",
             });
@@ -37,7 +42,7 @@ public class MedicalCenterWebApplicationFactory : WebApplicationFactory<Program>
 
             services.AddDbContext<MedicalCenterDbContext>(options =>
             {
-                options.UseInMemoryDatabase($"MedicalCenterTests-{Guid.NewGuid()}");
+                options.UseInMemoryDatabase(_databaseName);
             });
         });
     }

@@ -13,8 +13,7 @@ export class RelatedPatientsReviewsService {
   constructor(private http: HttpClient, private authService:AuthServiceService) {}
 
   getPatientsReview(doctorId: string): Observable<any> {
-    const headers = this.authService.getHeaders();  
-    return this.http.get<any[]>(`${this.apiUrl}/${doctorId}/reviews` , {headers});   
+    return this.http.get<any[]>(`${this.apiUrl}/${doctorId}/reviews`, this.authService.getHttpOptions());
   }
 
 

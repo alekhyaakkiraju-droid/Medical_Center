@@ -17,9 +17,7 @@ export class ForgotServiceService {
   // Forget Password
   forgetPassword(email: string): Observable<any> {
     const payload = { email };
-    const headers = this.authService.getHeaders();  
-    console.log(JSON.stringify(payload));
-    return this.http.post(`${this.apiUrl}/forgot-password`, payload, { headers }).pipe(
+    return this.http.post(`${this.apiUrl}/forgot-password`, payload, this.authService.getHttpOptions()).pipe(
       catchError(this.handeErrorService.handleError)
     );     
   }

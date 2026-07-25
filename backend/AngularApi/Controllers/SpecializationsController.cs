@@ -6,12 +6,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using AngularApi.DTO;
 using AngularApi.Models;
 
 namespace AngularApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "AdminPolicy")]
     public class SpecializationsController : ControllerBase
     {
         private readonly MedicalCenterDbContext _context;
@@ -24,13 +26,18 @@ namespace AngularApi.Controllers
         
         [AllowAnonymous]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Specialization>>> GetSpecializations()
+        public async Task<ActionResult<PagedResult<SpecializationListItemDTO>>> GetSpecializations([FromQuery] PaginationParameters pagination)
         {
-            var specializations = await _context.Specializations
-                .Include(s => s.Services)
-                .ToListAsync();
-
-            return Ok(specializations);
+            return await _context.Specializations
+                .Select(s => new SpecializationListItemDTO
+                {
+                    Id = s.Id,
+                    SpecializationName = s.SpecializationName,
+                    SpecializationImage = s.SpecializationImage,
+                    Description = s.Description,
+                    IsActive = s.IsActive
+                })
+                .ToPagedResultAsync(pagination);
         }
     
 
