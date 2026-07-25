@@ -9,7 +9,7 @@ import { AuthServiceService } from '../../pages/auth/auth-services/auth-service.
 })
 export class AppointmentsService {
 
-private apiUrl = `${environment}/Appointments`;
+private apiUrl = `${environment.api}/Appointments`;
 
   constructor(private http: HttpClient , private authService :AuthServiceService) {}
 

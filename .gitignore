@@ -42,6 +42,7 @@ appsettings.json
 .env.*
 !.env.example
 *.env
+docker-compose.override.yml
 credentials.json
 secrets.json
 **/local.settings.json

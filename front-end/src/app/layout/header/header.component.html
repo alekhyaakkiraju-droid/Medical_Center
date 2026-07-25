@@ -23,7 +23,7 @@
     <div class="container clearfix  mx-auto max-w-7xl px-5 sm:px-6">
       <div class="logo">
         <figure>
-          <a href="index.html">
+          <a routerLink="/">
             <img src="images/loggggo-3.png" alt="" width="220px" height="100">
           </a>
         </figure>
@@ -40,7 +40,7 @@
           </li>
           <li class="item" *ngIf="!isLoggedIn">
             <div class="icon-box">
-              <a href="/auth/login">
+              <a routerLink="/auth/login">
                 <i class="fa-regular fa-user text-xl text-dark "></i>
               </a>
             </div>
@@ -95,7 +95,7 @@
       <div class="items-center justify-between w-full lg:flex lg:w-auto lg:order-1" id="mobile-menu-2">
         <ul class="flex flex-col my-3 font-medium lg:flex-row lg:space-x-8 lg:mt-0">
           <li *ngFor="let item of menuItems">
-            <a [href]="item.href"
+            <a [routerLink]="item.href"
               style="font-family: 'Source Sans Pro sans-serif'; font-size: 17px; text-transform: uppercase; padding: 25px 20px;"
               class="block py-2 pl-3 pr-4 text-white border-b border-gray-100 lg:border-0">
               {{ item.label }}

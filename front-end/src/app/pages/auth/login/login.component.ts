@@ -127,6 +127,10 @@ export class LoginComponent implements OnInit, AfterViewInit{
     }
   }
 
+  loginWithGoogle(): void {
+    window.location.href = this.authService.googleloginUrl;
+  }
+
 // ------------------------------Forget password-------------------------------------
 openForgetPasswordModal() {
   this.modalService.openDialog();

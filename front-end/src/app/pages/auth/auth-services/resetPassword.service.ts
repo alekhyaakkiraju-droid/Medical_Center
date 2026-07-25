@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 import { AuthServiceService } from './auth-service.service';
 import { HandleErrorsService } from '../../../shared/service/handle-errors.service';
 
@@ -9,7 +10,7 @@ import { HandleErrorsService } from '../../../shared/service/handle-errors.servi
 })
 export class ResetPasswordService {
 
-  private apiUrl = 'http://localhost:5004/api/Account';
+  private apiUrl = `${environment.api}/Account`;
 
   constructor(private http: HttpClient,
               private authService :AuthServiceService,

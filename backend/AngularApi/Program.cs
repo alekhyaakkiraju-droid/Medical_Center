@@ -70,6 +70,11 @@ namespace WebApiDemo
 
             if (app.Environment.IsDevelopment())
             {
+                await DevelopmentDataSeeder.SeedAsync(app.Services);
+            }
+
+            if (app.Environment.IsDevelopment())
+            {
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {

@@ -130,7 +130,7 @@ export class AppointmentRequestComponent implements OnInit, OnDestroy {
   filterDoctorsByDepartment() {
     if (this.selectedDepartment) {
       this.filteredDoctors = this.doctorsData.filter((doctor) =>
-        doctor.specializations.includes(this.selectedDepartment)
+        doctor.specializations?.some((name: string) => name === this.selectedDepartment)
       );
     } else {
       this.filteredDoctors = [];

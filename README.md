@@ -134,10 +134,32 @@ cd backend/AngularApi && dotnet restore && dotnet ef database update && dotnet r
 cd front-end && npm ci && npm start
 
 # Full stack (Docker)
+cp .env.example .env   # adjust MSSQL_SA_PASSWORD, JWT_SECRET if needed
 docker compose up --build
 ```
 
-Environment variables for Docker Compose: `MSSQL_SA_PASSWORD`, `JWT_SECRET`, `JWT_VALID_ISSUER`, `JWT_VALID_AUDIENCE`, and optional Google/SMTP settings.
+After first startup, apply migrations once:
+
+```bash
+export PATH="$PATH:$HOME/.dotnet/tools"
+cd backend/AngularApi
+dotnet ef database update --project AngularApi.csproj \
+  --connection "Server=localhost,1433;Database=MedicalCenter;User Id=sa;Password=<MSSQL_SA_PASSWORD>;TrustServerCertificate=True;Encrypt=False"
+```
+
+**Local URLs (default `.env`):**
+
+| Service | URL |
+|---------|-----|
+| Frontend (use this) | http://localhost:8081 |
+| API via frontend proxy | http://localhost:8081/api/... |
+| YARP direct (optional) | http://localhost:8080 |
+
+The frontend nginx container proxies `/api` to YARP so the browser uses a single origin (`connect-src 'self'`).
+
+Environment variables for Docker Compose: `MSSQL_SA_PASSWORD`, `JWT_SECRET`, `JWT_VALID_ISSUER`, `JWT_VALID_AUDIENCE`, `API_PUBLIC_URL=/api`, and optional Google/SMTP settings.
+
+See [docs/phase-1-manifest.md](docs/phase-1-manifest.md) for Phase 1 WO traceability.
 
 ## Deployment
 
@@ -147,8 +169,9 @@ Environment variables for Docker Compose: `MSSQL_SA_PASSWORD`, `JWT_SECRET`, `JW
 docker compose up --build -d
 ```
 
-- YARP entry point: `http://localhost:8080`
-- Frontend direct: `http://localhost:8081`
+- **Frontend entry point:** `http://localhost:8081` (recommended)
+- **API via frontend proxy:** `http://localhost:8081/api/...`
+- YARP direct: `http://localhost:8080` (optional)
 - Health checks: `/health` on API and YARP
 
 ### CI/CD (Forge Shipping)

@@ -1,13 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 import { AuthServiceService } from './auth-service.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EmailConfirmationService {
-  private apiUrl = 'http://localhost:5004/api/Account/confirm-email';
+  private apiUrl = `${environment.api}/Account/confirm-email`;
 
   constructor(private http: HttpClient, private authService: AuthServiceService) {}
 
