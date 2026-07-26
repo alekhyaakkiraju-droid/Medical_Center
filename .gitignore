@@ -41,6 +41,7 @@ appsettings.json
 .env
 .env.*
 !.env.example
+!.env.staging.example
 *.env
 docker-compose.override.yml
 credentials.json

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # Post-deploy smoke and E2E tests (WO-026).
+# Staging (WO-031): a passing /health check confirms the API started with IDP SMTP
+# environment variables injected by the Forge pipeline Staging Deploy API step.
 # Local Docker Compose:
 #   SMOKE_BASE_URL=http://localhost:8081 SMOKE_API_URL=http://localhost:8080 ./scripts/run-e2e-smoke.sh
 set -euo pipefail
