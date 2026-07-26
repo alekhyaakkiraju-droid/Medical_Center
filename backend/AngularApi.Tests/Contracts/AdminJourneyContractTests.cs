@@ -53,7 +53,7 @@ public class AdminJourneyContractTests : ContractTestBase
         await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
         var response = await client.PostAsJsonAsync("/api/Account/Register/doctor", new RegisterUserDTO
         {
-            UserName = "New Contract Doctor", Email = email, Password = ContractPassword, ConfirmPassword = ContractPassword,
+            UserName = "Doctor Test", Email = email, Password = ContractPassword, ConfirmPassword = ContractPassword,
         });
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         using var document = ParseJson(await response.Content.ReadAsStringAsync());
