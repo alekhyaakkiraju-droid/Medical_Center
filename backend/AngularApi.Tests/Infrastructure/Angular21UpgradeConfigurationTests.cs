@@ -13,11 +13,10 @@ public class Angular21UpgradeConfigurationTests
     public void PackageJson_PinsAngularPackagesTo21()
     {
         var packageJson = File.ReadAllText(Path.Combine(FrontendRoot, "package.json"));
-
         packageJson.Should().Contain("\"@angular/core\": \"^21.");
         packageJson.Should().Contain("\"@angular/cli\": \"^21.");
         packageJson.Should().Contain("\"@angular/material\": \"^21.");
-        packageJson.Should().Contain("\"typescript\": \"~5.8.");
+        packageJson.Should().Contain("\"typescript\": \"~5.9.");
         packageJson.Should().Contain("\"ngx-toastr\": \"^20.");
         packageJson.Should().NotContain("\"@angular/core\": \"^20.");
     }
