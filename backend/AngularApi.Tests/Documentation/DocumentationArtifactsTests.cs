@@ -17,7 +17,7 @@ public class DocumentationArtifactsTests
             new object[] { "docs/adr/005-forge-shipping-cicd.md", new[] { "## Status", "## Context", "## Decision", "## Consequences" } },
             new object[] { "docs/adr/006-service-layer-refactor.md", new[] { "## Status", "## Context", "## Decision", "## Consequences" } },
             new object[] { "docs/compliance/data-classification.md", new[] { "T1", "T4", "Entity Mapping" } },
-            new object[] { "docs/compliance/hipaa-checklist.md", new[] { "Compliant", "In Progress", "Pending", "secrets-management.md", "baa-tracking.md", "BreachNotificationService" } },
+            new object[] { "docs/compliance/hipaa-checklist.md", new[] { "Compliant", "In Progress", "Pending", "secrets-management.md", "baa-tracking.md", "BreachNotificationService", "run-security-regression.sh" } },
             new object[] { "docs/secrets-management.md", new[] { "90-day", "Rotation Policy", "Emergency Rotation", "Audit Trail Requirements", "JWT Signing Key Rotation", "MSSQL SA Password Rotation", "SMTP Credentials Rotation", "Google OAuth Credentials Rotation" } },
             new object[] { "docs/compliance/data-subject-rights.md", new[] { "30-day", "Breach Notification", "In Progress", "BreachNotificationService", "/api/admin/breach-assessment" } },
             new object[] { "docs/compliance/baa-tracking.md", new[] { "BAA Register", "Review Cadence", "Escalation Process", "data-classification.md" } },

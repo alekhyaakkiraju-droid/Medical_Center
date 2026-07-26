@@ -1,9 +1,11 @@
 using AngularApi.Models;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net;
 
 namespace AngularApi.Tests.Infrastructure;
 
@@ -47,6 +49,30 @@ public class MedicalCenterWebApplicationFactory : WebApplicationFactory<Program>
             {
                 options.UseInMemoryDatabase(_databaseName);
             });
+
+            services.AddSingleton<IStartupFilter, TestClientIpStartupFilter>();
         });
+    }
+
+    private sealed class TestClientIpStartupFilter : IStartupFilter
+    {
+        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
+        {
+            return app =>
+            {
+                app.Use(async (context, nextMiddleware) =>
+                {
+                    if (context.Request.Headers.TryGetValue("X-Test-Client-Ip", out var testIp)
+                        && IPAddress.TryParse(testIp!, out var ipAddress))
+                    {
+                        context.Connection.RemoteIpAddress = ipAddress;
+                    }
+
+                    await nextMiddleware();
+                });
+
+                next(app);
+            };
+        }
     }
 }
