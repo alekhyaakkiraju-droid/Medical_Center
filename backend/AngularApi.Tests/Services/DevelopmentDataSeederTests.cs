@@ -39,6 +39,40 @@ public class DevelopmentDataSeederTests
     }
 
     [Fact]
+    public async Task SeedAsync_SeedsCanonicalAppointmentStatusesWithEnumAlignedIds()
+    {
+        await using var provider = CreateProvider();
+        await DevelopmentDataSeeder.SeedAsync(provider);
+
+        await using var scope = provider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+
+        var statuses = await context.AppointmentStatus.OrderBy(s => s.Id).ToListAsync();
+        statuses.Should().HaveCount(3);
+        statuses[0].Id.Should().Be((int)AppointmentStatusEnum.Active);
+        statuses[0].Status.Should().Be(AppointmentStatusEnum.Active);
+        statuses[1].Id.Should().Be((int)AppointmentStatusEnum.Complete);
+        statuses[1].Status.Should().Be(AppointmentStatusEnum.Complete);
+        statuses[2].Id.Should().Be((int)AppointmentStatusEnum.Canceled);
+        statuses[2].Status.Should().Be(AppointmentStatusEnum.Canceled);
+    }
+
+    [Fact]
+    public async Task SeedAsync_AppointmentStatusesAreIdempotent()
+    {
+        await using var provider = CreateProvider();
+
+        await DevelopmentDataSeeder.SeedAsync(provider);
+        await DevelopmentDataSeeder.SeedAsync(provider);
+
+        await using var scope = provider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+
+        (await context.AppointmentStatus.CountAsync()).Should().Be(3);
+        (await context.AppointmentStatus.CountAsync(s => s.Id == (int)AppointmentStatusEnum.Active)).Should().Be(1);
+    }
+
+    [Fact]
     public async Task SeedAsync_IsIdempotentWhenSpecializationsExist()
     {
         await using var provider = CreateProvider();

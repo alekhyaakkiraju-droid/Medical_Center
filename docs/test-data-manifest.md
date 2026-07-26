@@ -105,13 +105,15 @@ Complete appointments include an `ActualEndTime` 30–45 minutes after the proba
 
 ### AppointmentStatuses
 
-Seeded when missing; one row per enum value. On a fresh database, ids are assigned sequentially in seed order:
+Seeded when missing; one row per enum value. Primary keys match `AppointmentStatusEnum` so services can assign `AppointmentStatusId = (int)AppointmentStatusEnum.*` (for example `0` for Active):
 
-| Id (typical) | Status enum | Description |
-|--------------|-------------|-------------|
-| 1 | `Active` | Open / in-progress appointment |
-| 2 | `Complete` | Finished appointment |
-| 3 | `Canceled` | Cancelled appointment |
+| Id | Status enum | Description |
+|----|-------------|-------------|
+| `0` | `Active` | Open / in-progress appointment |
+| `1` | `Complete` | Finished appointment |
+| `2` | `Canceled` | Cancelled appointment |
+
+List endpoint: `GET /api/AppointmentStatus`.
 
 ### Specializations
 
@@ -138,7 +140,7 @@ Each seed step checks for existing data before inserting:
 | Entity type | Idempotency guard |
 |-------------|-------------------|
 | Specializations | Skips entire step if any specialization exists |
-| Appointment statuses | Inserts only missing enum values |
+| Appointment statuses | Inserts only missing enum values with explicit ids |
 | Medical center | Returns existing id `2` or first center if present |
 | Users (admin, doctors, patients) | Skips when email already registered |
 | Doctor qualifications / affiliations | Created only with new doctor records |
@@ -151,5 +153,5 @@ Re-running the application or seeder does **not** duplicate users, centers, avai
 
 - **WO-034** — Expanded UAT users, doctors, patients, and appointments
 - **WO-035** — Medical center and doctor availability seeding
-- **WO-036** — AppointmentStatus reference data baseline
+- **WO-036** — AppointmentStatus reference data with enum-aligned ids (`0`/`1`/`2`)
 - **WO-037** — This manifest
