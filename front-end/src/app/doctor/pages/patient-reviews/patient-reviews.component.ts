@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ReloadService } from '../../../shared/service/reload.service';
 import { AuthServiceService } from '../../../pages/auth/auth-services/auth-service.service';
 import { RelatedPatientsReviewsService } from '../../services/related-patients-reviews.service';
@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 @Component({
   standalone: false,
   selector: 'app-patient-reviews',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './patient-reviews.component.html'
 })
 export class PatientReviewsComponent implements OnInit, OnDestroy {

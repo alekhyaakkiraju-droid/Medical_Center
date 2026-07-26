@@ -5,13 +5,15 @@
 <div class="font-[sans-serif]">
   <div class="grid lg:grid-cols-3 md:grid-cols-2 items-center gap-4 h-full">
     <div class="w-full h-screen max-md:order-1 lg:col-span-2 md:h-screen w-full bg-[#000842] md:rounded-tr-xl md:rounded-br-xl ">
-      <img src="/images/signin-image.webp" class="lg:w-[70%] w-full h-full object-contain block mx-auto" alt="login-image" />      
+      <img src="/images/signin-image.webp" class="lg:w-[70%] w-full h-full object-contain block mx-auto" alt="login-image" />
     </div>
 
     <div class="w-full p-6">
-      <div *ngIf="errorMessage" class="alert alert-danger">
-        {{ errorMessage }}
-      </div>
+      @if (errorMessage) {
+        <div class="alert alert-danger">
+          {{ errorMessage }}
+        </div>
+      }
       <form [formGroup]="loginForm"  (ngSubmit)="onSubmit()">
         <div class="mb-8">
           <h3 class="text-gray-800 text-3xl font-extrabold">Sign in</h3>
@@ -20,7 +22,7 @@
         <div>
           <label for="login-email" class="text-gray-800 text-[15px] mb-2 block">Email</label>
           <div class="relative flex items-center">
-            <input id="login-email" name="email" type="email" formControlName="email" required aria-label="Email address" class="w-full text-sm text-gray-800 bg-gray-100  px-4 py-3.5 rounded-md outline-blue-600" placeholder="Enter email" />            
+            <input id="login-email" name="email" type="email" formControlName="email" required aria-label="Email address" class="w-full text-sm text-gray-800 bg-gray-100  px-4 py-3.5 rounded-md outline-blue-600" placeholder="Enter email" />
             <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" class="w-[18px] h-[18px] absolute right-4" viewBox="0 0 682.667 682.667">
               <defs>
                 <clipPath id="a" clipPathUnits="userSpaceOnUse">
@@ -31,24 +33,28 @@
                 <path fill="none" stroke-miterlimit="10" stroke-width="40" d="M452 444H60c-22.091 0-40-17.909-40-40v-39.446l212.127-157.782c14.17-10.54 33.576-10.54 47.746 0L492 364.554V404c0 22.091-17.909 40-40 40Z" data-original="#000000"></path>
                 <path d="M472 274.9V107.999c0-11.027-8.972-20-20-20H60c-11.028 0-20 8.973-20 20V274.9L0 304.652V107.999c0-33.084 26.916-60 60-60h392c33.084 0 60 26.916 60 60v196.653Z" data-original="#000000"></path>
               </g>
-            </svg>            
+            </svg>
           </div>
-          <div *ngIf="email?.invalid && email?.touched" class="error text-danger">
-            {{ getEmailErrorMessage() }}
-          </div>
+          @if (email?.invalid && email?.touched) {
+            <div class="error text-danger">
+              {{ getEmailErrorMessage() }}
+            </div>
+          }
         </div>
 
         <div class="mt-4">
           <label for="login-password" class="text-gray-800 text-[15px] mb-2 block">Password</label>
           <div class="relative flex items-center">
-            <input id="login-password" name="password" formControlName="password" type="password" required aria-label="Password" class="w-full text-sm text-gray-800 bg-gray-100  px-4 py-3.5 rounded-md outline-blue-600" placeholder="Enter password" />           
+            <input id="login-password" name="password" formControlName="password" type="password" required aria-label="Password" class="w-full text-sm text-gray-800 bg-gray-100  px-4 py-3.5 rounded-md outline-blue-600" placeholder="Enter password" />
             <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" class="w-[18px] h-[18px] absolute right-4 cursor-pointer" viewBox="0 0 128 128">
               <path d="M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z" data-original="#000000"></path>
-            </svg>            
+            </svg>
           </div>
-          <div *ngIf="password?.invalid && password?.touched" class="error text-danger">
-            {{ getPasswordErrorMessage() }}
-          </div>
+          @if (password?.invalid && password?.touched) {
+            <div class="error text-danger">
+              {{ getPasswordErrorMessage() }}
+            </div>
+          }
         </div>
 
         <div class="flex flex-wrap items-center justify-between gap-4 mt-4">
@@ -61,7 +67,7 @@
           <div>
             <button type="button" (click)="openForgetPasswordModal()" class="text-blue-600 font-semibold hover:text-blue-700  hover:underline text-sm ">
               Forgot Password?
-            </button>           
+            </button>
 
           </div>
         </div>
@@ -78,7 +84,7 @@
         </div>
 
         <button type="button" aria-label="Continue with Google" (click)="loginWithGoogle()" class="w-full flex items-center justify-center gap-4 py-3 px-6 text-sm tracking-wide text-gray-800 border border-gray-300 rounded-md bg-gray-50 hover:bg-gray-100 focus:outline-none">
-          <i class="fab fa-google mr-2"></i> 
+          <i class="fab fa-google mr-2"></i>
           Continue with google
         </button>
       </form>

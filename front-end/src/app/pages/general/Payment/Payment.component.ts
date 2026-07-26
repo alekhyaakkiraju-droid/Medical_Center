@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 
@@ -6,6 +6,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   standalone: false,
   selector: 'app-Payment',
   templateUrl: './Payment.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./Payment.component.css']
 })
 

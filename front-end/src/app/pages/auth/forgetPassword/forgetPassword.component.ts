@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { ForgotServiceService } from '../auth-services/forgot-service.service';
@@ -8,6 +8,7 @@ import { ToastrService } from 'ngx-toastr';
 @Component({
   standalone: false,
   selector: 'app-forgetPassword',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './forgetPassword.component.html'
 })
 export class ForgetPasswordComponent implements OnInit, OnDestroy {

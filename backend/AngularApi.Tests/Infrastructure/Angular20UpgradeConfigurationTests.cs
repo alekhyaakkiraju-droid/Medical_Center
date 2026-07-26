@@ -10,16 +10,14 @@ public class Angular20UpgradeConfigurationTests
     private static readonly string FrontendRoot = Path.Combine(RepoRoot, "front-end");
 
     [Fact]
-    public void PackageJson_PinsAngularPackagesTo20()
+    public void PackageJson_MeetsAngular20NodeAndVersionRequirements()
     {
         var packageJson = File.ReadAllText(Path.Combine(FrontendRoot, "package.json"));
 
-        packageJson.Should().Contain("\"@angular/core\": \"^20.");
-        packageJson.Should().Contain("\"@angular/cli\": \"^20.");
-        packageJson.Should().Contain("\"@angular/material\": \"^20.");
-        packageJson.Should().Contain("\"typescript\": \"~5.8.");
         packageJson.Should().Contain("\"node\": \">=20\"");
         packageJson.Should().NotContain("\"@angular/core\": \"^19.");
+        packageJson.Should().NotContain("\"@angular/core\": \"^18.");
+        packageJson.Should().MatchRegex("\"@angular/core\": \"\\^2[0-9]");
     }
 
     [Fact]

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AppointmentService } from '../../../pages/general/services/appointment.service';
 import { ReloadService } from '../../../shared/service/reload.service';
 import { MENU } from '../../menu';
@@ -6,6 +6,7 @@ import { MENU } from '../../menu';
 @Component({
   standalone: false,
   selector: 'app-temp-appointment',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './temp-appointment.component.html'
 })
 export class TempAppointmentComponent implements OnInit {

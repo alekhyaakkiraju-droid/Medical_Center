@@ -1,119 +1,126 @@
 <div id="preloader">
-    <div class="loader"></div>
+  <div class="loader"></div>
 </div>
 <app-side-bar></app-side-bar>
 <div class="p-4 sm:ml-64 ">
-    <div class="mt-5 relative overflow-x-auto shadow-md sm:rounded-lg">
-        <div class="flex flex-column sm:flex-row flex-wrap space-y-4 sm:space-y-0 items-center justify-between pb-4">
-            <div class="relative flex flex-wrap items-center justify-between w-full mt-5 mb-5">
-                <button (click)="toggleDropdown()"
-                    class="inline-flex items-center ms-3 text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 "
-                    type="button">
-                    <svg class="w-3 h-3 text-gray-500 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor" viewBox="0 0 20 20">
-                        <path
-                            d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm3.982 13.982a1 1 0 0 1-1.414 0l-3.274-3.274A1.012 1.012 0 0 1 9 10V6a1 1 0 0 1 2 0v3.586l2.982 2.982a1 1 0 0 1 0 1.414Z" />
-                    </svg> {{ getSelectedLabel() }}
-                    <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 10 6">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="m1 1 4 4 4-4" />
-                    </svg>
-                </button>
+  <div class="mt-5 relative overflow-x-auto shadow-md sm:rounded-lg">
+    <div class="flex flex-column sm:flex-row flex-wrap space-y-4 sm:space-y-0 items-center justify-between pb-4">
+      <div class="relative flex flex-wrap items-center justify-between w-full mt-5 mb-5">
+        <button (click)="toggleDropdown()"
+          class="inline-flex items-center ms-3 text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 "
+          type="button">
+          <svg class="w-3 h-3 text-gray-500 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor" viewBox="0 0 20 20">
+            <path
+              d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm3.982 13.982a1 1 0 0 1-1.414 0l-3.274-3.274A1.012 1.012 0 0 1 9 10V6a1 1 0 0 1 2 0v3.586l2.982 2.982a1 1 0 0 1 0 1.414Z" />
+          </svg> {{ getSelectedLabel() }}
+          <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 10 6">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="m1 1 4 4 4-4" />
+          </svg>
+        </button>
 
-                <div [class.hidden]="!isDropdownOpen"
-                    class="z-10 w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm absolute mt-2">
-                    <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200"
-                        aria-labelledby="dropdownRadioButton">
-                        <li *ngFor="let filter of filters">
-                            <div class="flex items-center p-2 rounded-sm hover:bg-gray-100">
-                                <input id="filter-radio-{{ filter.id }}" type="radio" [value]="filter.id"
-                                    name="filter-radio" (change)="onFilterChange(filter.id)"
-                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
-                                <label [for]="'filter-radio-' + filter.id"
-                                    class="w-full ms-2 text-sm font-medium text-gray-900 rounded-sm">
-                                    {{ filter.label }}
-                                </label>
-                            </div>
-                        </li>
-                    </ul>
+        <div [class.hidden]="!isDropdownOpen"
+          class="z-10 w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm absolute mt-2">
+          <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200"
+            aria-labelledby="dropdownRadioButton">
+            @for (filter of filters; track filter) {
+              <li>
+                <div class="flex items-center p-2 rounded-sm hover:bg-gray-100">
+                  <input id="filter-radio-{{ filter.id }}" type="radio" [value]="filter.id"
+                    name="filter-radio" (change)="onFilterChange(filter.id)"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
+                  <label [for]="'filter-radio-' + filter.id"
+                    class="w-full ms-2 text-sm font-medium text-gray-900 rounded-sm">
+                    {{ filter.label }}
+                  </label>
                 </div>
-                <label for="table-search" class="sr-only">Search</label>
-                <div class="relative mt-2 me-3 ms-3">
-                  <div class="absolute inset-y-0 right-0 rtl:inset-r-0 rtl:right-0 flex items-center ps-3 pointer-events-none me-3">
-                    <i class="fas fa-search text-gray-500"></i>
-                  </div>
-                  <input type="text" id="table-search" [(ngModel)]="searchItem" (keyup)="search($event)"
-                    class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 "
-                    placeholder="Search for patients">
-                </div>
-            </div>
+              </li>
+            }
+          </ul>
         </div>
-        <table class="w-full text-sm text-left rtl:text-right text-gray-500 ">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                <tr>
-                    <th scope="col" class="p-4">
-                        <div class="flex items-center">
-                            <input id="checkbox-all-search" type="checkbox"
-                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500  focus:ring-2 ">
-                            <label for="checkbox-all-search" class="sr-only">checkbox</label>
-                        </div>
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        Patient
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        Email
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        Appointment Time
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        Action
-                    </th>
-                </tr>
-            </thead>
-            <tbody >
-                <tr *ngFor="let book of displayBookings" class="bg-red border-b hover:bg-gray-100 ">
-                    <td class="w-4 p-4 ">
-                        <div class="flex items-center">
-                            <input id="checkbox-table-search-1" type="checkbox"
-                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 ">
-                            <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
-                        </div>
-                    </td>
-                    <th scope="row" class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap ">
-                        <div class="ps-3">
-                            <div class="text-base font-semibold">{{ book.patientName || 'Unknown' }}</div>
-                        </div>
-                    </th>
-                    <td class="px-6 py-4">
-                        {{ book.patientId || 'Unknown' }}
-                    </td>
-                    <td class="px-6 py-4">
-                        {{ book.appointmentTakenDate | date: 'MM/dd/yyyy' }} {{ book.appointmentTakenDate | date:
-                        'shortTime'}}
-                    </td>
-                    <td class="px-6 py-4">
-                        <button type="button" id="deleteButton"  (click)="openDeleteModal(book.appointmentId!)"
-                            data-modal-target="deleteModal" data-modal-toggle="deleteModal"
-                            class="font-medium text-red-600  hover:underline">Cancel
-                            Appointment</button>
-
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="styled-pagination mt-4" *ngIf="pageCount > 1">
-            <ul class="flex gap-2 list-none p-0">
-                <li><a href="javascript:;" (click)="goToPage(currentPage - 1)">Prev</a></li>
-                <li *ngFor="let page of [].constructor(pageCount); let i = index">
-                    <a href="javascript:;" [class.active]="currentPage === i + 1" (click)="goToPage(i + 1)">{{ i + 1 }}</a>
-                </li>
-                <li><a href="javascript:;" (click)="goToPage(currentPage + 1)">Next</a></li>
-            </ul>
+        <label for="table-search" class="sr-only">Search</label>
+        <div class="relative mt-2 me-3 ms-3">
+          <div class="absolute inset-y-0 right-0 rtl:inset-r-0 rtl:right-0 flex items-center ps-3 pointer-events-none me-3">
+            <i class="fas fa-search text-gray-500"></i>
+          </div>
+          <input type="text" id="table-search" [(ngModel)]="searchItem" (keyup)="search($event)"
+            class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 "
+            placeholder="Search for patients">
         </div>
+      </div>
     </div>
+    <table class="w-full text-sm text-left rtl:text-right text-gray-500 ">
+      <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+        <tr>
+          <th scope="col" class="p-4">
+            <div class="flex items-center">
+              <input id="checkbox-all-search" type="checkbox"
+                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500  focus:ring-2 ">
+              <label for="checkbox-all-search" class="sr-only">checkbox</label>
+            </div>
+          </th>
+          <th scope="col" class="px-6 py-3">
+            Patient
+          </th>
+          <th scope="col" class="px-6 py-3">
+            Email
+          </th>
+          <th scope="col" class="px-6 py-3">
+            Appointment Time
+          </th>
+          <th scope="col" class="px-6 py-3">
+            Action
+          </th>
+        </tr>
+      </thead>
+      <tbody >
+        @for (book of displayBookings; track book) {
+          <tr class="bg-red border-b hover:bg-gray-100 ">
+            <td class="w-4 p-4 ">
+              <div class="flex items-center">
+                <input id="checkbox-table-search-1" type="checkbox"
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 ">
+                <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
+              </div>
+            </td>
+            <th scope="row" class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap ">
+              <div class="ps-3">
+                <div class="text-base font-semibold">{{ book.patientName || 'Unknown' }}</div>
+              </div>
+            </th>
+            <td class="px-6 py-4">
+              {{ book.patientId || 'Unknown' }}
+            </td>
+            <td class="px-6 py-4">
+              {{ book.appointmentTakenDate | date: 'MM/dd/yyyy' }} {{ book.appointmentTakenDate | date:
+              'shortTime'}}
+            </td>
+            <td class="px-6 py-4">
+              <button type="button" id="deleteButton"  (click)="openDeleteModal(book.appointmentId!)"
+                data-modal-target="deleteModal" data-modal-toggle="deleteModal"
+                class="font-medium text-red-600  hover:underline">Cancel
+              Appointment</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (pageCount > 1) {
+      <div class="styled-pagination mt-4">
+        <ul class="flex gap-2 list-none p-0">
+          <li><a href="javascript:;" (click)="goToPage(currentPage - 1)">Prev</a></li>
+          @for (page of [].constructor(pageCount); track page; let i = $index) {
+            <li>
+              <a href="javascript:;" [class.active]="currentPage === i + 1" (click)="goToPage(i + 1)">{{ i + 1 }}</a>
+            </li>
+          }
+          <li><a href="javascript:;" (click)="goToPage(currentPage + 1)">Next</a></li>
+        </ul>
+      </div>
+    }
+  </div>
 </div>
 
 <app-delete-modal [itemId]="selectedAppointmentId" (confirm)="deleteAppointment($event)"></app-delete-modal>

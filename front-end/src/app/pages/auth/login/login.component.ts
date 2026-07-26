@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SnakebarService } from '../../../shared/service/SnakebarService.service';
@@ -13,6 +13,7 @@ import { ToastrService } from 'ngx-toastr';
 @Component({
   standalone: false,
   selector: 'app-login',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './login.component.html'
 })
 export class LoginComponent implements OnInit, AfterViewInit{

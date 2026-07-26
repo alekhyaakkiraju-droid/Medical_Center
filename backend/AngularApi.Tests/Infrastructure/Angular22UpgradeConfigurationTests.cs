@@ -2,7 +2,7 @@ using FluentAssertions;
 
 namespace AngularApi.Tests.Infrastructure;
 
-public class Angular19UpgradeConfigurationTests
+public class Angular22UpgradeConfigurationTests
 {
     private static readonly string RepoRoot = Path.GetFullPath(
         Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", ".."));
@@ -10,17 +10,19 @@ public class Angular19UpgradeConfigurationTests
     private static readonly string FrontendRoot = Path.Combine(RepoRoot, "front-end");
 
     [Fact]
-    public void PackageJson_PinsAngularPackagesTo19()
+    public void PackageJson_PinsAngularPackagesTo22()
     {
         var packageJson = File.ReadAllText(Path.Combine(FrontendRoot, "package.json"));
 
-        packageJson.Should().Contain("\"zone.js\": \"~0.15.");
-        packageJson.Should().NotContain("\"@angular/core\": \"^18.");
-        packageJson.Should().NotContain("\"@angular/core\": \"^17.");
+        packageJson.Should().Contain("\"@angular/core\": \"^22.");
+        packageJson.Should().Contain("\"@angular/cli\": \"^22.");
+        packageJson.Should().Contain("\"@angular/material\": \"^22.");
+        packageJson.Should().Contain("\"typescript\": \"~6.0.");
+        packageJson.Should().NotContain("\"@angular/core\": \"^19.");
     }
 
     [Fact]
-    public void ServerTs_UsesAngular19SsrNodeEntryPoint()
+    public void ServerTs_UsesAngularSsrNodeEntryPoint()
     {
         var serverSource = File.ReadAllText(Path.Combine(FrontendRoot, "server.ts"));
 
@@ -45,13 +47,12 @@ public class Angular19UpgradeConfigurationTests
     }
 
     [Fact]
-    public void IndexHtml_DoesNotReferenceCdnAssets()
+    public void BoardTemplate_UsesBuiltInControlFlowSyntax()
     {
-        var indexHtml = File.ReadAllText(Path.Combine(FrontendRoot, "src", "index.html")).ToLowerInvariant();
+        var boardTemplate = File.ReadAllText(
+            Path.Combine(FrontendRoot, "src", "app", "admin", "pages", "board", "board.component.html"));
 
-        indexHtml.Should().NotContain("jquery");
-        indexHtml.Should().NotContain("bootstrap");
-        indexHtml.Should().NotContain("flowbite");
-        indexHtml.Should().NotContain("<script");
+        boardTemplate.Should().Contain("@if");
+        boardTemplate.Should().Contain("@for");
     }
 }

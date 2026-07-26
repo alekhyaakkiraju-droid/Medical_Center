@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
@@ -10,6 +10,7 @@ import { ToastrService } from 'ngx-toastr';
 @Component({
   standalone: false,
   selector: 'app-register',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './register.component.html'
 })
 

@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   standalone: false,
   selector: 'app-gallery',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './gallery.component.html'
 })
 export class GalleryComponent implements OnInit {

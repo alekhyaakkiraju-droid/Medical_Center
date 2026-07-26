@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { DoctorMENU, MENU } from '../../menu';
 
 @Component({
   standalone: false,
   selector: 'app-side-bar',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './side-bar.component.html'
 })
 export class SideBarComponent implements OnInit {
