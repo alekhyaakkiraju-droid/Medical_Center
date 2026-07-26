@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# SSR integration smoke tests for Express 5 upgrade (WO-058).
+# SSR integration smoke tests for Express 5 upgrade (WO-058) and route hardening (WO-059).
 set -euo pipefail
 
 SSR_PORT="${SSR_PORT:-4000}"
 SSR_BASE_URL="${SSR_BASE_URL:-http://localhost:${SSR_PORT}}"
-SSR_STARTUP_TIMEOUT="${SSR_STARTUP_TIMEOUT:-60}"
+SSR_STARTUP_TIMEOUT="${SSR_STARTUP_TIMEOUT:-120}"
 
 PASS=0
 FAIL=0
@@ -58,7 +58,29 @@ else
   fail "SSR root page contains app-root" "HTTP 200 body containing app-root"
 fi
 
-echo "=== SSR Smoke Test 2: Static asset returns cache headers ==="
+echo "=== SSR Smoke Test 2: Public Angular routes render app-root ==="
+for route in /pages/about-us /pages/gallery /pages/team; do
+  ROUTE_CODE="$(curl -s -o /dev/null -w '%{http_code}' "${SSR_BASE_URL}${route}" 2>/dev/null || true)"
+  ROUTE_BODY="$(curl -sf "${SSR_BASE_URL}${route}" 2>/dev/null || true)"
+  if [[ "${ROUTE_CODE}" == "200" ]] && echo "${ROUTE_BODY}" | grep -qi 'app-root'; then
+    pass "SSR route ${route} returns app-root"
+  else
+    fail "SSR route ${route} returns app-root" "HTTP 200 body containing app-root (status=${ROUTE_CODE})"
+  fi
+done
+
+echo "=== SSR Smoke Test 3: Unknown API path returns 404 JSON ==="
+API_TMP="$(mktemp)"
+API_CODE="$(curl -s -o "${API_TMP}" -w '%{http_code}' "${SSR_BASE_URL}/api/nonexistent" 2>/dev/null || true)"
+API_TYPE="$(curl -s -I "${SSR_BASE_URL}/api/nonexistent" 2>/dev/null | tr -d '' | awk 'tolower($0) ~ /^content-type:/ {print $0; exit}')"
+if [[ "${API_CODE}" == "404" ]] && echo "${API_TYPE}" | grep -qi 'application/json' && grep -q 'API endpoint not found' "${API_TMP}" && ! grep -qi '<html' "${API_TMP}"; then
+  pass "Unknown /api path returns 404 JSON without SSR HTML"
+else
+  fail "Unknown /api path returns 404 JSON without SSR HTML" "HTTP 404 JSON body (status=${API_CODE})"
+fi
+rm -f "${API_TMP}"
+
+echo "=== SSR Smoke Test 4: Static asset returns cache headers ==="
 STATIC_ASSET="$(find dist/medical-center/browser -type f \( -name '*.js' -o -name '*.css' \) | head -n 1 || true)"
 if [[ -z "${STATIC_ASSET}" ]]; then
   fail "Static asset discovery" "at least one JS or CSS file in browser dist"

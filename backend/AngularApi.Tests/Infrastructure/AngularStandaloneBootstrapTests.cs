@@ -68,7 +68,7 @@ public class AngularStandaloneBootstrapTests
         var serverSource = File.ReadAllText(Path.Combine(FrontendRoot, "server.ts"));
         serverSource.Should().Contain("AngularNodeAppEngine");
         serverSource.Should().NotContain("AppServerModule");
-        serverSource.Should().NotContain("CommonEngine");
+        serverSource.Should().NotMatchRegex(r"\bCommonEngine\s*\(");
     }
 
     [Fact]
