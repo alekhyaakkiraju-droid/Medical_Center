@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medical-center-yarp
+  labels:
+    app: medical-center-yarp
+    tenant: opsera
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: medical-center-yarp
+  template:
+    metadata:
+      labels:
+        app: medical-center-yarp
+        tenant: opsera
+    spec:
+      containers:
+        - name: yarp
+          image: PLACEHOLDER_YARP_ECR_URI
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30

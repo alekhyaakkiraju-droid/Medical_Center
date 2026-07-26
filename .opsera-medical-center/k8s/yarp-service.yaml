@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: medical-center-yarp
+  labels:
+    app: medical-center-yarp
+    tenant: opsera
+spec:
+  selector:
+    app: medical-center-yarp
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
