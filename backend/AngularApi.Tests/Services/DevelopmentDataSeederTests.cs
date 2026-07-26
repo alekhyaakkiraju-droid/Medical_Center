@@ -47,4 +47,97 @@ public class DevelopmentDataSeederTests
         var count = await context.Specializations.CountAsync();
         count.Should().Be(3);
     }
+
+    [Fact]
+    public async Task SeedAsync_SeedsMedicalCenterWithExpectedFields()
+    {
+        await using var provider = CreateProvider();
+        await DevelopmentDataSeeder.SeedAsync(provider);
+
+        await using var scope = provider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+
+        var center = await context.MedicalCenter.SingleAsync();
+        center.Id.Should().Be(DevelopmentDataSeeder.DefaultMedicalCenterId);
+        center.TimeSlotPerClientInMin.Should().Be(30);
+        center.FirstConsultationFee.Should().Be(50.00m);
+        center.FollowupConsultationFee.Should().Be(30.00m);
+        center.StreetAddress.Should().Be("450 CareShift Medical Plaza");
+        center.City.Should().Be("Springfield");
+        center.State.Should().Be("IL");
+        center.Zip.Should().Be("62701");
+    }
+
+    [Fact]
+    public async Task SeedAsync_SeedsAvailabilitySlotsForDefaultMedicalCenter()
+    {
+        await using var provider = CreateProvider();
+        await DevelopmentDataSeeder.SeedAsync(provider);
+
+        await using var scope = provider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+
+        var availability = await context.MedicalCenterDoctorAvailability
+            .Where(a => a.MedicalCenterId == DevelopmentDataSeeder.DefaultMedicalCenterId)
+            .ToListAsync();
+
+        availability.Should().HaveCount(3);
+        availability.Select(a => a.DayOfWeek).Should().BeEquivalentTo(["Monday", "Wednesday", "Friday"]);
+        availability.Should().OnlyContain(a => a.IsAvailable == true);
+        availability.Should().OnlyContain(a => a.StartTime!.Value.Hour == 9);
+        availability.Should().OnlyContain(a => a.EndTime!.Value.Hour == 17);
+    }
+
+    [Fact]
+    public async Task SeedAsync_SeedsAvailabilityForEachDoctorMedicalCenter()
+    {
+        await using var provider = CreateProvider();
+        await using (var setupScope = provider.CreateAsyncScope())
+        {
+            var setupContext = setupScope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+            setupContext.MedicalCenter.Add(new MedicalCenter
+            {
+                Id = 9,
+                StreetAddress = "900 Doctor Lane",
+                City = "Boston",
+                State = "MA",
+                Zip = "02108"
+            });
+            setupContext.Doctors.Add(new Doctor
+            {
+                Id = "doctor-uat-1",
+                Name = "Dr. UAT",
+                Email = "doctor-uat-1@example.com",
+                MedicalCenterId = 9
+            });
+            await setupContext.SaveChangesAsync();
+        }
+
+        await DevelopmentDataSeeder.SeedAsync(provider);
+
+        await using var scope = provider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+
+        var doctorCenterAvailability = await context.MedicalCenterDoctorAvailability
+            .Where(a => a.MedicalCenterId == 9)
+            .ToListAsync();
+
+        doctorCenterAvailability.Should().HaveCount(3);
+        doctorCenterAvailability.Should().OnlyContain(a => a.IsAvailable == true);
+    }
+
+    [Fact]
+    public async Task SeedAsync_MedicalCenterAndAvailabilityAreIdempotent()
+    {
+        await using var provider = CreateProvider();
+
+        await DevelopmentDataSeeder.SeedAsync(provider);
+        await DevelopmentDataSeeder.SeedAsync(provider);
+
+        await using var scope = provider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+
+        (await context.MedicalCenter.CountAsync()).Should().Be(1);
+        (await context.MedicalCenterDoctorAvailability.CountAsync()).Should().Be(3);
+    }
 }
