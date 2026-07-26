@@ -7,6 +7,10 @@ secrets:
     file: ./secrets/smtp_email_username
   smtp_email_password:
     file: ./secrets/smtp_email_password
+  google_auth_client_id:
+    file: ./secrets/google_auth_client_id
+  google_auth_client_secret:
+    file: ./secrets/google_auth_client_secret
 
 services:
   sqlserver:
@@ -43,13 +47,13 @@ services:
       ConnectionStrings__connection: Server=sqlserver,1433;Database=MedicalCenter;User Id=sa;TrustServerCertificate=True;Encrypt=False
       Jwt__ValidIssuer: ${JWT_VALID_ISSUER}
       Jwt__ValidAudience: ${JWT_VALID_AUDIENCE}
-      GoogleAuth__ClientId: ${GOOGLE_AUTH_CLIENT_ID}
-      GoogleAuth__ClientSecret: ${GOOGLE_AUTH_CLIENT_SECRET}
     secrets:
       - jwt_secret
       - mssql_sa_password
       - smtp_email_username
       - smtp_email_password
+      - google_auth_client_id
+      - google_auth_client_secret
     depends_on:
       sqlserver:
         condition: service_healthy

@@ -28,10 +28,14 @@ public class DockerComposeConfigurationTests
         compose.Should().Contain("mssql_sa_password:");
         compose.Should().Contain("smtp_email_username:");
         compose.Should().Contain("smtp_email_password:");
+        compose.Should().Contain("google_auth_client_id:");
+        compose.Should().Contain("google_auth_client_secret:");
         compose.Should().NotContain("Jwt__Secret: ${JWT_SECRET}");
         compose.Should().NotContain("EmailSettings__EmailUsername: ${SMTP_EMAIL_USERNAME}");
         compose.Should().NotContain("EmailSettings__EmailPassword: ${SMTP_EMAIL_PASSWORD}");
         compose.Should().NotContain("MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}");
+        compose.Should().NotContain("GoogleAuth__ClientId: ${GOOGLE_AUTH_CLIENT_ID}");
+        compose.Should().NotContain("GoogleAuth__ClientSecret: ${GOOGLE_AUTH_CLIENT_SECRET}");
     }
 
     [Fact]
@@ -44,6 +48,8 @@ public class DockerComposeConfigurationTests
         compose.Should().Contain("- mssql_sa_password");
         compose.Should().Contain("- smtp_email_username");
         compose.Should().Contain("- smtp_email_password");
+        compose.Should().Contain("- google_auth_client_id");
+        compose.Should().Contain("- google_auth_client_secret");
     }
 
     [Fact]

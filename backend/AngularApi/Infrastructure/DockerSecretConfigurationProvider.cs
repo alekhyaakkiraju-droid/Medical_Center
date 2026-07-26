@@ -13,6 +13,8 @@ public sealed class DockerSecretConfigurationProvider : ConfigurationProvider
             ["smtp_email_username"] = "EmailSettings:EmailUsername",
             ["smtp_email_password"] = "EmailSettings:EmailPassword",
             ["mssql_sa_password"] = "ConnectionStrings:SaPassword",
+            ["google_auth_client_id"] = "GoogleAuth:ClientId",
+            ["google_auth_client_secret"] = "GoogleAuth:ClientSecret",
         };
 
     internal static readonly IReadOnlyDictionary<string, string> SecretFileEnvironmentMappings =
