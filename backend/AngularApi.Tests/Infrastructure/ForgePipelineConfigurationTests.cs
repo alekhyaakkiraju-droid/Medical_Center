@@ -95,6 +95,46 @@ public class ForgePipelineConfigurationTests
     }
 
     [Fact]
+    public void ForgePipelineFile_IncludesDastScanStepAfterStagingE2eBeforeProductionGate()
+    {
+        var yaml = File.ReadAllText(PipelinePath);
+
+        yaml.Should().Contain("DAST Scan");
+        yaml.Should().Contain("variantId: scan:zap");
+        yaml.Should().Contain(".forge/zap-baseline.conf");
+        yaml.Should().Contain("zap-dast-report.json");
+        yaml.Should().Contain("zap-dast-report.xml");
+        yaml.Should().Contain("timeoutMinutes: 10");
+        yaml.Should().Contain("archiveArtifacts:");
+
+        var dastIndex = yaml.IndexOf("DAST Scan", StringComparison.Ordinal);
+        var e2eIndex = yaml.IndexOf("Staging E2E Tests", StringComparison.Ordinal);
+        var gateIndex = yaml.IndexOf("Production Promotion Gate", StringComparison.Ordinal);
+
+        dastIndex.Should().BeGreaterThan(e2eIndex, because: "DAST must run after staging E2E");
+        dastIndex.Should().BeLessThan(gateIndex, because: "DAST must complete before production promotion");
+
+        var stagingBlockStart = yaml.IndexOf("staging:", StringComparison.Ordinal);
+        var productionBlockStart = yaml.IndexOf("production:", StringComparison.Ordinal);
+        var stagingSteps = yaml[stagingBlockStart..productionBlockStart];
+        stagingSteps.Should().Contain("- DAST Scan");
+    }
+
+    [Fact]
+    public void ZapBaselineConfig_ExistsWithTargetUrlsAndExclusions()
+    {
+        var configPath = Path.Combine(RepoRoot, ".forge", "zap-baseline.conf");
+        File.Exists(configPath).Should().BeTrue(because: "WO-006 requires a committed ZAP baseline configuration");
+
+        var config = File.ReadAllText(configPath);
+        config.Should().Contain("STAGING_BASE_URL");
+        config.Should().Contain("STAGING_API_URL");
+        config.Should().Contain("swagger/v1/swagger.json");
+        config.Should().Contain("IGNORE");
+        config.Should().Contain("#");
+    }
+
+    [Fact]
     public void ForgePipelineFile_DefinesProductionEnvironmentBlock()
     {
         var yaml = File.ReadAllText(PipelinePath);
@@ -141,5 +181,15 @@ public class ForgePipelineConfigurationTests
         runbook.Should().Contain("scripts/smoke-tests.sh");
         runbook.Should().Contain("scripts/run-e2e-smoke.sh");
         runbook.Should().Contain("secrets.example/");
+    }
+
+    [Fact]
+    public void DeploymentRunbook_IncludesDastInPrePromotionChecklist()
+    {
+        var runbook = File.ReadAllText(Path.Combine(RepoRoot, "docs", "deployment-runbook.md"));
+
+        runbook.Should().Contain("DAST Scan");
+        runbook.Should().Contain("zap-dast-report.json");
+        runbook.Should().Contain(".forge/zap-baseline.conf");
     }
 }
