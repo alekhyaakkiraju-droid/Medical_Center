@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medical-center-api
+  labels:
+    app: medical-center-api
+    tenant: opsera
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: medical-center-api
+  template:
+    metadata:
+      labels:
+        app: medical-center-api
+        tenant: opsera
+    spec:
+      containers:
+        - name: api
+          image: PLACEHOLDER_API_ECR_URI
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_URLS
+              value: http://+:8080
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 40
+            periodSeconds: 30

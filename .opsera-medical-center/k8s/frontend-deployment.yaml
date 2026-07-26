@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medical-center-frontend
+  labels:
+    app: medical-center-frontend
+    tenant: opsera
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: medical-center-frontend
+  template:
+    metadata:
+      labels:
+        app: medical-center-frontend
+        tenant: opsera
+    spec:
+      containers:
+        - name: frontend
+          image: PLACEHOLDER_FRONTEND_ECR_URI
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 30
