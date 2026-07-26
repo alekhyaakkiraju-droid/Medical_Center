@@ -1,0 +1,19 @@
+# Staging email override (WO-031): routes outbound API email through the Forge IDP SMTP capture service.
+# Credentials are injected via pipeline secrets — never commit real values.
+#
+# Usage (local validation of staging SMTP wiring):
+#   cp .env.staging.example .env.staging
+#   set -a && source .env.staging && set +a
+#   docker compose -f docker-compose.yml -f docker-compose.staging.yml up --build
+#
+# Production ECS staging deploy uses the same SmtpSettings / EmailSettings keys via
+# .forge/pipeline.yaml Staging Deploy API envVars.
+
+services:
+  api:
+    environment:
+      SmtpSettings__Host: ${IDP_SMTP_HOST}
+      SmtpSettings__Port: ${IDP_SMTP_PORT:-587}
+      SmtpSettings__UseTls: ${IDP_SMTP_USE_TLS:-true}
+      EmailSettings__EmailUsername: ${IDP_SMTP_USERNAME}
+      EmailSettings__EmailPassword: ${IDP_SMTP_PASSWORD}

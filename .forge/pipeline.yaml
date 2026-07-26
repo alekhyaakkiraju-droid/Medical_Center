@@ -47,6 +47,18 @@ variables:
     value: "${ECS_PRODUCTION_YARP_SERVICE:-medical-center-yarp-production}"
   ECS_PRODUCTION_FRONTEND_SERVICE:
     value: "${ECS_PRODUCTION_FRONTEND_SERVICE:-medical-center-frontend-production}"
+  IDP_SMTP_HOST:
+    value: "${IDP_SMTP_HOST}"
+  IDP_SMTP_PORT:
+    value: "${IDP_SMTP_PORT:-587}"
+  IDP_SMTP_USE_TLS:
+    value: "${IDP_SMTP_USE_TLS:-true}"
+  IDP_SMTP_USERNAME:
+    value: "${IDP_SMTP_USERNAME}"
+  IDP_SMTP_PASSWORD:
+    value: "${IDP_SMTP_PASSWORD}"
+  IDP_SMTP_WEB_URL:
+    value: "${IDP_SMTP_WEB_URL}"
 
 steps:
   # --- Security scans (parallel source-level) ---
@@ -189,6 +201,11 @@ steps:
       envVars:
         IMAGE_TAG: "$GIT_SHA"
         IMAGE_NAME: medical-center-api
+        SmtpSettings__Host: "${IDP_SMTP_HOST}"
+        SmtpSettings__Port: "${IDP_SMTP_PORT:-587}"
+        SmtpSettings__UseTls: "${IDP_SMTP_USE_TLS:-true}"
+        EmailSettings__EmailUsername: "${IDP_SMTP_USERNAME}"
+        EmailSettings__EmailPassword: "${IDP_SMTP_PASSWORD}"
 
   - name: Staging Deploy YARP
     variantId: deploy:aws_ecs
@@ -217,6 +234,7 @@ steps:
   - name: Staging Smoke Tests
     variantId: test:generic
     config:
+      # WO-031: passing /health confirms API started with IDP SMTP env vars from Staging Deploy API
       testCommand: SMOKE_BASE_URL="${STAGING_BASE_URL}" SMOKE_API_URL="${STAGING_API_URL}" ./scripts/run-e2e-smoke.sh
 
   - name: Staging E2E Tests
