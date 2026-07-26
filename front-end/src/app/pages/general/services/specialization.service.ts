@@ -3,7 +3,7 @@ import { environment } from '../../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthServiceService } from '../../auth/auth-services/auth-service.service';
-import { PagedResult } from '../../models';
+import { PagedResult, SpecializationListItem } from '../../models';
 
 @Injectable({
   providedIn: 'root'
@@ -20,8 +20,8 @@ export class SpecializationService {
       .set('pageSize', pageSize.toString());
   }
 
-  getSpecializations(page = 1, pageSize = 100): Observable<PagedResult<unknown>> {
-    return this.http.get<PagedResult<unknown>>(
+  getSpecializations(page = 1, pageSize = 100): Observable<PagedResult<SpecializationListItem>> {
+    return this.http.get<PagedResult<SpecializationListItem>>(
       this.apiUrl,
       { ...this.authService.getHttpOptions(), params: this.buildParams(page, pageSize) }
     );

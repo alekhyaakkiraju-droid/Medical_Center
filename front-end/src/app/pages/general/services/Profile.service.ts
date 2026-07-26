@@ -1,9 +1,10 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AuthServiceService } from '../../auth/auth-services/auth-service.service';
 import { HandleErrorsService } from '../../../shared/service/handle-errors.service';
+import { Profile, UserDetailsResponse } from '../../models';
 
 @Injectable({
   providedIn: 'root'
@@ -19,16 +20,16 @@ export class ProfileService {
               private authService :AuthServiceService ,
               private handeErrorService :HandleErrorsService) {}
 
-  getProfileDetails2(): Observable<any> {
-    return this.http.get<any>(this.apiGetUrl, this.authService.getHttpOptions());
+  getProfileDetails2(): Observable<UserDetailsResponse> {
+    return this.http.get<UserDetailsResponse>(this.apiGetUrl, this.authService.getHttpOptions());
   }
 
-  updateProfileDetails(profile: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUpdateUrl}`, profile, {
+  updateProfileDetails(profile: Profile): Observable<string> {
+    return this.http.put<string>(`${this.apiUpdateUrl}`, profile, {
       ...this.authService.getHttpOptions(),
       responseType: 'text' as 'json'
     }).pipe(
-      catchError(this.handeErrorService.handleError)
+      catchError((error: HttpErrorResponse) => this.handeErrorService.handleError(error))
       
     );
   }

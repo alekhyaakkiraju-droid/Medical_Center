@@ -47,7 +47,7 @@ export class PatientsComponent implements OnInit , OnDestroy{
   fetchPatientReviews(): void {
    this.patientSubscription= this.patientService.getAllPatient().subscribe({
       next: (data) => {
-        this.patientData = data;
+        this.patientData = data.items ?? [];
         console.log("Patient retrieved successfully ", this.patientData)
       },
       error: (error) => {

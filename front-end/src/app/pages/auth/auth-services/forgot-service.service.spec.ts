@@ -1,17 +1,25 @@
-/* tslint:disable:no-unused-variable */
-
-import { TestBed,  inject } from '@angular/core/testing';
+import { TestBed, inject } from '@angular/core/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { AuthServiceService } from './auth-service.service';
+import { environment } from '../../../../environments/environment';
 import { ForgotServiceService } from './forgot-service.service';
-import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
+import { HandleErrorsService } from '../../../shared/service/handle-errors.service';
 
-describe('Service: ForgotService', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [...standaloneComponentTestProviders, ForgotServiceService]
-    });
-  });
-
-  it('should ...', inject([ForgotServiceService], (service: ForgotServiceService) => {
-    expect(service).toBeTruthy();
+describe('ForgotServiceService', () => {
+  let httpMock: HttpTestingController;
+  beforeEach(() => { TestBed.configureTestingModule({ providers: [ForgotServiceService, HandleErrorsService,         {
+          provide: AuthServiceService,
+          useValue: {
+            getHttpOptions: () => ({
+              headers: { 'Content-Type': 'application/json' },
+              withCredentials: true
+            })
+          }
+        }, provideHttpClient(), provideHttpClientTesting()] }); httpMock = TestBed.inject(HttpTestingController); });
+  afterEach(() => httpMock.verify());
+  it('forgetPassword returns typed auth message response', inject([ForgotServiceService], (service: ForgotServiceService) => {
+    service.forgetPassword('user@example.com').subscribe((result) => { expect(result.message).toContain('reset link'); });
+    httpMock.expectOne(`${environment.api}/Account/forgot-password`).flush({ status: 'Success', message: 'Password reset link sent.' });
   }));
 });
