@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medical-center-mailhog
+  namespace: opsera-medical-center-dev
+  labels:
+    app: medical-center-mailhog
+    tenant: opsera
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: medical-center-mailhog
+  template:
+    metadata:
+      labels:
+        app: medical-center-mailhog
+        tenant: opsera
+    spec:
+      containers:
+        - name: mailhog
+          image: mailhog/mailhog:latest
+          ports:
+            - containerPort: 1025
+              name: smtp
+            - containerPort: 8025
+              name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: medical-center-mailhog
+  namespace: opsera-medical-center-dev
+  labels:
+    app: medical-center-mailhog
+    tenant: opsera
+spec:
+  selector:
+    app: medical-center-mailhog
+  ports:
+    - name: smtp
+      port: 1025
+      targetPort: 1025
+    - name: http
+      port: 8025
+      targetPort: 8025

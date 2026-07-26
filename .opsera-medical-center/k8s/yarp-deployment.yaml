@@ -21,6 +21,11 @@ spec:
           image: PLACEHOLDER_YARP_ECR_URI
           ports:
             - containerPort: 8080
+          volumeMounts:
+            - name: yarp-config
+              mountPath: /app/appsettings.json
+              subPath: appsettings.json
+              readOnly: true
           readinessProbe:
             httpGet:
               path: /health
@@ -33,3 +38,7 @@ spec:
               port: 8080
             initialDelaySeconds: 30
             periodSeconds: 30
+      volumes:
+        - name: yarp-config
+          configMap:
+            name: medical-center-yarp-config

@@ -16,6 +16,13 @@ spec:
         app: medical-center-api
         tenant: opsera
     spec:
+      initContainers:
+        - name: wait-for-sql
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - until nc -z medical-center-sqlserver 1433; do echo waiting for sqlserver; sleep 3; done
       containers:
         - name: api
           image: PLACEHOLDER_API_ECR_URI
@@ -26,6 +33,50 @@ spec:
               value: http://+:8080
             - name: ASPNETCORE_ENVIRONMENT
               value: Development
+            - name: ConnectionStrings__connection
+              valueFrom:
+                secretKeyRef:
+                  name: medical-center-app-secrets
+                  key: connection-string
+            - name: Jwt__Secret
+              valueFrom:
+                secretKeyRef:
+                  name: medical-center-app-secrets
+                  key: jwt-secret
+            - name: Jwt__ValidIssuer
+              value: medical-center-dev
+            - name: Jwt__ValidAudience
+              value: medical-center-dev
+            - name: Jwt__FrontendBaseUrl
+              value: https://medical-center-yarp-dev.agent.opsera.dev
+            - name: CorsSettings__AllowedOrigins__0
+              value: https://medical-center-yarp-dev.agent.opsera.dev
+            - name: SmtpSettings__Host
+              value: medical-center-mailhog
+            - name: SmtpSettings__Port
+              value: "1025"
+            - name: SmtpSettings__UseTls
+              value: "false"
+            - name: EmailSettings__EmailUsername
+              valueFrom:
+                secretKeyRef:
+                  name: medical-center-app-secrets
+                  key: smtp-email-username
+            - name: EmailSettings__EmailPassword
+              valueFrom:
+                secretKeyRef:
+                  name: medical-center-app-secrets
+                  key: smtp-email-password
+            - name: GoogleAuth__ClientId
+              valueFrom:
+                secretKeyRef:
+                  name: medical-center-app-secrets
+                  key: google-auth-client-id
+            - name: GoogleAuth__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: medical-center-app-secrets
+                  key: google-auth-client-secret
           readinessProbe:
             httpGet:
               path: /health
