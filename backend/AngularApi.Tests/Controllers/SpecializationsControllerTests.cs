@@ -1,6 +1,7 @@
 ﻿using AngularApi.Controllers;
 using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Services.impelementation;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +21,8 @@ namespace AngularApi.Tests.Controllers
                 .Options;
             _context = new MedicalCenterDbContext(options);
 
-            _controller = new SpecializationsController(_context);
+            var specializationService = new SpecializationService(_context);
+            _controller = new SpecializationsController(specializationService);
 
             _controller.ControllerContext = new ControllerContext
             {
