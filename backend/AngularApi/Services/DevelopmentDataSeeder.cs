@@ -25,6 +25,17 @@ public static class DevelopmentDataSeeder
 
     private static readonly string[] AvailabilityDays = ["Monday", "Wednesday", "Friday"];
 
+    /// <summary>
+    /// Canonical reference statuses. Ids match <see cref="AppointmentStatusEnum"/> values
+    /// so services can assign <c>AppointmentStatusId = (int)AppointmentStatusEnum.*</c>.
+    /// </summary>
+    internal static readonly (int Id, AppointmentStatusEnum Status)[] CanonicalAppointmentStatuses =
+    [
+        ((int)AppointmentStatusEnum.Active, AppointmentStatusEnum.Active),
+        ((int)AppointmentStatusEnum.Complete, AppointmentStatusEnum.Complete),
+        ((int)AppointmentStatusEnum.Canceled, AppointmentStatusEnum.Canceled),
+    ];
+
     public static async Task SeedAsync(IServiceProvider services)
     {
         using var scope = services.CreateScope();
@@ -99,24 +110,24 @@ public static class DevelopmentDataSeeder
 
     private static async Task SeedAppointmentStatusesAsync(MedicalCenterDbContext context)
     {
-        var expectedStatuses = new[]
-        {
-            AppointmentStatusEnum.Active,
-            AppointmentStatusEnum.Complete,
-            AppointmentStatusEnum.Canceled
-        };
+        var toInsert = new List<AppointmentStatus>();
 
-        foreach (var status in expectedStatuses)
+        foreach (var (id, status) in CanonicalAppointmentStatuses)
         {
             if (await context.AppointmentStatus.AnyAsync(s => s.Status == status))
             {
                 continue;
             }
 
-            context.AppointmentStatus.Add(new AppointmentStatus { Status = status });
+            toInsert.Add(new AppointmentStatus { Id = id, Status = status });
         }
 
-        await context.SaveChangesAsync();
+        if (toInsert.Count == 0)
+        {
+            return;
+        }
+
+        await InsertAppointmentStatusesAsync(context, toInsert);
     }
 
     internal static async Task<int> SeedMedicalCentersAsync(MedicalCenterDbContext context)
@@ -383,7 +394,6 @@ public static class DevelopmentDataSeeder
             return;
         }
 
-        var statuses = await context.AppointmentStatus.ToDictionaryAsync(s => s.Status!.Value, s => s.Id);
         var today = DateTime.UtcNow.Date;
         const decimal defaultFee = 30.00m;
 
@@ -403,7 +413,7 @@ public static class DevelopmentDataSeeder
                 Name = patientOne.Name,
                 Email = patientOne.Email,
                 Phone = "555-0101",
-                AppointmentStatusId = statuses[AppointmentStatusEnum.Active],
+                AppointmentStatusId = (int)AppointmentStatusEnum.Active,
                 AppointmentTakenDate = today,
                 ProbableStartTime = today.AddHours(10),
                 Amount = defaultFee,
@@ -418,7 +428,7 @@ public static class DevelopmentDataSeeder
                 Name = patientTwo.Name,
                 Email = patientTwo.Email,
                 Phone = "555-0102",
-                AppointmentStatusId = statuses[AppointmentStatusEnum.Complete],
+                AppointmentStatusId = (int)AppointmentStatusEnum.Complete,
                 AppointmentTakenDate = today.AddDays(-1),
                 ProbableStartTime = today.AddDays(-1).AddHours(14),
                 ActualEndTime = today.AddDays(-1).AddHours(14).AddMinutes(30),
@@ -434,7 +444,7 @@ public static class DevelopmentDataSeeder
                 Name = patientOne.Name,
                 Email = patientOne.Email,
                 Phone = "555-0103",
-                AppointmentStatusId = statuses[AppointmentStatusEnum.Canceled],
+                AppointmentStatusId = (int)AppointmentStatusEnum.Canceled,
                 AppointmentTakenDate = today.AddDays(-2),
                 ProbableStartTime = today.AddDays(-2).AddHours(9),
                 Amount = defaultFee,
@@ -449,7 +459,7 @@ public static class DevelopmentDataSeeder
                 Name = patientTwo.Name,
                 Email = patientTwo.Email,
                 Phone = "555-0104",
-                AppointmentStatusId = statuses[AppointmentStatusEnum.Active],
+                AppointmentStatusId = (int)AppointmentStatusEnum.Active,
                 AppointmentTakenDate = today.AddDays(-7),
                 ProbableStartTime = today.AddDays(-7).AddHours(11),
                 Amount = defaultFee,
@@ -464,7 +474,7 @@ public static class DevelopmentDataSeeder
                 Name = patientOne.Name,
                 Email = patientOne.Email,
                 Phone = "555-0105",
-                AppointmentStatusId = statuses[AppointmentStatusEnum.Complete],
+                AppointmentStatusId = (int)AppointmentStatusEnum.Complete,
                 AppointmentTakenDate = today.AddDays(-14),
                 ProbableStartTime = today.AddDays(-14).AddHours(16),
                 ActualEndTime = today.AddDays(-14).AddHours(16).AddMinutes(45),
@@ -486,6 +496,38 @@ public static class DevelopmentDataSeeder
             EndTime = DateTime.Today.AddHours(17),
             IsAvailable = true
         };
+
+    private static async Task InsertAppointmentStatusesAsync(
+        MedicalCenterDbContext context,
+        IReadOnlyList<AppointmentStatus> statuses)
+    {
+        if (context.Database.IsSqlServer())
+        {
+            await context.Database.OpenConnectionAsync();
+            try
+            {
+                await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [AppointmentStatus] ON");
+                context.AppointmentStatus.AddRange(statuses);
+                await context.SaveChangesAsync();
+            }
+            finally
+            {
+                await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [AppointmentStatus] OFF");
+                await context.Database.CloseConnectionAsync();
+            }
+
+            return;
+        }
+
+        foreach (var status in statuses)
+        {
+            var entity = new AppointmentStatus { Status = status.Status };
+            var entry = context.AppointmentStatus.Add(entity);
+            entry.Property(s => s.Id).CurrentValue = status.Id;
+            entry.Property(s => s.Id).IsTemporary = false;
+            await context.SaveChangesAsync();
+        }
+    }
 
     private static async Task InsertMedicalCenterAsync(MedicalCenterDbContext context, MedicalCenter center)
     {
