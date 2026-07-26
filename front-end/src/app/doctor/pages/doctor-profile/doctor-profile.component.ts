@@ -5,6 +5,7 @@ import { ReloadService } from '../../../shared/service/reload.service';
 import { Subscription } from 'rxjs';
 
 @Component({
+  standalone: false,
   selector: 'app-doctor-profile',
   templateUrl: './doctor-profile.component.html'
 })

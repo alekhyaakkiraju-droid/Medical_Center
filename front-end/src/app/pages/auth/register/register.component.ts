@@ -8,6 +8,7 @@ import { ReloadService } from '../../../shared/service/reload.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
+  standalone: false,
   selector: 'app-register',
   templateUrl: './register.component.html'
 })

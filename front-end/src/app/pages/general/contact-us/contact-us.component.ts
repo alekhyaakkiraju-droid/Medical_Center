@@ -7,6 +7,7 @@ import { AuthServiceService } from '../../auth/auth-services/auth-service.servic
 import { ContactInquiryDTO, ContactService } from '../services/contact.service';
 
 @Component({
+  standalone: false,
   selector: 'app-contact-us',
   templateUrl: './contact-us.component.html',
   styleUrls: ['./contact-us.component.css']

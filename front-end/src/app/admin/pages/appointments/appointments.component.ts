@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { MENU } from '../../menu';
 
 @Component({
+  standalone: false,
   selector: 'app-appointments',
   templateUrl: './appointments.component.html'
 })

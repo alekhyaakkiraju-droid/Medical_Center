@@ -2,6 +2,7 @@ import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { ReloadService } from '../../../shared/service/reload.service';
 
 @Component({
+  standalone: false,
   selector: 'app-request-appointment',
   templateUrl: './request-appointment.component.html',
   styleUrls: ['./request-appointment.component.css']
