@@ -6,6 +6,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace AngularApi.Tests.Controllers;
 
@@ -19,7 +20,8 @@ public class MedicalCentersControllerTests : IDisposable
         var options = new DbContextOptionsBuilder<MedicalCenterDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
         _context = new MedicalCenterDbContext(options);
-        _controller = new MedicalCentersController(new MedicalCenterService(_context));
+        _controller = new MedicalCentersController(
+            new MedicalCenterService(_context, new OwnershipValidator(), NullLogger<MedicalCenterService>.Instance));
         _controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
     }
 

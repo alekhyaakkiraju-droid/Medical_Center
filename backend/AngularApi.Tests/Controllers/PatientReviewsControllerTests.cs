@@ -1,4 +1,4 @@
-using AngularApi.Controllers;
+﻿using AngularApi.Controllers;
 using AngularApi.DTO;
 using AngularApi.Models;
 using AngularApi.Services.impelementation;
@@ -6,6 +6,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Security.Claims;
 
 namespace AngularApi.Tests.Controllers;
@@ -18,7 +19,8 @@ public class PatientReviewsControllerTests : IDisposable
     public PatientReviewsControllerTests()
     {
         _context = new MedicalCenterDbContext(new DbContextOptionsBuilder<MedicalCenterDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
-        _controller = new PatientReviewsController(new PatientReviewService(_context, new OwnershipValidator()));
+        _controller = new PatientReviewsController(
+            new PatientReviewService(_context, new OwnershipValidator(), NullLogger<PatientReviewService>.Instance));
         _controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, "patient1"), new Claim(ClaimTypes.Role, "admin") }, "TestAuth")) } };
     }
 
