@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SSR integration smoke tests for Express 5 upgrade (WO-058) and route hardening (WO-059).
+# SSR integration smoke tests for Express 5 upgrade (WO-058) and route hardening (WO-059), and Angular 22 SSR (WO-060).
 set -euo pipefail
 
 SSR_PORT="${SSR_PORT:-4000}"
@@ -58,8 +58,8 @@ else
   fail "SSR root page contains app-root" "HTTP 200 body containing app-root"
 fi
 
-echo "=== SSR Smoke Test 2: Public Angular routes render app-root ==="
-for route in /pages/about-us /pages/gallery /pages/team; do
+echo "=== WO-060 SSR Smoke Test 2: Public Angular routes render app-root ==="
+for route in /pages/about-us /pages/service /pages/gallery /pages/blog /pages/contact /pages/team /pages/appointment; do
   ROUTE_CODE="$(curl -s -o /dev/null -w '%{http_code}' "${SSR_BASE_URL}${route}" 2>/dev/null || true)"
   ROUTE_BODY="$(curl -sf "${SSR_BASE_URL}${route}" 2>/dev/null || true)"
   if [[ "${ROUTE_CODE}" == "200" ]] && echo "${ROUTE_BODY}" | grep -qi 'app-root'; then
