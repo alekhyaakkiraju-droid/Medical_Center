@@ -16,7 +16,7 @@ variables:
   REPO_FULL_NAME:
     value: alekhyaakkiraju-droid/Medical_Center
   DOTNET_VERSION:
-    value: "8.0"
+    value: "10.0"
   NODE_VERSION:
     value: "22"
   CONTAINER_REGISTRY_URL:
@@ -87,7 +87,7 @@ steps:
     config:
       repoFullName: alekhyaakkiraju-droid/Medical_Center
       branch: main
-      dotnetVersion: "8.0"
+      dotnetVersion: "10.0"
       buildCommand: dotnet build backend/AngularApi/AngularApi.csproj -c Release
 
   - name: Frontend Build
