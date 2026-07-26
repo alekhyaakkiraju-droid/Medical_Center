@@ -1,3 +1,4 @@
+import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,10 +7,10 @@ import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
 
 @Component({
-  standalone: false,
-  selector: 'app-confirm-email',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './confirm-email.component.html'
+    selector: 'app-confirm-email',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './confirm-email.component.html',
+    imports: [RouterLink],
 })
 export class ConfirmEmailComponent implements OnInit, OnDestroy {
 

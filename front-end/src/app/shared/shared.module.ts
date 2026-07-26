@@ -9,24 +9,22 @@ import { AuthModule } from '../pages/auth/auth.module';
 import { AssetUrlPipe } from './asset-url.pipe';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    RouterModule,
-    AuthModule,
-  ],
-  declarations: [
-    DeleteModalComponent,
-    PaymentComponent,
-    SideBarComponent,
-    AssetUrlPipe,
-  ],
-  exports: [
-    DeleteModalComponent,
-    PaymentComponent,
-    SideBarComponent,
-    AssetUrlPipe,
-  ],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        RouterModule,
+        AuthModule,
+        DeleteModalComponent,
+        PaymentComponent,
+        SideBarComponent,
+        AssetUrlPipe,
+    ],
+    exports: [
+        DeleteModalComponent,
+        PaymentComponent,
+        SideBarComponent,
+        AssetUrlPipe,
+    ],
 })
 export class SharedModule { }

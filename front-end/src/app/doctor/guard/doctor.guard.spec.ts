@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { DoctorGuard } from './doctor.guard';
 import { AuthServiceService } from '../../pages/auth/auth-services/auth-service.service';
+import { standaloneComponentTestProviders } from '../../testing/standalone-component-test-providers';
 
 describe('DoctorGuard', () => {
   let guard: DoctorGuard;
@@ -15,7 +16,7 @@ describe('DoctorGuard', () => {
     router = jasmine.createSpyObj('Router', ['navigate']);
 
     TestBed.configureTestingModule({
-      providers: [
+      providers: [...standaloneComponentTestProviders, 
         DoctorGuard,
         { provide: AuthServiceService, useValue: authService },
         { provide: Router, useValue: router },

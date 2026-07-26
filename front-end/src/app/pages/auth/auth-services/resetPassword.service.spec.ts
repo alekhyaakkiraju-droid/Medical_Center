@@ -2,11 +2,12 @@
 
 import { TestBed, waitForAsync, inject } from '@angular/core/testing';
 import { ResetPasswordService } from './resetPassword.service';
+import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
 
 describe('Service: ResetPassword', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ResetPasswordService]
+      providers: [...standaloneComponentTestProviders, ResetPasswordService]
     });
   });
 

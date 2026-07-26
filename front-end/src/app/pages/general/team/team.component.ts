@@ -4,13 +4,16 @@ import { Doctor } from '../../models';
 import { ReloadService } from '../../../shared/service/reload.service';
 import { TEAM_TABS } from '../../models/teamTabs ';
 import { Subscription } from 'rxjs';
+import { RouterLink } from '@angular/router';
+import { TitleCasePipe } from '@angular/common';
+import { AssetUrlPipe } from '../../../shared/asset-url.pipe';
 
 @Component({
-  standalone: false,
-  selector: 'app-team',
-  templateUrl: './team.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrls: ['./team.component.css']
+    selector: 'app-team',
+    templateUrl: './team.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrls: ['./team.component.css'],
+    imports: [RouterLink, TitleCasePipe, AssetUrlPipe]
 })
 
 export class TeamComponent implements OnInit, OnDestroy {

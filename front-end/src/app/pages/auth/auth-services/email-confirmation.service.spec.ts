@@ -2,11 +2,12 @@
 
 import { TestBed, waitForAsync, inject } from '@angular/core/testing';
 import { EmailConfirmationService } from './email-confirmation.service';
+import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
 
 describe('Service: EmailConfirmation', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [EmailConfirmationService]
+      providers: [...standaloneComponentTestProviders, EmailConfirmationService]
     });
   });
 

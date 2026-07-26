@@ -1,5 +1,6 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ReloadService } from './reload.service';
+import { standaloneComponentTestProviders } from '../../testing/standalone-component-test-providers';
 
 describe('ReloadService', () => {
   let service: ReloadService;
@@ -10,7 +11,7 @@ describe('ReloadService', () => {
     document.body.appendChild(container);
 
     TestBed.configureTestingModule({
-      providers: [ReloadService]
+      providers: [...standaloneComponentTestProviders, ReloadService]
     });
     service = TestBed.inject(ReloadService);
   });

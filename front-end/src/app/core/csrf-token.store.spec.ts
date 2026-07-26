@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { CsrfTokenStore } from './csrf-token.store';
+import { standaloneComponentTestProviders } from '../testing/standalone-component-test-providers';
 
 describe('CsrfTokenStore', () => {
   let store: CsrfTokenStore;

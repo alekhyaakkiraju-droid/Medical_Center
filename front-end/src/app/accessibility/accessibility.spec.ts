@@ -21,21 +21,30 @@ import { AppointmentService } from '../pages/general/services/appointment.servic
 import { PatientService } from '../admin/services/patient.service';
 import { TotalEarningsService } from '../admin/services/total-earnings.service';
 import { expectNoA11yViolations } from './axe-test.helper';
+import { standaloneComponentTestProviders } from '../testing/standalone-component-test-providers';
 
-@Component({ selector: 'app-forgetPassword', template: '', changeDetection: ChangeDetectionStrategy.Eager,
- standalone: false })
+@Component({
+    selector: 'app-forgetPassword', template: '', changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [ReactiveFormsModule, FormsModule, CommonModule]
+})
 class ForgetPasswordStubComponent {}
 
-@Component({ selector: 'app-side-bar', template: '', changeDetection: ChangeDetectionStrategy.Eager,
- standalone: false })
+@Component({
+    selector: 'app-side-bar', template: '', changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [ReactiveFormsModule, FormsModule, CommonModule]
+})
 class SideBarStubComponent {}
 
-@Component({ selector: 'app-chart', template: '', changeDetection: ChangeDetectionStrategy.Eager,
- standalone: false })
+@Component({
+    selector: 'app-chart', template: '', changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [ReactiveFormsModule, FormsModule, CommonModule]
+})
 class ChartStubComponent {}
 
-@Component({ selector: 'app-delete-modal', template: '', changeDetection: ChangeDetectionStrategy.Eager,
- standalone: false })
+@Component({
+    selector: 'app-delete-modal', template: '', changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [ReactiveFormsModule, FormsModule, CommonModule]
+})
 class DeleteModalStubComponent {}
 
 describe('WCAG 2.1 AA accessibility', () => {
@@ -48,18 +57,17 @@ describe('WCAG 2.1 AA accessibility', () => {
 
     beforeEach(async () => {
       await TestBed.configureTestingModule({
-        declarations: [LoginComponent, ForgetPasswordStubComponent],
-        imports: [ReactiveFormsModule, FormsModule, CommonModule],
-        providers: [
-          { provide: Router, useValue: routerStub },
-          { provide: ToastrService, useValue: toastrStub },
-          { provide: ReloadService, useValue: reloadStub },
-          { provide: AuthServiceService, useValue: jasmine.createSpyObj('AuthServiceService', ['login', 'isRole', 'getUsernameFromToken']) },
-          { provide: ForgotServiceService, useValue: jasmine.createSpyObj('ForgotServiceService', ['forgetPassword']) },
-          { provide: ResetPasswordService, useValue: {} },
-          { provide: ModelService, useValue: { dialogState$: of(false), openDialog: () => {}, closeDialog: () => {} } },
-        ],
-      }).compileComponents();
+    imports: [ReactiveFormsModule, FormsModule, CommonModule, LoginComponent, ForgetPasswordStubComponent],
+    providers: [...standaloneComponentTestProviders, 
+        { provide: Router, useValue: routerStub },
+        { provide: ToastrService, useValue: toastrStub },
+        { provide: ReloadService, useValue: reloadStub },
+        { provide: AuthServiceService, useValue: jasmine.createSpyObj('AuthServiceService', ['login', 'isRole', 'getUsernameFromToken']) },
+        { provide: ForgotServiceService, useValue: jasmine.createSpyObj('ForgotServiceService', ['forgetPassword']) },
+        { provide: ResetPasswordService, useValue: {} },
+        { provide: ModelService, useValue: { dialogState$: of(false), openDialog: () => { }, closeDialog: () => { } } },
+    ],
+}).compileComponents();
 
       fixture = TestBed.createComponent(LoginComponent);
       fixture.detectChanges();
@@ -82,15 +90,14 @@ describe('WCAG 2.1 AA accessibility', () => {
 
     beforeEach(async () => {
       await TestBed.configureTestingModule({
-        declarations: [RegisterComponent],
-        imports: [ReactiveFormsModule, FormsModule, CommonModule],
-        providers: [
-          { provide: Router, useValue: routerStub },
-          { provide: ToastrService, useValue: toastrStub },
-          { provide: ReloadService, useValue: reloadStub },
-          { provide: AuthServiceService, useValue: jasmine.createSpyObj('AuthServiceService', ['register']) },
-        ],
-      }).compileComponents();
+    imports: [ReactiveFormsModule, FormsModule, CommonModule, RegisterComponent],
+    providers: [...standaloneComponentTestProviders, 
+        { provide: Router, useValue: routerStub },
+        { provide: ToastrService, useValue: toastrStub },
+        { provide: ReloadService, useValue: reloadStub },
+        { provide: AuthServiceService, useValue: jasmine.createSpyObj('AuthServiceService', ['register']) },
+    ],
+}).compileComponents();
 
       fixture = TestBed.createComponent(RegisterComponent);
       fixture.detectChanges();
@@ -113,17 +120,16 @@ describe('WCAG 2.1 AA accessibility', () => {
 
     beforeEach(async () => {
       await TestBed.configureTestingModule({
-        declarations: [AppointmentRequestComponent],
-        imports: [ReactiveFormsModule, FormsModule, CommonModule],
-        providers: [
-          { provide: Router, useValue: routerStub },
-          { provide: ToastrService, useValue: toastrStub },
-          { provide: AuthServiceService, useValue: { getloggedStatus: () => of(true) } },
-          { provide: SpecializationService, useValue: { getSpecializations: () => of({ items: [] }) } },
-          { provide: DoctorService, useValue: { getAllDoctors: () => of({ items: [] }) } },
-          { provide: AppointmentService, useValue: jasmine.createSpyObj('AppointmentService', ['postAppointment', 'getUserAppointments', 'deleteBookingById']) },
-        ],
-      }).compileComponents();
+    imports: [ReactiveFormsModule, FormsModule, CommonModule, AppointmentRequestComponent],
+    providers: [...standaloneComponentTestProviders, 
+        { provide: Router, useValue: routerStub },
+        { provide: ToastrService, useValue: toastrStub },
+        { provide: AuthServiceService, useValue: { getloggedStatus: () => of(true) } },
+        { provide: SpecializationService, useValue: { getSpecializations: () => of({ items: [] }) } },
+        { provide: DoctorService, useValue: { getAllDoctors: () => of({ items: [] }) } },
+        { provide: AppointmentService, useValue: jasmine.createSpyObj('AppointmentService', ['postAppointment', 'getUserAppointments', 'deleteBookingById']) },
+    ],
+}).compileComponents();
 
       fixture = TestBed.createComponent(AppointmentRequestComponent);
       fixture.detectChanges();
@@ -154,22 +160,22 @@ describe('WCAG 2.1 AA accessibility', () => {
 
     beforeEach(async () => {
       await TestBed.configureTestingModule({
-        declarations: [BoardComponent, SideBarStubComponent, ChartStubComponent, DeleteModalStubComponent],
-        imports: [ReactiveFormsModule, FormsModule, CommonModule],
-        schemas: [NO_ERRORS_SCHEMA],
-        providers: [
-          { provide: ReloadService, useValue: reloadStub },
-          { provide: ToastrService, useValue: toastrStub },
-          { provide: AppointmentService, useValue: {
-            getAppointments: () => of({ items: [], currentPage: 1, pageCount: 0, totalCount: 0 }),
-            deleteBookingById: () => of({}),
-            editeBooking: () => of({}),
-          }},
-          { provide: DoctorService, useValue: { getAllDoctors: () => of({ items: [], totalCount: 0 }) } },
-          { provide: PatientService, useValue: { getAllPatient: () => of([]) } },
-          { provide: TotalEarningsService, useValue: { getTotalEarnings: () => of({ totalEarnings: 12500 }) } },
-        ],
-      }).compileComponents();
+    imports: [ReactiveFormsModule, FormsModule, CommonModule, BoardComponent, SideBarStubComponent, ChartStubComponent, DeleteModalStubComponent],
+    schemas: [NO_ERRORS_SCHEMA],
+    providers: [...standaloneComponentTestProviders, 
+        { provide: ReloadService, useValue: reloadStub },
+        { provide: ToastrService, useValue: toastrStub },
+        { provide: AppointmentService, useValue: {
+                getAppointments: () => of({ items: [], currentPage: 1, pageCount: 0, totalCount: 0 }),
+                deleteBookingById: () => of({}),
+                editeBooking: () => of({}),
+            } },
+        { provide: DoctorService, useValue: { getAllDoctors: () => of({ items: [], totalCount: 0 }) } },
+        { provide: PatientService, useValue: { getAllPatient: () => of([]) } },
+        { provide: TotalEarningsService, useValue: { getTotalEarnings: () => of({ totalEarnings: 12500 }) } },
+        { provide: AuthServiceService, useValue: jasmine.createSpyObj('AuthServiceService', ['isRole', 'getUsernameFromToken', 'getloggedStatus']) },
+    ],
+}).compileComponents();
 
       fixture = TestBed.createComponent(BoardComponent);
       fixture.detectChanges();

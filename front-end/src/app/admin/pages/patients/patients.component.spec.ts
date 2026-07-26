@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
 import { PatientsComponent } from './patients.component';
+import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
 
 describe('PatientsComponent', () => {
   let component: PatientsComponent;
@@ -11,8 +12,9 @@ describe('PatientsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ PatientsComponent ]
-    })
+    imports: [PatientsComponent],
+    providers: standaloneComponentTestProviders,
+})
     .compileComponents();
   }));
 

@@ -1,17 +1,19 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Subject, Subscription, switchMap, takeUntil } from 'rxjs';
 import { AuthServiceService } from '../../auth/auth-services/auth-service.service';
 import { ContactInquiryDTO, ContactService } from '../services/contact.service';
+import { RouterLink } from '@angular/router';
+import { NgClass } from '@angular/common';
 
 @Component({
-  standalone: false,
-  selector: 'app-contact-us',
-  templateUrl: './contact-us.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrls: ['./contact-us.component.css']
+    selector: 'app-contact-us',
+    templateUrl: './contact-us.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrls: ['./contact-us.component.css'],
+    imports: [RouterLink, ReactiveFormsModule, NgClass]
 })
 export class ContactUsComponent implements OnInit, OnDestroy {
   contactForm!: FormGroup;

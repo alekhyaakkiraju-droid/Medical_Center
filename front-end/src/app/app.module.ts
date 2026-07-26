@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule, provideClientHydration, withNoIncrementalHydration } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { ErrorPageComponent } from './pages/general/errorPage/errorPage.component';
 import { FooterComponent } from './layout/footer/footer.component';
 import { HeaderComponent } from './layout/header/header.component';
 import { RouterModule } from '@angular/router';
@@ -15,36 +16,35 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { provideToastr, ToastrModule } from 'ngx-toastr';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    FooterComponent,
-    HeaderComponent
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    RouterModule ,
-    AuthModule,
-    GeneralModule,
-    BrowserModule,
-    FormsModule,
-    HttpClientModule,
-    BrowserAnimationsModule,      
-    ToastrModule.forRoot({
-      positionClass: 'toast-bottom-left',  
-      preventDuplicates: true,          
-      closeButton: true,                
-      timeOut: 5000,                    
-      progressBar: true                    
-    }),
-  ],
-  providers: [
-    provideClientHydration(withNoIncrementalHydration()),  
-    provideAnimationsAsync(), 
-    provideToastr(),
-    provideHttpClient(withFetch(), withInterceptors([credentialsInterceptor])),
-  ],
-  bootstrap: [AppComponent]
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        RouterModule,
+        AuthModule,
+        GeneralModule,
+        BrowserModule,
+        FormsModule,
+        HttpClientModule,
+        BrowserAnimationsModule,
+        ToastrModule.forRoot({
+            positionClass: 'toast-bottom-left',
+            preventDuplicates: true,
+            closeButton: true,
+            timeOut: 5000,
+            progressBar: true
+        }),
+        AppComponent,
+        FooterComponent,
+        HeaderComponent,
+        ErrorPageComponent,
+    ],
+    providers: [
+        provideClientHydration(withNoIncrementalHydration()),
+        provideAnimationsAsync(),
+        provideToastr(),
+        provideHttpClient(withFetch(), withInterceptors([credentialsInterceptor])),
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }
 

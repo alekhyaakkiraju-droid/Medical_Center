@@ -1,12 +1,13 @@
+import { RouterLink } from '@angular/router';
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthServiceService } from '../auth-services/auth-service.service';
 
 @Component({
-  standalone: false,
-  selector: 'app-LoginSuccess',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './LoginSuccess.component.html'
+    selector: 'app-LoginSuccess',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './LoginSuccess.component.html',
+    imports: [RouterLink],
 })
 export class LoginSuccessComponent implements OnInit {
 

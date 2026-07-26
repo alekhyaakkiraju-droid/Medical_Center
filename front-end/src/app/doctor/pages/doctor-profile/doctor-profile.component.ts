@@ -3,12 +3,13 @@ import { AuthServiceService } from '../../../pages/auth/auth-services/auth-servi
 import { DoctorAppointmentsService } from '../../services/doctor-appointments.service';
 import { ReloadService } from '../../../shared/service/reload.service';
 import { Subscription } from 'rxjs';
+import { SideBarComponent } from '../../../admin/pages/side-bar/side-bar.component';
 
 @Component({
-  standalone: false,
-  selector: 'app-doctor-profile',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './doctor-profile.component.html'
+    selector: 'app-doctor-profile',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './doctor-profile.component.html',
+    imports: [SideBarComponent]
 })
 export class DoctorProfileComponent implements OnInit, OnDestroy {
 

@@ -1,15 +1,15 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { SnakebarService } from '../../../shared/service/SnakebarService.service';
 import { ResetPasswordService } from '../auth-services/resetPassword.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
-  standalone: false,
-  selector: 'app-reset-password',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './reset-password.component.html'
+    selector: 'app-reset-password',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './reset-password.component.html',
+    imports: [ReactiveFormsModule]
 })
 export class ResetPasswordComponent implements OnInit {
   resetForm!: FormGroup;

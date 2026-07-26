@@ -1,11 +1,12 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { NgClass } from '@angular/common';
 
 @Component({
-  standalone: false,
-  selector: 'app-faq',
-  templateUrl: './faq.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrls: ['./faq.component.css']
+    selector: 'app-faq',
+    templateUrl: './faq.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrls: ['./faq.component.css'],
+    imports: [NgClass]
 })
 export class FaqComponent implements OnInit {
 

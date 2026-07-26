@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
 import { RegisterComponent } from './register.component';
+import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
 
 describe('ResgisterComponent', () => {
   let component: RegisterComponent;
@@ -11,8 +12,9 @@ describe('ResgisterComponent', () => {
 
   beforeEach((async () => {
     await TestBed.configureTestingModule({
-      declarations: [ RegisterComponent ]
-    })
+    imports: [RegisterComponent],
+    providers: standaloneComponentTestProviders,
+})
     .compileComponents();
   }));
 

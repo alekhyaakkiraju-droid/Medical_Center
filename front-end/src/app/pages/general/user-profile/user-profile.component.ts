@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { SnakebarService } from '../../../shared/service/SnakebarService.service';
 import { ReloadService } from '../../../shared/service/reload.service';
 import { Router } from '@angular/router';
@@ -8,12 +8,13 @@ import { ToastrService } from 'ngx-toastr';
 import { ChangePasswordService } from '../services/change-password.service';
 import { ProfileService } from '../services/Profile.service';
 import { Profile, ProfileDetails } from '../../models';
+import { NgClass } from '@angular/common';
 
 @Component({
-  standalone: false,
-  selector: 'app-user-profile',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './user-profile.component.html'
+    selector: 'app-user-profile',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './user-profile.component.html',
+    imports: [ReactiveFormsModule, NgClass]
 })
 export class UserProfileComponent implements OnInit {
 

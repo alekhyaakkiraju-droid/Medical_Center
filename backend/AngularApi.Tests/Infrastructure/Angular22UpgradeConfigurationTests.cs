@@ -31,19 +31,19 @@ public class Angular22UpgradeConfigurationTests
     }
 
     [Fact]
-    public void AngularJson_PreservesNgModuleSchematicsWithStandaloneFalse()
+    public void AngularJson_DefaultsComponentSchematicsToStandaloneTrue()
     {
         var angularJson = File.ReadAllText(Path.Combine(FrontendRoot, "angular.json"));
 
-        angularJson.Should().Contain("\"standalone\": false");
+        angularJson.Should().Contain("\"standalone\": true");
     }
 
     [Fact]
-    public void SampleComponent_DeclaresStandaloneFalseForNgModuleCompatibility()
+    public void SampleComponent_UsesStandaloneImportsArray()
     {
         var appComponent = File.ReadAllText(Path.Combine(FrontendRoot, "src", "app", "app.component.ts"));
 
-        appComponent.Should().Contain("standalone: false");
+        appComponent.Should().Contain("imports:");
     }
 
     [Fact]

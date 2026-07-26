@@ -7,13 +7,16 @@ import { ToastrService } from 'ngx-toastr';
 import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
 import { Subscription } from 'rxjs';
 import { Booking } from '../../../pages/models';
+import { SideBarComponent } from '../../../admin/pages/side-bar/side-bar.component';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 
 
 @Component({
-  standalone: false,
-  selector: 'app-related-appointments',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './related-appointments.component.html'
+    selector: 'app-related-appointments',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './related-appointments.component.html',
+    imports: [SideBarComponent, ReactiveFormsModule, FormsModule, DeleteModalComponent, DatePipe]
 })
 
 export class RelatedAppointmentsComponent implements OnInit, OnDestroy {

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { AuthGuard } from './auth.guard';
 import { AuthServiceService } from '../auth-services/auth-service.service';
+import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
 
 describe('AuthGuard', () => {
   let guard: AuthGuard;
@@ -15,7 +16,7 @@ describe('AuthGuard', () => {
     authService.logout.and.returnValue(of(void 0));
 
     TestBed.configureTestingModule({
-      providers: [
+      providers: [...standaloneComponentTestProviders, 
         AuthGuard,
         { provide: AuthServiceService, useValue: authService },
         { provide: Router, useValue: router },

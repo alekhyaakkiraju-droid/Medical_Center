@@ -1,12 +1,13 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { DoctorMENU, MENU } from '../../menu';
+import { LogoutComponent } from '../../../pages/auth/logout/logout.component';
 
 @Component({
-  standalone: false,
-  selector: 'app-side-bar',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './side-bar.component.html'
+    selector: 'app-side-bar',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './side-bar.component.html',
+    imports: [LogoutComponent]
 })
 export class SideBarComponent implements OnInit {
   menuItems: any;

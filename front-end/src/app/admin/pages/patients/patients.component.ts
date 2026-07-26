@@ -4,11 +4,12 @@ import { ReloadService } from '../../../shared/service/reload.service';
 import { Subscription } from 'rxjs';
 import { AppointmentService } from '../../../pages/general/services/appointment.service';
 import { MENU } from '../../menu';
+import { SideBarComponent } from '../side-bar/side-bar.component';
 @Component({
-  standalone: false,
-  selector: 'app-patients',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './patients.component.html'
+    selector: 'app-patients',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './patients.component.html',
+    imports: [SideBarComponent]
 })
 export class PatientsComponent implements OnInit , OnDestroy{
 

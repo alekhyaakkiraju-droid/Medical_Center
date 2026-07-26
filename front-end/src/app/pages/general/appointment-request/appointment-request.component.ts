@@ -1,19 +1,21 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { SpecializationService } from '../services/specialization.service';
 import { DoctorService } from '../services/doctor.service';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AppointmentService } from '../services/appointment.service';
 import { AuthServiceService } from '../../auth/auth-services/auth-service.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
+import { NgClass, CurrencyPipe, DatePipe } from '@angular/common';
+import { PaymentComponent } from '../Payment/Payment.component';
 
 @Component({
-  standalone: false,
-  selector: 'app-appointment-request',
-  templateUrl: './appointment-request.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrls: ['./appointment-request.component.css']
+    selector: 'app-appointment-request',
+    templateUrl: './appointment-request.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrls: ['./appointment-request.component.css'],
+    imports: [ReactiveFormsModule, NgClass, PaymentComponent, CurrencyPipe, DatePipe]
 })
 export class AppointmentRequestComponent implements OnInit, OnDestroy {
 

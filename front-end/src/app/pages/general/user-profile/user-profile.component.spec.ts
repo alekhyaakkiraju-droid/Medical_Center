@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
 import { UserProfileComponent } from './user-profile.component';
+import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
 
 describe('UserProfileComponent', () => {
   let component: UserProfileComponent;
@@ -11,8 +12,9 @@ describe('UserProfileComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ UserProfileComponent ]
-    })
+    imports: [UserProfileComponent],
+    providers: standaloneComponentTestProviders,
+})
     .compileComponents();
   }));
 

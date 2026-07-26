@@ -1,10 +1,10 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  standalone: false,
-  selector: 'app-auth',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './auth.component.html', 
+    selector: 'app-auth',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './auth.component.html',
+    imports: []
 })
 export class AuthComponent implements OnInit {
 

@@ -1,10 +1,13 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { CollectedShotsComponent } from '../collected-shots/collected-shots.component';
+import { AssetUrlPipe } from '../../../shared/asset-url.pipe';
 
 @Component({
-  standalone: false,
-  selector: 'app-gallery',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './gallery.component.html'
+    selector: 'app-gallery',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './gallery.component.html',
+    imports: [RouterLink, CollectedShotsComponent, AssetUrlPipe]
 })
 export class GalleryComponent implements OnInit {
 

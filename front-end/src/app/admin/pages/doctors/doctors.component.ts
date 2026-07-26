@@ -5,12 +5,14 @@ import { ReloadService } from '../../../shared/service/reload.service';
 import { Subscription } from 'rxjs';
 import { MENU } from '../../menu';
 import { AppointmentService } from '../../../pages/general/services/appointment.service';
+import { SideBarComponent } from '../side-bar/side-bar.component';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 @Component({
-  standalone: false,
-  selector: 'app-doctors',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './doctors.component.html'
+    selector: 'app-doctors',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './doctors.component.html',
+    imports: [SideBarComponent, ReactiveFormsModule, FormsModule]
 })
 export class DoctorsComponent implements OnInit, OnDestroy {
 

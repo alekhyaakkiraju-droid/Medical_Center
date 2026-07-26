@@ -1,10 +1,10 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  standalone: false,
-  selector: 'app-general',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './general.component.html',
+    selector: 'app-general',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './general.component.html',
+    imports: []
 })
 export class GeneralComponent implements OnInit {
 
