@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Security.Claims;
 
 namespace AngularApi.Tests.Controllers;
 
@@ -22,7 +23,16 @@ public class MedicalCentersControllerTests : IDisposable
         _context = new MedicalCenterDbContext(options);
         _controller = new MedicalCentersController(
             new MedicalCenterService(_context, new OwnershipValidator(), NullLogger<MedicalCenterService>.Instance));
-        _controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, "admin1"),
+            new Claim(ClaimTypes.Role, "admin"),
+        };
+        var identity = new ClaimsIdentity(claims, "TestAuth");
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) }
+        };
     }
 
     [Fact]
