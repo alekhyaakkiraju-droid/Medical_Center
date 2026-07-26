@@ -1,51 +1,53 @@
 <div id="preloader">
-    <div class="loader"></div>
+  <div class="loader"></div>
 </div>
 <!--Page Title-->
 <section class="page-title text-center" [style.background-image]="'url(' + ('images/background/3.jpg' | assetUrl) + ')'">
-    <div class="container">
-        <div class="title-text">
-            <h1>gallery</h1>
-            <ul class="title-menu clearfix">
-                <li>
-                    <a routerLink="/pages/home">home &nbsp;/</a>
-                </li>
-                <li>gallery</li>
-            </ul>
-        </div>
+  <div class="container">
+    <div class="title-text">
+      <h1>gallery</h1>
+      <ul class="title-menu clearfix">
+        <li>
+          <a routerLink="/pages/home">home &nbsp;/</a>
+        </li>
+        <li>gallery</li>
+      </ul>
     </div>
+  </div>
 </section>
 <!--End Page Title-->
 
 
 
 <section class="video-gallery max-w-screen-xl px-4 mx-auto">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-              <div class="section-title text-center">
-                <h3>Collected Media <span>of Our PrimeCare  Center</span></h3>
-                <p>
-                  Discover the latest advancements in medical science, patient care, and healthcare technology 
-                  through our exclusive conferences and symposiums.
-                </p>
-              </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="section-title text-center">
+          <h3>Collected Media <span>of Our PrimeCare  Center</span></h3>
+          <p>
+            Discover the latest advancements in medical science, patient care, and healthcare technology
+            through our exclusive conferences and symposiums.
+          </p>
+        </div>
+      </div>
+
+      @for (video of videoGallery; track video) {
+        <div class="col-sm-6">
+          <div class="video-gallery-item">
+            <div class="image-holder">
+              <img [src]="video.thumbnail | assetUrl" class="img-responsive" alt="video-gallery" />
+              <a data-fancybox [href]="video.videoUrl">
+                <i class="fa fa-play"></i>
+              </a>
             </div>
-          
-            <div class="col-sm-6" *ngFor="let video of videoGallery">
-              <div class="video-gallery-item">
-                <div class="image-holder">
-                  <img [src]="video.thumbnail | assetUrl" class="img-responsive" alt="video-gallery" />
-                  <a data-fancybox [href]="video.videoUrl">
-                    <i class="fa fa-play"></i>
-                  </a>
-                </div>
-                <h3>{{ video.title }}</h3>
-              </div>
-            </div>
+            <h3>{{ video.title }}</h3>
           </div>
-          
+        </div>
+      }
     </div>
+
+  </div>
 </section>
 
 <app-collected-shots></app-collected-shots>

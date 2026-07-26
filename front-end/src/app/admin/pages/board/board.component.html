@@ -1,262 +1,272 @@
 <div id="preloader">
-	<div class="loader"></div>
+  <div class="loader"></div>
 </div>
 
 <app-side-bar></app-side-bar>
 <div class="p-4 sm:ml-64" style="background-color: #eef1f5;">
-	<div class="page-container">
-		<!-- start page content -->
-		<div class="page-content-wrapper">
-			<div class="page-content">
+  <div class="page-container">
+    <!-- start page content -->
+    <div class="page-content-wrapper">
+      <div class="page-content">
 
-				<div class="page-bar">
-					<div class="page-title-breadcrumb">
-						<div class=" pull-left">
-							<div class="page-title">Dashboard</div>
-						</div>
-						<ol class="breadcrumb page-breadcrumb pull-right">
-							<li><i class="fa fa-home"></i>&nbsp;<a class="parent-item"
-									href="index.html">Home</a>&nbsp;<i class="fa fa-angle-right"></i>
-							</li>
-							<li class="active">Dashboard</li>
-						</ol>
-					</div>
-				</div>
-				<!-- Start Widget -->
-				<div class="state-overview mt-5">
-					<div class="row ">
-						<div class="col-xl-3 col-md-6 col-12" *ngFor="let box of infoBoxes">
-							<div class="info-box" [ngClass]="box.bgClass">
-								<span class="info-box-icon push-bottom">
-									<i [class]="box.iconClass"></i>
-								</span>
-								<div class="info-box-content">
-									<span class="info-box-text">{{ box.text }}</span>
-									<span class="info-box-number">{{ box.isCurrency ? (box.number | currency:'USD':'symbol':'1.0-0') : box.number }}</span>
-								</div>							
-							</div>							
-						</div>						
-					</div>
-				</div>
-				<!-- End Widget -->
+        <div class="page-bar">
+          <div class="page-title-breadcrumb">
+            <div class=" pull-left">
+              <div class="page-title">Dashboard</div>
+            </div>
+            <ol class="breadcrumb page-breadcrumb pull-right">
+              <li><i class="fa fa-home"></i>&nbsp;<a class="parent-item"
+              href="index.html">Home</a>&nbsp;<i class="fa fa-angle-right"></i>
+            </li>
+            <li class="active">Dashboard</li>
+          </ol>
+        </div>
+      </div>
+      <!-- Start Widget -->
+      <div class="state-overview mt-5">
+        <div class="row ">
+          @for (box of infoBoxes; track box) {
+            <div class="col-xl-3 col-md-6 col-12">
+              <div class="info-box" [ngClass]="box.bgClass">
+                <span class="info-box-icon push-bottom">
+                  <i [class]="box.iconClass"></i>
+                </span>
+                <div class="info-box-content">
+                  <span class="info-box-text">{{ box.text }}</span>
+                  <span class="info-box-number">{{ box.isCurrency ? (box.number | currency:'USD':'symbol':'1.0-0') : box.number }}</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+      <!-- End Widget -->
 
-				<!-- chart start -->
-				<app-chart></app-chart>
-				<!-- Chart end -->
-				<div class="row">
-					<div class="col-md-8 col-sm-12">
-						<div class="card  card-box">
-							<div class="card-head">
-								<header>BOOKED APPOINTMENT</header>
-								<div class="tools">
-									<a class="fa fa-repeat btn-color box-refresh" href="javascript:;"></a>
-									<a class="t-collapse btn-color fa fa-chevron-down" href="javascript:;"></a>
-									<a class="t-close btn-color fa fa-times" href="javascript:;"></a>
-								</div>
-							</div>
-							<div class="card-body ">
-								<div class="row table-padding">
-									<div class="col-md-6 col-sm-6 col-xs-6">
-										<div class="btn-group">
-											<a href="book_appointment_material.html" id="addRow"
-												class="btn btn-info btn-circle">
-												Add New <i class="fa fa-plus"></i>
-											</a>
-										</div>
-									</div>
-									<div class="col-md-6 col-sm-6 col-xs-6">
-										<div class="btn-group pull-right">
-											<button class="btn deepPink-bgcolor btn-circle btn-outline dropdown-toggle"
-												data-bs-toggle="dropdown">Tools
-												<i class="fa fa-angle-down"></i>
-											</button>
-											<ul class="dropdown-menu pull-right">
-												<li>
-													<a href="javascript:;">
-														<i class="fa fa-print"></i> Print </a>
-												</li>
-												<li>
-													<a (click)="downloadAsPDF()">
-														<i class="fa fa-file-pdf-o"></i> Save as PDF </a>
-												</li>
-												<li>
-													<a (click)="downloadAsExcel()">
-														<i class="fa fa-file-excel-o"></i> Export to Excel </a>
-												</li>
-											</ul>
-										</div>
-									</div>
-								</div>
-								<div class="table-responsive">
-									<table #tableRef
-										class="table table-striped table-bordered table-hover table-checkable order-column"
-										id="example4">
-										<thead>
-											<tr>
-												<th>
-													<label class="rt-chkbox rt-chkbox-single rt-chkbox-outline">
-														<input type="checkbox" class="group-checkable" aria-label="Select all appointments"
-															data-set="#sample_1 .checkboxes" />
-														<span></span>
-													</label>
-												</th>
-												<th>Patient Name</th>
-												<th>Assigned Doctor</th>
-												<th>Date</th>
-												<th>Time</th>
-												<th>Actions </th>
-											</tr>
-										</thead>
-										<tbody>
-											<tr *ngFor="let appointment of appointments" class="odd gradeX">
-												<td>
-													<label class="rt-chkbox rt-chkbox-single rt-chkbox-outline">
-														<input type="checkbox" class="checkboxes" value="1" aria-label="Select appointment row" />
-														<span></span>
-													</label>
-												</td>
-												<td> {{ appointment.patient?.name || 'Unknown' }} </td>
-												<td> {{ appointment.doctor.name || 'Not Assigned' }} </td>
-												<td class="center"> {{ appointment.appointmentDate | date:
-													'MM/dd/yyyy' }} </td>
-												<td class="center"> {{ appointment.appointmentDate | date: 'shortTime'
-													}} </td>
-												<td class="center">
-													<div class="btn-group">
-														<button
-															class="btn btn-xs btn-warning btn-circle dropdown-toggle center no-margin"
-															type="button" data-bs-toggle="dropdown"
-															aria-expanded="false"> Actions
-															<i class="fa fa-angle-down"></i>
-														</button>
-														<ul class="dropdown-menu pull-left" role="menu">
-															<li>
-																<a href="javascript:;" aria-label="Delete appointment" (click)="openDeleteModal(appointment.appointmentId)"><i
-																		class="fa fa-trash-o"></i>
-																	Delete </a>
-															</li>
-															<li>
-																<a href="javascript:;" aria-label="Edit appointment" (click)="onEditeAppointment(appointment.appointmentId ,appointment.appointmentDate)"><i
-																		class="fa fa-ban"></i>
-																	Edite </a>
-															</li>
-														</ul>
-													</div>
-												</td>
-
-											</tr>
-										</tbody>
-									</table>
-									<div class="styled-pagination mt-3" *ngIf="pageCount > 1">
-										<ul>
-											<li><a href="javascript:;" (click)="goToAppointmentPage(currentPage - 1)">Prev</a></li>
-											<li *ngFor="let page of [].constructor(pageCount); let i = index">
-												<a href="javascript:;" [class.active]="currentPage === i + 1" (click)="goToAppointmentPage(i + 1)">{{ i + 1 }}</a>
-											</li>
-											<li><a href="javascript:;" (click)="goToAppointmentPage(currentPage + 1)">Next</a></li>
-										</ul>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-4 col-sm-12">
-						<div class="card  card-box">
-							<div class="card-head">
-								<header>DOCTORS LIST</header>
-								<div class="tools">
-									<a class="fa fa-repeat btn-color box-refresh" href="javascript:;"></a>
-									<a class="t-collapse btn-color fa fa-chevron-down" href="javascript:;"></a>
-									<a class="t-close btn-color fa fa-times" href="javascript:;"></a>
-								</div>
-							</div>
-							<div class="card-body no-padding height-9">
-								<div class="row">
-									<ul class="docListWindow">
-										<li *ngFor="let doctor of doctorsData">
-											<div class="prog-avatar">
-												<img [src]="doctor.image" alt="" width="40" height="40">
-											</div>
-											<div class="details">
-												<div class="title">
-													<a href="#">{{doctor.name}}</a> -(MBBS,MD)
-												</div>
-												<div>
-													<span class="clsAvailable">Available</span>
-												</div>
-											</div>
-										</li>
-									</ul>
-									<div class="text-center full-width">
-										<a href="#">View all</a>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<!-- start admited patient list -->
-				<div class="row">
-					<div class="col-md-12 col-sm-12">
-						<div class="card  card-box">
-							<div class="card-head">
-								<header>ADMIT PATIENT LIST</header>
-								<div class="tools">
-									<a class="fa fa-repeat btn-color box-refresh" href="javascript:;"></a>
-									<a class="t-collapse btn-color fa fa-chevron-down" href="javascript:;"></a>
-									<a class="t-close btn-color fa fa-times" href="javascript:;"></a>
-								</div>
-							</div>
-							<div class="card-body ">
-								<div class="table-wrap">
-									<div class="table-responsive">
-										<table class="table display product-overview mb-30" id="support_table">
-											<thead>
-												<tr>
-													<th>No</th>
-													<th>Name</th>
-													<th>Email</th>
-													<th>Assigned Doctor</th>
-													<th>Date Of Admit</th>
-													<th>Diseases</th>
-													<th>Edit</th>
-												</tr>
-											</thead>
-											<tbody>
-												<tr *ngFor="let appointment of appointments, let index = index"
-													class="odd gradeX">
-													<td>{{index+1}}</td>
-													<td>{{ appointment.patient?.name || 'Unknown' }}</td>
-													<td> {{ appointment.patient?.email || 'Unknown' }} </td>
-													<td>{{ appointment.doctor.name || 'Not Assigned' }}</td>
-													<td>{{ appointment.appointmentDate | date: 'MM/dd/yyyy' }}</td>
-													<td>
-														<span
-															class="label label-sm label-success">{{appointment.doctor.specializations[0]}}</span>
-													</td>
-
-													<td>
-														<a href="javascript:void(0)" class="tblEditBtn" aria-label="Edit patient record">
-															<i class="fa fa-pencil"></i>
-														</a>
-														<a href="javascript:void(0)" class="tblDelBtn" aria-label="Delete patient record">
-															<i class="fa fa-trash-o"></i>
-														</a>
-													</td>
-												</tr>
-											</tbody>
-										</table>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<!-- end admited patient list -->
-			</div>
-		</div>
-		<!-- end page content -->
-	</div>
+      <!-- chart start -->
+      <app-chart></app-chart>
+      <!-- Chart end -->
+      <div class="row">
+        <div class="col-md-8 col-sm-12">
+          <div class="card  card-box">
+            <div class="card-head">
+              <header>BOOKED APPOINTMENT</header>
+              <div class="tools">
+                <a class="fa fa-repeat btn-color box-refresh" href="javascript:;"></a>
+                <a class="t-collapse btn-color fa fa-chevron-down" href="javascript:;"></a>
+                <a class="t-close btn-color fa fa-times" href="javascript:;"></a>
+              </div>
+            </div>
+            <div class="card-body ">
+              <div class="row table-padding">
+                <div class="col-md-6 col-sm-6 col-xs-6">
+                  <div class="btn-group">
+                    <a href="book_appointment_material.html" id="addRow"
+                      class="btn btn-info btn-circle">
+                      Add New <i class="fa fa-plus"></i>
+                    </a>
+                  </div>
+                </div>
+                <div class="col-md-6 col-sm-6 col-xs-6">
+                  <div class="btn-group pull-right">
+                    <button class="btn deepPink-bgcolor btn-circle btn-outline dropdown-toggle"
+                      data-bs-toggle="dropdown">Tools
+                      <i class="fa fa-angle-down"></i>
+                    </button>
+                    <ul class="dropdown-menu pull-right">
+                      <li>
+                        <a href="javascript:;">
+                          <i class="fa fa-print"></i> Print </a>
+                        </li>
+                        <li>
+                          <a (click)="downloadAsPDF()">
+                            <i class="fa fa-file-pdf-o"></i> Save as PDF </a>
+                          </li>
+                          <li>
+                            <a (click)="downloadAsExcel()">
+                              <i class="fa fa-file-excel-o"></i> Export to Excel </a>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="table-responsive">
+                      <table #tableRef
+                        class="table table-striped table-bordered table-hover table-checkable order-column"
+                        id="example4">
+                        <thead>
+                          <tr>
+                            <th>
+                              <label class="rt-chkbox rt-chkbox-single rt-chkbox-outline">
+                                <input type="checkbox" class="group-checkable" aria-label="Select all appointments"
+                                  data-set="#sample_1 .checkboxes" />
+                                <span></span>
+                              </label>
+                            </th>
+                            <th>Patient Name</th>
+                            <th>Assigned Doctor</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Actions </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (appointment of appointments; track appointment) {
+                            <tr class="odd gradeX">
+                              <td>
+                                <label class="rt-chkbox rt-chkbox-single rt-chkbox-outline">
+                                  <input type="checkbox" class="checkboxes" value="1" aria-label="Select appointment row" />
+                                  <span></span>
+                                </label>
+                              </td>
+                              <td> {{ appointment.patient?.name || 'Unknown' }} </td>
+                              <td> {{ appointment.doctor.name || 'Not Assigned' }} </td>
+                              <td class="center"> {{ appointment.appointmentDate | date:
+                              'MM/dd/yyyy' }} </td>
+                              <td class="center"> {{ appointment.appointmentDate | date: 'shortTime'
+                              }} </td>
+                              <td class="center">
+                                <div class="btn-group">
+                                  <button
+                                    class="btn btn-xs btn-warning btn-circle dropdown-toggle center no-margin"
+                                    type="button" data-bs-toggle="dropdown"
+                                    aria-expanded="false"> Actions
+                                    <i class="fa fa-angle-down"></i>
+                                  </button>
+                                  <ul class="dropdown-menu pull-left" role="menu">
+                                    <li>
+                                      <a href="javascript:;" aria-label="Delete appointment" (click)="openDeleteModal(appointment.appointmentId)"><i
+                                      class="fa fa-trash-o"></i>
+                                    Delete </a>
+                                  </li>
+                                  <li>
+                                    <a href="javascript:;" aria-label="Edit appointment" (click)="onEditeAppointment(appointment.appointmentId ,appointment.appointmentDate)"><i
+                                    class="fa fa-ban"></i>
+                                  Edite </a>
+                                </li>
+                              </ul>
+                            </div>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                  @if (pageCount > 1) {
+                    <div class="styled-pagination mt-3">
+                      <ul>
+                        <li><a href="javascript:;" (click)="goToAppointmentPage(currentPage - 1)">Prev</a></li>
+                        @for (page of [].constructor(pageCount); track page; let i = $index) {
+                          <li>
+                            <a href="javascript:;" [class.active]="currentPage === i + 1" (click)="goToAppointmentPage(i + 1)">{{ i + 1 }}</a>
+                          </li>
+                        }
+                        <li><a href="javascript:;" (click)="goToAppointmentPage(currentPage + 1)">Next</a></li>
+                      </ul>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-12">
+            <div class="card  card-box">
+              <div class="card-head">
+                <header>DOCTORS LIST</header>
+                <div class="tools">
+                  <a class="fa fa-repeat btn-color box-refresh" href="javascript:;"></a>
+                  <a class="t-collapse btn-color fa fa-chevron-down" href="javascript:;"></a>
+                  <a class="t-close btn-color fa fa-times" href="javascript:;"></a>
+                </div>
+              </div>
+              <div class="card-body no-padding height-9">
+                <div class="row">
+                  <ul class="docListWindow">
+                    @for (doctor of doctorsData; track doctor) {
+                      <li>
+                        <div class="prog-avatar">
+                          <img [src]="doctor.image" alt="" width="40" height="40">
+                        </div>
+                        <div class="details">
+                          <div class="title">
+                            <a href="#">{{doctor.name}}</a> -(MBBS,MD)
+                          </div>
+                          <div>
+                            <span class="clsAvailable">Available</span>
+                          </div>
+                        </div>
+                      </li>
+                    }
+                  </ul>
+                  <div class="text-center full-width">
+                    <a href="#">View all</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- start admited patient list -->
+        <div class="row">
+          <div class="col-md-12 col-sm-12">
+            <div class="card  card-box">
+              <div class="card-head">
+                <header>ADMIT PATIENT LIST</header>
+                <div class="tools">
+                  <a class="fa fa-repeat btn-color box-refresh" href="javascript:;"></a>
+                  <a class="t-collapse btn-color fa fa-chevron-down" href="javascript:;"></a>
+                  <a class="t-close btn-color fa fa-times" href="javascript:;"></a>
+                </div>
+              </div>
+              <div class="card-body ">
+                <div class="table-wrap">
+                  <div class="table-responsive">
+                    <table class="table display product-overview mb-30" id="support_table">
+                      <thead>
+                        <tr>
+                          <th>No</th>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Assigned Doctor</th>
+                          <th>Date Of Admit</th>
+                          <th>Diseases</th>
+                          <th>Edit</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (appointment of appointments; track appointment; let index = $index) {
+                          <tr
+                            class="odd gradeX">
+                            <td>{{index+1}}</td>
+                            <td>{{ appointment.patient?.name || 'Unknown' }}</td>
+                            <td> {{ appointment.patient?.email || 'Unknown' }} </td>
+                            <td>{{ appointment.doctor.name || 'Not Assigned' }}</td>
+                            <td>{{ appointment.appointmentDate | date: 'MM/dd/yyyy' }}</td>
+                            <td>
+                              <span
+                              class="label label-sm label-success">{{appointment.doctor.specializations[0]}}</span>
+                            </td>
+                            <td>
+                              <a href="javascript:void(0)" class="tblEditBtn" aria-label="Edit patient record">
+                                <i class="fa fa-pencil"></i>
+                              </a>
+                              <a href="javascript:void(0)" class="tblDelBtn" aria-label="Delete patient record">
+                                <i class="fa fa-trash-o"></i>
+                              </a>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- end admited patient list -->
+      </div>
+    </div>
+    <!-- end page content -->
+  </div>
 
 
 
@@ -267,22 +277,21 @@
 
 
 
-<div *ngIf="showEditModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-	<div class="bg-white rounded-lg shadow-lg p-6 w-96">
-		<h2 class="text-xl text-dark mb-4">Edit Appointment</h2>
-
-		<!-- Date Input -->
-		<label for="edit-appointment-date" class="block text-sm font-medium text-dark mb-2">Appointment Date</label>
-		<input id="edit-appointment-date" type="date" [(ngModel)]="appointmentDate" aria-label="Appointment date" class="w-full px-3 py-2 border  text-dark rounded-lg">
-
-		<label for="edit-appointment-time" class="block text-sm font-medium text-dark my-2">Appointment Time</label>
-		<input id="edit-appointment-time" type="time" [(ngModel)]="appointmentTime" aria-label="Appointment time" class="w-full px-3 py-2 border  text-dark rounded-lg">
-
-		<!-- Modal Actions -->
-		<div class="flex justify-end mt-4">
-			<button (click)="closeModal()" class="bg-gray-400 px-4 py-2 rounded-lg mr-2">Cancel</button>
-			<button (click)="saveAppointment()"
-				class="bg-blue-600 text-white px-4 py-2 rounded-lg">Save</button>
-		</div>
-	</div>
-</div>
+@if (showEditModal) {
+  <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+      <h2 class="text-xl text-dark mb-4">Edit Appointment</h2>
+      <!-- Date Input -->
+      <label for="edit-appointment-date" class="block text-sm font-medium text-dark mb-2">Appointment Date</label>
+      <input id="edit-appointment-date" type="date" [(ngModel)]="appointmentDate" aria-label="Appointment date" class="w-full px-3 py-2 border  text-dark rounded-lg">
+      <label for="edit-appointment-time" class="block text-sm font-medium text-dark my-2">Appointment Time</label>
+      <input id="edit-appointment-time" type="time" [(ngModel)]="appointmentTime" aria-label="Appointment time" class="w-full px-3 py-2 border  text-dark rounded-lg">
+      <!-- Modal Actions -->
+      <div class="flex justify-end mt-4">
+        <button (click)="closeModal()" class="bg-gray-400 px-4 py-2 rounded-lg mr-2">Cancel</button>
+        <button (click)="saveAppointment()"
+        class="bg-blue-600 text-white px-4 py-2 rounded-lg">Save</button>
+      </div>
+    </div>
+  </div>
+}

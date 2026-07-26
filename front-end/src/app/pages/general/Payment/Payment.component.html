@@ -40,10 +40,16 @@
                 <label for="cardHolderName" class="block mb-1 text-gray-700">Name of Card Holder</label>
                 <input formControlName="cardHolderName" id="cardHolderName" placeholder="Name of card holder"
                   class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500" />
-                <div *ngIf="cardHolderName?.invalid && cardHolderName?.touched">
-                  <small *ngIf="cardHolderName?.errors?.['required']" class="text-red-500">Name is required.</small>
-                  <small *ngIf="cardHolderName?.errors?.['minlength']" class="text-red-500">Minimum length is 3.</small>
-                </div>
+                @if (cardHolderName?.invalid && cardHolderName?.touched) {
+                  <div>
+                    @if (cardHolderName?.errors?.['required']) {
+                      <small class="text-red-500">Name is required.</small>
+                    }
+                    @if (cardHolderName?.errors?.['minlength']) {
+                      <small class="text-red-500">Minimum length is 3.</small>
+                    }
+                  </div>
+                }
               </div>
 
               <!-- Postal Code -->
@@ -51,9 +57,13 @@
                 <label for="postalCode" class="block mb-1 text-gray-700">Postal Code</label>
                 <input formControlName="postalCode" id="postalCode" placeholder="Postal code"
                   class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500" />
-                <div *ngIf="postalCode?.invalid && postalCode?.touched">
-                  <small *ngIf="postalCode?.errors?.['required']" class="text-red-500">Postal code is required.</small>
-                </div>
+                @if (postalCode?.invalid && postalCode?.touched) {
+                  <div>
+                    @if (postalCode?.errors?.['required']) {
+                      <small class="text-red-500">Postal code is required.</small>
+                    }
+                  </div>
+                }
               </div>
 
               <!-- Card Number -->
@@ -61,9 +71,13 @@
                 <label for="cardNumber" class="block mb-1 text-gray-700">Card Number</label>
                 <input formControlName="cardNumber" id="cardNumber" placeholder="Card number"
                   class="col-span-full block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500" />
-                <div *ngIf="cardNumber?.invalid && cardNumber?.touched">
-                  <small *ngIf="cardNumber?.errors?.['required']" class="text-red-500">Card number is required.</small>
-                </div>
+                @if (cardNumber?.invalid && cardNumber?.touched) {
+                  <div>
+                    @if (cardNumber?.errors?.['required']) {
+                      <small class="text-red-500">Card number is required.</small>
+                    }
+                  </div>
+                }
               </div>
 
               <!-- Expiry Date -->
@@ -71,9 +85,13 @@
                 <label for="expiryDate" class="block mb-1 text-gray-700">Expiry Date</label>
                 <input formControlName="expiryDate" id="expiryDate" placeholder="EXP."
                   class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500" />
-                <div *ngIf="expiryDate?.invalid && expiryDate?.touched">
-                  <small *ngIf="expiryDate?.errors?.['required']" class="text-red-500">Expiry date is required.</small>
-                </div>
+                @if (expiryDate?.invalid && expiryDate?.touched) {
+                  <div>
+                    @if (expiryDate?.errors?.['required']) {
+                      <small class="text-red-500">Expiry date is required.</small>
+                    }
+                  </div>
+                }
               </div>
 
               <!-- CVV -->
@@ -81,9 +99,13 @@
                 <label for="cvv" class="block mb-1 text-gray-700">CVV</label>
                 <input formControlName="cvv" id="cvv" placeholder="CVV"
                   class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500" />
-                <div *ngIf="cvv?.invalid && cvv?.touched">
-                  <small *ngIf="cvv?.errors?.['required']" class="text-red-500">CVV is required.</small>
-                </div>
+                @if (cvv?.invalid && cvv?.touched) {
+                  <div>
+                    @if (cvv?.errors?.['required']) {
+                      <small class="text-red-500">CVV is required.</small>
+                    }
+                  </div>
+                }
               </div>
             </div>
 

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Doctor } from '../../../pages/models';
 import { DoctorService } from '../../../pages/general/services/doctor.service';
 import { ReloadService } from '../../../shared/service/reload.service';
@@ -9,6 +9,7 @@ import { AppointmentService } from '../../../pages/general/services/appointment.
 @Component({
   standalone: false,
   selector: 'app-doctors',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './doctors.component.html'
 })
 export class DoctorsComponent implements OnInit, OnDestroy {

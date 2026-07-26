@@ -1,4 +1,4 @@
-import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
+import { Component, NO_ERRORS_SCHEMA, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -22,16 +22,20 @@ import { PatientService } from '../admin/services/patient.service';
 import { TotalEarningsService } from '../admin/services/total-earnings.service';
 import { expectNoA11yViolations } from './axe-test.helper';
 
-@Component({ selector: 'app-forgetPassword', template: '', standalone: false })
+@Component({ selector: 'app-forgetPassword', template: '', changeDetection: ChangeDetectionStrategy.Eager,
+ standalone: false })
 class ForgetPasswordStubComponent {}
 
-@Component({ selector: 'app-side-bar', template: '', standalone: false })
+@Component({ selector: 'app-side-bar', template: '', changeDetection: ChangeDetectionStrategy.Eager,
+ standalone: false })
 class SideBarStubComponent {}
 
-@Component({ selector: 'app-chart', template: '', standalone: false })
+@Component({ selector: 'app-chart', template: '', changeDetection: ChangeDetectionStrategy.Eager,
+ standalone: false })
 class ChartStubComponent {}
 
-@Component({ selector: 'app-delete-modal', template: '', standalone: false })
+@Component({ selector: 'app-delete-modal', template: '', changeDetection: ChangeDetectionStrategy.Eager,
+ standalone: false })
 class DeleteModalStubComponent {}
 
 describe('WCAG 2.1 AA accessibility', () => {

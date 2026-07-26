@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Subject, Subscription, switchMap, takeUntil } from 'rxjs';
@@ -10,6 +10,7 @@ import { ContactInquiryDTO, ContactService } from '../services/contact.service';
   standalone: false,
   selector: 'app-contact-us',
   templateUrl: './contact-us.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./contact-us.component.css']
 })
 export class ContactUsComponent implements OnInit, OnDestroy {
