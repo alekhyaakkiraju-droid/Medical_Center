@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SnakebarService } from '../../../shared/service/SnakebarService.service';
@@ -8,6 +8,7 @@ import { ToastrService } from 'ngx-toastr';
 @Component({
   standalone: false,
   selector: 'app-reset-password',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './reset-password.component.html'
 })
 export class ResetPasswordComponent implements OnInit {

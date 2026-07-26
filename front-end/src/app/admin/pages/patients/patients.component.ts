@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { PatientService } from '../../services/patient.service';
 import { ReloadService } from '../../../shared/service/reload.service';
 import { Subscription } from 'rxjs';
@@ -7,6 +7,7 @@ import { MENU } from '../../menu';
 @Component({
   standalone: false,
   selector: 'app-patients',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './patients.component.html'
 })
 export class PatientsComponent implements OnInit , OnDestroy{

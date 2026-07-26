@@ -2,7 +2,8 @@ import { TestBed, inject } from '@angular/core/testing';
 import {
   HttpClient,
   provideHttpClient,
-  withInterceptors
+  withInterceptors,
+  withXhr
 } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -29,7 +30,7 @@ describe('ContactService', () => {
             })
           }
         },
-        provideHttpClient(withInterceptors([credentialsInterceptor])),
+        provideHttpClient(withXhr(), withInterceptors([credentialsInterceptor])),
         provideHttpClientTesting()
       ]
     });

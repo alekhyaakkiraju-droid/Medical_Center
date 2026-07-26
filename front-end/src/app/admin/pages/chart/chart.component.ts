@@ -1,9 +1,10 @@
-import { AfterViewInit, Component, ElementRef, Inject, PLATFORM_ID, QueryList, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, PLATFORM_ID, QueryList, ViewChildren, ChangeDetectionStrategy } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   standalone: false,
   selector: 'app-chart',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './chart.component.html'
 })
 export class ChartComponent implements AfterViewInit {

@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   standalone: false,
   selector: 'app-blog',
   templateUrl: './blog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./blog.component.css']
 })
 export class BlogComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ReloadService } from '../../../shared/service/reload.service';
 import { SpecializationService } from '../services/specialization.service';
 import { Subscription } from 'rxjs';
@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
   standalone: false,
   selector: 'app-Home',
   templateUrl: './Home.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./Home.component.css']
 })
 export class HomeComponent implements  OnInit , AfterViewInit {
