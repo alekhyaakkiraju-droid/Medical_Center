@@ -59,7 +59,7 @@ export class PatientsComponent implements OnInit , OnDestroy{
   loadAppointments(): void {
     const appointmentSub = this.appointmentService.getAppointments().subscribe(
       (data) => {
-        this.numOfAppointments = data.totalCount;
+        this.numOfAppointments = data['totalCount'];
         this.setBadgeForAppointments();
       },
       (error) => {

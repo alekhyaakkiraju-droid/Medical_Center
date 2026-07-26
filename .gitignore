@@ -5,12 +5,8 @@ npm-debug.log
 yarn-error.log
 package-lock.json
 !front-end/package-lock.json
-/.angular
-/src/assets/*.json
-/src/assets/images/
-*.tsbuildinfo
-front-end/src/app/api/generated/api.ts
-openapi/swagger.json
+!front-end/src/app/api/generated/api.ts
+!openapi/swagger.json
 
 # Visual Studio files
 .vs/

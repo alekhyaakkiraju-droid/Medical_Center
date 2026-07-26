@@ -36,7 +36,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     this.appointmentsSubscription = this.appointmentService.getAppointments().subscribe(
       (data) => {
         this.appointments = data.items;
-        this.numOfAppointments = data.totalCount;
+        this.numOfAppointments = data['totalCount'];
         console.log('Fetched appointments:', this.appointments);
       },
       (error) => {

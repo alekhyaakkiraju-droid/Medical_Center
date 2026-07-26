@@ -79,10 +79,10 @@ export class BoardComponent implements OnInit, OnDestroy {
     const appointmentSub = this.appointmentService.getAppointments(page, this.pageSize).subscribe(
       (data) => {
         this.appointments = data.items;
-        this.currentPage = data.currentPage;
-        this.pageCount = data.pageCount;
-        this.totalCount = data.totalCount;
-        this.numOfAppointments = data.totalCount;
+        this.currentPage = data['currentPage'];
+        this.pageCount = data['pageCount'];
+        this.totalCount = data['totalCount'];
+        this.numOfAppointments = data['totalCount'];
         this.optimizeWidget();
         this.setBadgeForAppointments();
       },
@@ -105,7 +105,7 @@ export class BoardComponent implements OnInit, OnDestroy {
       (result) => {
         if (result?.items) {
           this.doctorsData = result.items;
-          this.numOfDoctors = result.totalCount;
+          this.numOfDoctors = result['totalCount'];
         }
       },
       (error) => {
@@ -118,7 +118,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   fetchPatientLength(): void {
     const patientSub = this.patientService.getAllPatient().subscribe({
       next: (data) => {
-        this.numOfPatients = data.totalCount ?? data.items?.length ?? 0;
+        this.numOfPatients = data['totalCount'] ?? data.items?.length ?? 0;
         this.optimizeWidget();
       },
       error: (err) => {
