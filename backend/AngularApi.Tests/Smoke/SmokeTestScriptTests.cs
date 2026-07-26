@@ -108,4 +108,21 @@ public class SmokeTestScriptTests
         e2eSmoke.Exists.Should().BeTrue();
         patientJourney.Exists.Should().BeTrue();
     }
+
+    [Fact]
+    public void OpenApiGenerationScripts_ContainOutputValidation()
+    {
+        var generateOpenApi = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "generate-openapi.sh"));
+        var generateApiTypes = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "generate-api-types.sh"));
+        generateOpenApi.Should().Contain("exit 1").And.Contain("json.tool").And.Contain("ERROR:");
+        generateApiTypes.Should().Contain("exit 1").And.Contain("ERROR:").And.Contain("export statements");
+    }
+    [Fact]
+    public void ForgePipeline_FrontendBuildRunsGenerateApiTypesBeforeNgBuild()
+    {
+        var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
+        pipeline.Should().Contain("- name: Generate OpenAPI Spec");
+        pipeline.Should().Contain("npm run build -- --configuration production");
+        pipeline.Should().NotContain("./node_modules/.bin/ng build --configuration production");
+    }
 }
