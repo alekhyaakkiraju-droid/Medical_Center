@@ -200,6 +200,29 @@ public class ForgePipelineConfigurationTests
     }
 
     [Fact]
+    public void ForgePipelineFile_UsesDotNet10ForBackendBuild()
+    {
+        var yaml = File.ReadAllText(PipelinePath);
+
+        yaml.Should().Contain("DOTNET_VERSION:", because: "WO-049 requires a pipeline variable for the .NET SDK version");
+        yaml.Should().Contain("value: \"10.0\"", because: "WO-049 requires DOTNET_VERSION to be 10.0");
+        yaml.Should().Contain("dotnetVersion: \"10.0\"", because: "WO-049 requires the build:dotnet step to use .NET 10");
+        yaml.Should().NotContain("value: \"8.0\"", because: "WO-049 must remove .NET 8 pipeline version references");
+        yaml.Should().NotContain("dotnetVersion: \"8.0\"", because: "WO-049 must remove .NET 8 build step configuration");
+    }
+
+    [Fact]
+    public void ForgePipelineFile_BackendBuildAndTestCommandsReferenceCsprojWithoutHardcodedSdk()
+    {
+        var yaml = File.ReadAllText(PipelinePath);
+
+        yaml.Should().Contain("buildCommand: dotnet build backend/AngularApi/AngularApi.csproj -c Release");
+        yaml.Should().Contain("testCommand: dotnet test backend/AngularApi.Tests/AngularApi.Tests.csproj -c Release");
+        yaml.Should().Contain("testCommand: dotnet test backend/AngularApi.Tests/AngularApi.Tests.csproj --filter FullyQualifiedName~Authorization -c Release");
+        yaml.Should().NotContain("--framework net8.0", because: "backend build/test commands should rely on csproj target frameworks");
+    }
+
+    [Fact]
     public void ForgePipelineFile_IncludesAuthorizationRegressionGateInDevAndStaging()
     {
         var yaml = File.ReadAllText(PipelinePath);
