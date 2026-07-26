@@ -19,23 +19,21 @@ const routes: Routes = [
   { path: 'appointments', component: AppointmentsComponent }
 ]
 @NgModule({
-  imports: [
-    CommonModule,
-    RouterModule.forChild(routes),
-    ReactiveFormsModule,
-    RouterModule,
-    FormsModule,
-    SharedModule,
-  ],
-  declarations: [
-    AdminComponent,
-    DoctorsComponent,
-    BoardComponent,
-    ChartComponent,
-    PatientsComponent,
-    AppointmentsComponent,
-    TempAppointmentComponent
-  ],
-  bootstrap: [AdminComponent]
+    imports: [
+        CommonModule,
+        RouterModule.forChild(routes),
+        ReactiveFormsModule,
+        RouterModule,
+        FormsModule,
+        SharedModule,
+        DoctorsComponent,
+        BoardComponent,
+        ChartComponent,
+        PatientsComponent,
+        AppointmentsComponent,
+        TempAppointmentComponent,
+        AdminComponent,
+    ],
+    bootstrap: [AdminComponent]
 })
 export class AdminModule { }

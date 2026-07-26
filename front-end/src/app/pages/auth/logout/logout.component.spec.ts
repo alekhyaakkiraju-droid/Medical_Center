@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
 import { LogoutComponent } from './logout.component';
+import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
 
 describe('LogoutComponent', () => {
   let component: LogoutComponent;
@@ -11,8 +12,9 @@ describe('LogoutComponent', () => {
 
   beforeEach((async () => {
     await TestBed.configureTestingModule({
-      declarations: [ LogoutComponent ]
-    })
+    imports: [LogoutComponent],
+    providers: standaloneComponentTestProviders,
+})
     .compileComponents();
   }));
 

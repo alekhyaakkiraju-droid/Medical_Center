@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
 import { ResetPasswordComponent } from './reset-password.component';
+import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
 
 describe('ResetPasswordComponent', () => {
   let component: ResetPasswordComponent;
@@ -11,8 +12,9 @@ describe('ResetPasswordComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ ResetPasswordComponent ]
-    })
+    imports: [ResetPasswordComponent],
+    providers: standaloneComponentTestProviders,
+})
     .compileComponents();
   }));
 

@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
 import { LoginComponent } from './login.component';
+import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -11,8 +12,9 @@ describe('LoginComponent', () => {
 
   beforeEach((async () => {
     await TestBed.configureTestingModule({
-      declarations: [ LoginComponent ]
-    })
+    imports: [LoginComponent],
+    providers: standaloneComponentTestProviders,
+})
     .compileComponents();
   }));
 

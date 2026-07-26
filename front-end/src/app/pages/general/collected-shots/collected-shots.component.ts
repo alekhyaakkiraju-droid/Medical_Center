@@ -1,10 +1,11 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { AssetUrlPipe } from '../../../shared/asset-url.pipe';
 
 @Component({
-  standalone: false,
-  selector: 'app-collected-shots',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './collected-shots.component.html'
+    selector: 'app-collected-shots',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './collected-shots.component.html',
+    imports: [AssetUrlPipe]
 })
 export class CollectedShotsComponent implements OnInit {
 

@@ -1,14 +1,16 @@
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AuthServiceService } from '../../pages/auth/auth-services/auth-service.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { NgClass } from '@angular/common';
+import { LogoutComponent } from '../../pages/auth/logout/logout.component';
 
 @Component({
-  standalone: false,
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrls: ['./header.component.css']
+    selector: 'app-header',
+    templateUrl: './header.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrls: ['./header.component.css'],
+    imports: [NgClass, RouterLink, RouterLinkActive, LogoutComponent]
 })
 export class HeaderComponent implements OnInit , OnDestroy {
 

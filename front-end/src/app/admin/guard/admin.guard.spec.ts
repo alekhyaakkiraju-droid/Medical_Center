@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { AdminGuard } from './admin.guard';
 import { AuthServiceService } from '../../pages/auth/auth-services/auth-service.service';
+import { standaloneComponentTestProviders } from '../../testing/standalone-component-test-providers';
 
 describe('AdminGuard', () => {
   let guard: AdminGuard;
@@ -15,7 +16,7 @@ describe('AdminGuard', () => {
     router = jasmine.createSpyObj('Router', ['navigate']);
 
     TestBed.configureTestingModule({
-      providers: [
+      providers: [...standaloneComponentTestProviders, 
         AdminGuard,
         { provide: AuthServiceService, useValue: authService },
         { provide: Router, useValue: router },

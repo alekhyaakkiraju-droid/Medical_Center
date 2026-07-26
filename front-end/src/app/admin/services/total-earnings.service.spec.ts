@@ -2,11 +2,12 @@
 
 import { TestBed, waitForAsync, inject } from '@angular/core/testing';
 import { TotalEarningsService } from './total-earnings.service';
+import { standaloneComponentTestProviders } from '../../testing/standalone-component-test-providers';
 
 describe('Service: TotalEarnings', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [TotalEarningsService]
+      providers: [...standaloneComponentTestProviders, TotalEarningsService]
     });
   });
 

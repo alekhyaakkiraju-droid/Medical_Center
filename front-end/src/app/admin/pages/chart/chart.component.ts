@@ -1,11 +1,12 @@
+import { NgIf } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, Inject, PLATFORM_ID, QueryList, ViewChildren, ChangeDetectionStrategy } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 @Component({
-  standalone: false,
-  selector: 'app-chart',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './chart.component.html'
+    selector: 'app-chart',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './chart.component.html',
+    imports: [NgIf],
 })
 export class ChartComponent implements AfterViewInit {
   private ApexCharts: any;

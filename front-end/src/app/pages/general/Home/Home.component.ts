@@ -2,13 +2,17 @@ import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angu
 import { ReloadService } from '../../../shared/service/reload.service';
 import { SpecializationService } from '../services/specialization.service';
 import { Subscription } from 'rxjs';
+import { DoctorcsComponent } from '../doctorcs/doctorcs.component';
+import { FaqComponent } from '../faq/faq.component';
+import { AppointmentRequestComponent } from '../appointment-request/appointment-request.component';
+import { AssetUrlPipe } from '../../../shared/asset-url.pipe';
 
 @Component({
-  standalone: false,
-  selector: 'app-Home',
-  templateUrl: './Home.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrls: ['./Home.component.css']
+    selector: 'app-Home',
+    templateUrl: './Home.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrls: ['./Home.component.css'],
+    imports: [DoctorcsComponent, FaqComponent, AppointmentRequestComponent, AssetUrlPipe]
 })
 export class HomeComponent implements  OnInit , AfterViewInit {
 

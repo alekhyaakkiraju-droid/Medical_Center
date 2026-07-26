@@ -2,11 +2,12 @@
 
 import { TestBed,  inject } from '@angular/core/testing';
 import { HandleErrorsService } from './handle-errors.service';
+import { standaloneComponentTestProviders } from '../../testing/standalone-component-test-providers';
 
 describe('Service: HandleErrors', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [HandleErrorsService]
+      providers: [...standaloneComponentTestProviders, HandleErrorsService]
     });
   });
 

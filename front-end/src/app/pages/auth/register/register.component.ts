@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { AuthServiceService } from '../auth-services/auth-service.service';
@@ -8,10 +8,10 @@ import { ReloadService } from '../../../shared/service/reload.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
-  standalone: false,
-  selector: 'app-register',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './register.component.html'
+    selector: 'app-register',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './register.component.html',
+    imports: [ReactiveFormsModule]
 })
 
 export class RegisterComponent implements OnInit,AfterViewInit {

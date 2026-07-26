@@ -1,15 +1,16 @@
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { ForgotServiceService } from '../auth-services/forgot-service.service';
 import { ModelService } from '../auth-services/model.service';
 import { ToastrService } from 'ngx-toastr';
+import { NgClass } from '@angular/common';
 
 @Component({
-  standalone: false,
-  selector: 'app-forgetPassword',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './forgetPassword.component.html'
+    selector: 'app-forgetPassword',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './forgetPassword.component.html',
+    imports: [ReactiveFormsModule, NgClass]
 })
 export class ForgetPasswordComponent implements OnInit, OnDestroy {
 
@@ -20,7 +21,9 @@ export class ForgetPasswordComponent implements OnInit, OnDestroy {
 
   constructor(private forgetpasswordService: ForgotServiceService,
               private modalService: ModelService,
-              private toaster: ToastrService) { }
+              private toaster: ToastrService, private fb: FormBuilder) {
+    this.forgetForm = this.fb.group({ emailForgot: ['', [Validators.required, Validators.email]] });
+  }
 
   ngOnInit() {
     this.modalSubscription = this.modalService.dialogState$.subscribe((state) => {

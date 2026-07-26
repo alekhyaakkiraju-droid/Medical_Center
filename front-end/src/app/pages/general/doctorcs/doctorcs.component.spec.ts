@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
 import { DoctorcsComponent } from './doctorcs.component';
+import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
 
 describe('DoctorcsComponent', () => {
   let component: DoctorcsComponent;
@@ -11,8 +12,9 @@ describe('DoctorcsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ DoctorcsComponent ]
-    })
+    imports: [DoctorcsComponent],
+    providers: standaloneComponentTestProviders,
+})
     .compileComponents();
   }));
 

@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  standalone: false,
-  selector: 'app-delete-modal',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './delete-modal.component.html'
+    selector: 'app-delete-modal',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './delete-modal.component.html',
+    imports: [],
 })
 export class DeleteModalComponent {
   @Input() itemId!: number;

@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
 import { ConfirmEmailComponent } from './confirm-email.component';
+import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
 
 describe('ConfirmEmailComponent', () => {
   let component: ConfirmEmailComponent;
@@ -11,8 +12,9 @@ describe('ConfirmEmailComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ ConfirmEmailComponent ]
-    })
+    imports: [ConfirmEmailComponent],
+    providers: standaloneComponentTestProviders,
+})
     .compileComponents();
   }));
 

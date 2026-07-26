@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { SnakebarService } from '../../../shared/service/SnakebarService.service';
 import { ReloadService } from '../../../shared/service/reload.service';
 import { AuthServiceService } from '../auth-services/auth-service.service';
@@ -9,12 +9,13 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { ResetPasswordService } from '../auth-services/resetPassword.service';
 import { ModelService } from '../auth-services/model.service';
 import { ToastrService } from 'ngx-toastr';
+import { ForgetPasswordComponent } from '../forgetPassword/forgetPassword.component';
 
 @Component({
-  standalone: false,
-  selector: 'app-login',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './login.component.html'
+    selector: 'app-login',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './login.component.html',
+    imports: [ReactiveFormsModule, ForgetPasswordComponent]
 })
 export class LoginComponent implements OnInit, AfterViewInit{
 

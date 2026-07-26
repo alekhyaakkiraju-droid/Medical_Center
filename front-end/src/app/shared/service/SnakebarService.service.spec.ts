@@ -2,11 +2,12 @@
 
 import { TestBed, waitForAsync, inject } from '@angular/core/testing';
 import { SnakebarService } from './SnakebarService.service';
+import { standaloneComponentTestProviders } from '../../testing/standalone-component-test-providers';
 
 describe('Service: SnakebarService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [SnakebarService]
+      providers: [...standaloneComponentTestProviders, SnakebarService]
     });
   });
 

@@ -3,12 +3,14 @@ import { AppointmentService } from '../../../pages/general/services/appointment.
 import { ReloadService } from '../../../shared/service/reload.service';
 import { Subscription } from 'rxjs';
 import { MENU } from '../../menu';
+import { SideBarComponent } from '../side-bar/side-bar.component';
+import { TempAppointmentComponent } from '../temp-appointment/temp-appointment.component';
 
 @Component({
-  standalone: false,
-  selector: 'app-appointments',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './appointments.component.html'
+    selector: 'app-appointments',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './appointments.component.html',
+    imports: [SideBarComponent, TempAppointmentComponent]
 })
 export class AppointmentsComponent implements OnInit, OnDestroy {
   appointments: any[] = [];

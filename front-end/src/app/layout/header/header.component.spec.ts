@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
 import { HeaderComponent } from './header.component';
+import { standaloneComponentTestProviders } from '../../testing/standalone-component-test-providers';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
@@ -11,8 +12,9 @@ describe('HeaderComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ HeaderComponent ]
-    })
+    imports: [HeaderComponent],
+    providers: standaloneComponentTestProviders,
+})
     .compileComponents();
   }));
 

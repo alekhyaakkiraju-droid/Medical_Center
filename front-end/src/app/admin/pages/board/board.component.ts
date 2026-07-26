@@ -12,14 +12,18 @@ import { TotalEarningsService } from '../../services/total-earnings.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { SideBarComponent } from '../side-bar/side-bar.component';
+import { NgClass, CurrencyPipe, DatePipe } from '@angular/common';
+import { ChartComponent } from '../chart/chart.component';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 
 @Component({
-  standalone: false,
-  selector: 'app-board',
-  templateUrl: './board.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrls: ['./board.component.css']
+    selector: 'app-board',
+    templateUrl: './board.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrls: ['./board.component.css'],
+    imports: [SideBarComponent, NgClass, ChartComponent, DeleteModalComponent, ReactiveFormsModule, FormsModule, CurrencyPipe, DatePipe]
 })
 export class BoardComponent implements OnInit, OnDestroy {
 

@@ -1,11 +1,13 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 @Component({
-  standalone: false,
-  selector: 'app-blog',
-  templateUrl: './blog.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrls: ['./blog.component.css']
+    selector: 'app-blog',
+    templateUrl: './blog.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrls: ['./blog.component.css'],
+    imports: [RouterLink, ReactiveFormsModule, FormsModule]
 })
 export class BlogComponent implements OnInit {
 

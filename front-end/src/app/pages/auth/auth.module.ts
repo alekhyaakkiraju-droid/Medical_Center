@@ -24,23 +24,21 @@ const routes: Routes = [
 ] 
 
 @NgModule({
-  imports: [
-    CommonModule,
-    RouterModule.forChild(routes),
-    ReactiveFormsModule,          
-    HttpClientModule,
-    FormsModule 
-  ],
-  declarations: [
-    AuthComponent,
-    LoginComponent,
-    RegisterComponent,
-    LogoutComponent,
-    ResetPasswordComponent,
-    ForgetPasswordComponent,
-    LoginSuccessComponent,
-    ConfirmEmailComponent
-  ],
-  exports: [LogoutComponent]
+    imports: [
+        CommonModule,
+        RouterModule.forChild(routes),
+        ReactiveFormsModule,
+        HttpClientModule,
+        FormsModule,
+        AuthComponent,
+        LoginComponent,
+        RegisterComponent,
+        LogoutComponent,
+        ResetPasswordComponent,
+        ForgetPasswordComponent,
+        LoginSuccessComponent,
+        ConfirmEmailComponent
+    ],
+    exports: [LogoutComponent]
 })
 export class AuthModule { }

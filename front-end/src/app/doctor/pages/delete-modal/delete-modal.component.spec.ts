@@ -1,13 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { DeleteModalComponent } from './delete-modal.component';
+import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
 
 describe('DeleteModalComponent', () => {
   let component: DeleteModalComponent;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [DeleteModalComponent]
-    });
+    imports: [DeleteModalComponent],
+    providers: standaloneComponentTestProviders,
+});
     component = TestBed.createComponent(DeleteModalComponent).componentInstance;
   });
 

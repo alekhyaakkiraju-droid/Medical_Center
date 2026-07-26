@@ -2,11 +2,12 @@
 
 import { TestBed, waitForAsync, inject } from '@angular/core/testing';
 import { SearchService } from './search.service';
+import { standaloneComponentTestProviders } from '../../testing/standalone-component-test-providers';
 
 describe('Service: Search', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [SearchService]
+      providers: [...standaloneComponentTestProviders, SearchService]
     });
   });
 

@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
 import { SideBarComponent } from './side-bar.component';
+import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
 
 describe('SideBarComponent', () => {
   let component: SideBarComponent;
@@ -11,8 +12,9 @@ describe('SideBarComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ SideBarComponent ]
-    })
+    imports: [SideBarComponent],
+    providers: standaloneComponentTestProviders,
+})
     .compileComponents();
   }));
 

@@ -2,13 +2,14 @@ import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/
 import { DoctorService } from '../services/doctor.service';
 import { Doctor } from '../../models';
 import { Subscription } from 'rxjs';
+import { AssetUrlPipe } from '../../../shared/asset-url.pipe';
 
 @Component({
-  standalone: false,
-  selector: 'app-doctorcs',
-  templateUrl: './doctorcs.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrls: ['./doctorcs.component.css']
+    selector: 'app-doctorcs',
+    templateUrl: './doctorcs.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrls: ['./doctorcs.component.css'],
+    imports: [AssetUrlPipe]
 })
 export class DoctorcsComponent implements OnInit, OnDestroy {
   

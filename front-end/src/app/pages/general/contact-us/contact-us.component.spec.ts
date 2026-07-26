@@ -6,6 +6,7 @@ import { of, throwError } from 'rxjs';
 import { ContactUsComponent } from './contact-us.component';
 import { ContactService } from '../services/contact.service';
 import { AuthServiceService } from '../../auth/auth-services/auth-service.service';
+import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
 
 describe('ContactUsComponent', () => {
   let component: ContactUsComponent;
@@ -21,14 +22,13 @@ describe('ContactUsComponent', () => {
     authService.ensureCsrfToken.and.returnValue(of(void 0));
 
     TestBed.configureTestingModule({
-      declarations: [ContactUsComponent],
-      imports: [ReactiveFormsModule],
-      providers: [
+    imports: [ReactiveFormsModule, ContactUsComponent],
+    providers: [...standaloneComponentTestProviders, 
         { provide: ContactService, useValue: contactService },
         { provide: ToastrService, useValue: toastr },
         { provide: AuthServiceService, useValue: authService }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
   }));
 
   beforeEach(() => {

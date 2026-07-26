@@ -2,11 +2,12 @@
 
 import { TestBed, waitForAsync, inject } from '@angular/core/testing';
 import { DoctorAppointmentsService } from './doctor-appointments.service';
+import { standaloneComponentTestProviders } from '../../testing/standalone-component-test-providers';
 
 describe('Service: DoctorAppointments', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [DoctorAppointmentsService]
+      providers: [...standaloneComponentTestProviders, DoctorAppointmentsService]
     });
   });
 

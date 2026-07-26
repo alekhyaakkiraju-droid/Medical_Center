@@ -3,10 +3,12 @@ import { SharedModule } from './shared.module';
 import { DeleteModalComponent } from '../doctor/pages/delete-modal/delete-modal.component';
 import { PaymentComponent } from '../pages/general/Payment/Payment.component';
 import { SideBarComponent } from '../admin/pages/side-bar/side-bar.component';
+import { standaloneComponentTestProviders } from '../testing/standalone-component-test-providers';
 
 describe('SharedModule', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      providers: standaloneComponentTestProviders,
       imports: [SharedModule],
     }).compileComponents();
   });

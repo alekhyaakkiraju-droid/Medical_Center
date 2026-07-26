@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
 import { AppointmentsComponent } from './appointments.component';
+import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
 
 describe('AppointmentsComponent', () => {
   let component: AppointmentsComponent;
@@ -11,8 +12,9 @@ describe('AppointmentsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ AppointmentsComponent ]
-    })
+    imports: [AppointmentsComponent],
+    providers: standaloneComponentTestProviders,
+})
     .compileComponents();
   }));
 
