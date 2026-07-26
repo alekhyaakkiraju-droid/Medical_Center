@@ -1,4 +1,5 @@
-﻿using AngularApi.Models;
+﻿using AngularApi.Infrastructure;
+using AngularApi.Models;
 using AngularApi.Options;
 using AngularApi.Services.impelementation;
 using AngularApi.Services.Interfaces;
@@ -40,6 +41,7 @@ namespace AngularApi.Services
             {
                 option.UseSqlServer(configuration.GetConnectionString("connection"));
             });
+            services.AddScoped<IDatabaseMigrationRunner, EfCoreDatabaseMigrationRunner>();
 
 
             services.AddIdentity<AppUser, IdentityRole>(options =>
