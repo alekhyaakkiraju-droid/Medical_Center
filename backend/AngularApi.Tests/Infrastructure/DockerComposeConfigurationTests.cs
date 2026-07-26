@@ -16,6 +16,27 @@ public class DockerComposeConfigurationTests
         compose.Should().Contain("api:");
         compose.Should().Contain("yarp-proxy:");
         compose.Should().Contain("sqlserver:");
+        compose.Should().Contain("mailhog:");
+    }
+
+    [Fact]
+    public void DockerComposeFile_DefinesMailHogServiceWithCorrectImageAndPorts()
+    {
+        var compose = File.ReadAllText(Path.Combine(RepoRoot, "docker-compose.yml"));
+
+        compose.Should().Contain("mailhog/mailhog:latest");
+        compose.Should().Contain("\"1025:1025\"");
+        compose.Should().Contain("\"8025:8025\"");
+    }
+
+    [Fact]
+    public void DockerComposeFile_RoutesApiEmailThroughMailHog()
+    {
+        var compose = File.ReadAllText(Path.Combine(RepoRoot, "docker-compose.yml"));
+
+        compose.Should().Contain("SmtpSettings__Host: mailhog");
+        compose.Should().Contain("SmtpSettings__Port: 1025");
+        compose.Should().Contain("SmtpSettings__UseTls: \"false\"");
     }
 
     [Fact]
@@ -109,5 +130,15 @@ public class DockerComposeConfigurationTests
         envExample.Should().Contain("API_PUBLIC_URL=");
         envExample.Should().Contain("YARP_HOST_PORT=");
         envExample.Should().Contain("FRONTEND_HOST_PORT=");
+    }
+
+    [Fact]
+    public void EnvExample_DocumentsMailHogConfiguration()
+    {
+        var envExample = File.ReadAllText(Path.Combine(RepoRoot, ".env.example"));
+
+        envExample.Should().Contain("MailHog");
+        envExample.Should().Contain("http://localhost:8025");
+        envExample.Should().Contain("SmtpSettings__Host=mailhog");
     }
 }
