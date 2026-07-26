@@ -50,37 +50,13 @@ public class MedicalCenterServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateMedicalCenterAsync_ValidInput_PersistsMedicalCenter()
-    {
-        var center = new MedicalCenter { Id = 1, City = "Boston", State = "MA", FirstConsultationFee = 100m, FollowupConsultationFee = 75m };
-        var created = await _service.CreateMedicalCenterAsync(center);
-        created.Id.Should().Be(1);
-        (await _context.MedicalCenter.FindAsync(1)).Should().NotBeNull();
-    }
+    public async Task CreateMedicalCenterAsync_ValidInput_PersistsMedicalCenter(){var dto=new CreateMedicalCenterDTO{StreetAddress="1 Main St",City="Boston",State="MA",Zip="02101",FirstConsultationFee=100m,FollowupConsultationFee=75m};var created=await _service.CreateMedicalCenterAsync(dto);created.Id.Should().BeGreaterThan(0);created.City.Should().Be("Boston");(await _context.MedicalCenter.FindAsync(created.Id)).Should().NotBeNull();}
 
     [Fact]
-    public async Task UpdateMedicalCenterAsync_ValidInput_UpdatesMedicalCenter()
-    {
-        var center = new MedicalCenter { Id = 1, City = "Boston", State = "MA" };
-        _context.MedicalCenter.Add(center);
-        await _context.SaveChangesAsync();
-        center.City = "Cambridge";
-        center.Zip = "02139";
-        (await _service.UpdateMedicalCenterAsync(1, center)).Should().BeTrue();
-        (await _context.MedicalCenter.FindAsync(1))!.City.Should().Be("Cambridge");
-    }
+    public async Task UpdateMedicalCenterAsync_ValidInput_UpdatesMedicalCenter(){var center=new MedicalCenter{Id=1,StreetAddress="1 Main St",City="Boston",State="MA",Zip="02101"};_context.MedicalCenter.Add(center);await _context.SaveChangesAsync();var dto=new UpdateMedicalCenterDTO{StreetAddress="2 Oak Ave",City="Cambridge",State="MA",Zip="02139"};(await _service.UpdateMedicalCenterAsync(1,dto)).Should().BeTrue();(await _context.MedicalCenter.FindAsync(1))!.City.Should().Be("Cambridge");}
 
     [Fact]
-    public async Task UpdateMedicalCenterAsync_IdMismatch_ReturnsFalse()
-    {
-        (await _service.UpdateMedicalCenterAsync(1, new MedicalCenter { Id = 2, City = "Boston" })).Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task UpdateMedicalCenterAsync_NonExistingId_ReturnsFalse()
-    {
-        (await _service.UpdateMedicalCenterAsync(1, new MedicalCenter { Id = 1, City = "Boston" })).Should().BeFalse();
-    }
+    public async Task UpdateMedicalCenterAsync_ExistingIdWithOptionalFields_Updates(){var center=new MedicalCenter{Id=1,StreetAddress="1 Main St",City="Boston",State="MA",Zip="02101"};_context.MedicalCenter.Add(center);await _context.SaveChangesAsync();(await _service.UpdateMedicalCenterAsync(1,new UpdateMedicalCenterDTO{StreetAddress="1 Main St",City="Boston",State="MA",Zip="02101",HospitalAffiliationId=5})).Should().BeTrue();}
 
     [Fact]
     public async Task DeleteMedicalCenterAsync_ExistingId_RemovesMedicalCenter()

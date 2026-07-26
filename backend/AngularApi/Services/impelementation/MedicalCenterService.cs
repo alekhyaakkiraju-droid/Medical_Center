@@ -35,42 +35,13 @@ public class MedicalCenterService : IMedicalCenterService
     public Task<MedicalCenter?> GetMedicalCenterByIdAsync(int id, CancellationToken cancellationToken = default) =>
         _context.MedicalCenter.FindAsync([id], cancellationToken).AsTask();
 
-    public async Task<MedicalCenter> CreateMedicalCenterAsync(
-        MedicalCenter medicalCenter,
-        CancellationToken cancellationToken = default)
-    {
-        _context.MedicalCenter.Add(medicalCenter);
-        await _context.SaveChangesAsync(cancellationToken);
-        return medicalCenter;
-    }
-
-    public async Task<bool> UpdateMedicalCenterAsync(
-        int id,
-        MedicalCenter medicalCenter,
-        CancellationToken cancellationToken = default)
-    {
-        if (id != medicalCenter.Id)
-        {
-            return false;
-        }
-
-        _context.Entry(medicalCenter).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync(cancellationToken);
-            return true;
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!await MedicalCenterExistsAsync(id, cancellationToken))
-            {
-                return false;
-            }
-
-            throw;
-        }
-    }
+    public async Task<MedicalCenter> CreateMedicalCenterAsync(CreateMedicalCenterDTO dto, CancellationToken cancellationToken = default)
+    { var medicalCenter = MapToEntity(dto); _context.MedicalCenter.Add(medicalCenter); await _context.SaveChangesAsync(cancellationToken); return medicalCenter; }
+    public async Task<bool> UpdateMedicalCenterAsync(int id, UpdateMedicalCenterDTO dto, CancellationToken cancellationToken = default)
+    { var existing = await _context.MedicalCenter.FindAsync([id], cancellationToken); if (existing == null) return false; ApplyDto(existing, dto);
+      try { await _context.SaveChangesAsync(cancellationToken); return true; } catch (DbUpdateConcurrencyException) { if (!await MedicalCenterExistsAsync(id, cancellationToken)) return false; throw; } }
+    private static MedicalCenter MapToEntity(CreateMedicalCenterDTO dto) => new() { HospitalAffiliationId = dto.HospitalAffiliationId, TimeSlotPerClientInMin = dto.TimeSlotPerClientInMin, FirstConsultationFee = dto.FirstConsultationFee, FollowupConsultationFee = dto.FollowupConsultationFee, StreetAddress = dto.StreetAddress, City = dto.City, State = dto.State, Zip = dto.Zip };
+    private static void ApplyDto(MedicalCenter entity, UpdateMedicalCenterDTO dto) { entity.HospitalAffiliationId = dto.HospitalAffiliationId; entity.TimeSlotPerClientInMin = dto.TimeSlotPerClientInMin; entity.FirstConsultationFee = dto.FirstConsultationFee; entity.FollowupConsultationFee = dto.FollowupConsultationFee; entity.StreetAddress = dto.StreetAddress; entity.City = dto.City; entity.State = dto.State; entity.Zip = dto.Zip; }
 
     public async Task<bool> DeleteMedicalCenterAsync(int id, CancellationToken cancellationToken = default)
     {

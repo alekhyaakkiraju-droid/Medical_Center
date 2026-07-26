@@ -39,48 +39,13 @@ public class MedicalCenterDoctorAvailabilityService : IMedicalCenterDoctorAvaila
     public Task<MedicalCenterDoctorAvailability?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
         _context.MedicalCenterDoctorAvailability.FindAsync([id], cancellationToken).AsTask();
 
-    public async Task<MedicalCenterDoctorAvailability?> CreateAsync(
-        MedicalCenterDoctorAvailability availability,
-        CancellationToken cancellationToken = default)
-    {
-        if (availability.MedicalCenterId.HasValue
-            && !await MedicalCenterExistsAsync(availability.MedicalCenterId.Value, cancellationToken))
-        {
-            return null;
-        }
-
-        _context.MedicalCenterDoctorAvailability.Add(availability);
-        await _context.SaveChangesAsync(cancellationToken);
-        return availability;
-    }
-
-    public async Task<bool> UpdateAsync(
-        int id,
-        MedicalCenterDoctorAvailability availability,
-        CancellationToken cancellationToken = default)
-    {
-        if (id != availability.Id)
-        {
-            return false;
-        }
-
-        _context.Entry(availability).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync(cancellationToken);
-            return true;
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!await AvailabilityExistsAsync(id, cancellationToken))
-            {
-                return false;
-            }
-
-            throw;
-        }
-    }
+    public async Task<MedicalCenterDoctorAvailability?> CreateAsync(CreateMedicalCenterDoctorAvailabilityDTO dto, CancellationToken cancellationToken = default)
+    { if (!await MedicalCenterExistsAsync(dto.MedicalCenterId, cancellationToken)) return null; var availability = MapToEntity(dto); _context.MedicalCenterDoctorAvailability.Add(availability); await _context.SaveChangesAsync(cancellationToken); return availability; }
+    public async Task<bool> UpdateAsync(int id, UpdateMedicalCenterDoctorAvailabilityDTO dto, CancellationToken cancellationToken = default)
+    { var existing = await _context.MedicalCenterDoctorAvailability.FindAsync([id], cancellationToken); if (existing == null) return false; if (!await MedicalCenterExistsAsync(dto.MedicalCenterId, cancellationToken)) return false; ApplyDto(existing, dto);
+      try { await _context.SaveChangesAsync(cancellationToken); return true; } catch (DbUpdateConcurrencyException) { if (!await AvailabilityExistsAsync(id, cancellationToken)) return false; throw; } }
+    private static MedicalCenterDoctorAvailability MapToEntity(CreateMedicalCenterDoctorAvailabilityDTO dto) => new() { MedicalCenterId = dto.MedicalCenterId, DayOfWeek = dto.DayOfWeek, StartTime = dto.StartTime, EndTime = dto.EndTime, IsAvailable = dto.IsAvailable, ReasonOfUnavailability = dto.ReasonOfUnavailability };
+    private static void ApplyDto(MedicalCenterDoctorAvailability entity, UpdateMedicalCenterDoctorAvailabilityDTO dto) { entity.MedicalCenterId = dto.MedicalCenterId; entity.DayOfWeek = dto.DayOfWeek; entity.StartTime = dto.StartTime; entity.EndTime = dto.EndTime; entity.IsAvailable = dto.IsAvailable; entity.ReasonOfUnavailability = dto.ReasonOfUnavailability; }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
     {

@@ -9,9 +9,9 @@ public interface IMedicalCenterDoctorAvailabilityService
 
     Task<MedicalCenterDoctorAvailability?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
-    Task<MedicalCenterDoctorAvailability?> CreateAsync(MedicalCenterDoctorAvailability availability, CancellationToken cancellationToken = default);
+    Task<MedicalCenterDoctorAvailability?> CreateAsync(CreateMedicalCenterDoctorAvailabilityDTO dto, CancellationToken cancellationToken = default);
 
-    Task<bool> UpdateAsync(int id, MedicalCenterDoctorAvailability availability, CancellationToken cancellationToken = default);
+    Task<bool> UpdateAsync(int id, UpdateMedicalCenterDoctorAvailabilityDTO dto, CancellationToken cancellationToken = default);
 
     Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default);
 }

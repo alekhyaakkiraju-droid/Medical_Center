@@ -33,21 +33,16 @@ namespace AngularApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMedicalCenter(int id, MedicalCenter medicalCenter)
+        public async Task<IActionResult> PutMedicalCenter(int id, UpdateMedicalCenterDTO dto)
         {
-            if (id != medicalCenter.Id)
-            {
-                return BadRequest();
-            }
-
-            var updated = await _medicalCenterService.UpdateMedicalCenterAsync(id, medicalCenter);
+            var updated = await _medicalCenterService.UpdateMedicalCenterAsync(id, dto);
             return updated ? NoContent() : NotFound();
         }
 
         [HttpPost]
-        public async Task<ActionResult<MedicalCenter>> PostMedicalCenter(MedicalCenter medicalCenter)
+        public async Task<ActionResult<MedicalCenter>> PostMedicalCenter(CreateMedicalCenterDTO dto)
         {
-            var created = await _medicalCenterService.CreateMedicalCenterAsync(medicalCenter);
+            var created = await _medicalCenterService.CreateMedicalCenterAsync(dto);
             return CreatedAtAction("GetMedicalCenter", new { id = created.Id }, created);
         }
 

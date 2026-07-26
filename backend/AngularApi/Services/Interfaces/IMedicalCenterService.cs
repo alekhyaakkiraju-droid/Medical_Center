@@ -12,12 +12,12 @@ public interface IMedicalCenterService
     Task<MedicalCenter?> GetMedicalCenterByIdAsync(int id, CancellationToken cancellationToken = default);
 
     Task<MedicalCenter> CreateMedicalCenterAsync(
-        MedicalCenter medicalCenter,
+        CreateMedicalCenterDTO dto,
         CancellationToken cancellationToken = default);
 
     Task<bool> UpdateMedicalCenterAsync(
         int id,
-        MedicalCenter medicalCenter,
+        UpdateMedicalCenterDTO dto,
         CancellationToken cancellationToken = default);
 
     Task<bool> DeleteMedicalCenterAsync(int id, CancellationToken cancellationToken = default);
