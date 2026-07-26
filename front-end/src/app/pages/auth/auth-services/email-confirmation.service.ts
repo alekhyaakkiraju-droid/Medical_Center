@@ -12,7 +12,7 @@ export class EmailConfirmationService {
 
   constructor(private http: HttpClient, private authService: AuthServiceService) {}
 
-  confirmEmail(userId: string, token: string): Observable<any> {
+  confirmEmail(userId: string, token: string): Observable<string> {
     const encodedToken = encodeURIComponent(token);
     const url = `${this.apiUrl}?userId=${userId}&token=${encodedToken}`;
     return this.http.get(url, {

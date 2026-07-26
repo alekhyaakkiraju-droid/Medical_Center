@@ -3,6 +3,7 @@ import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { AuthServiceService } from '../../pages/auth/auth-services/auth-service.service';
 import { Observable } from 'rxjs';
+import { PagedResult, Review } from '../../pages/models';
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +13,11 @@ export class RelatedPatientsReviewsService {
  private readonly apiUrl = `${environment.api}/Doctors`;
   constructor(private http: HttpClient, private authService:AuthServiceService) {}
 
-  getPatientsReview(doctorId: string): Observable<any> {
-    return this.http.get<any[]>(`${this.apiUrl}/${doctorId}/reviews`, this.authService.getHttpOptions());
+  getPatientsReview(doctorId: string): Observable<PagedResult<Review>> {
+    return this.http.get<PagedResult<Review>>(
+      `${this.apiUrl}/${doctorId}/reviews`,
+      this.authService.getHttpOptions()
+    );
   }
 
 
