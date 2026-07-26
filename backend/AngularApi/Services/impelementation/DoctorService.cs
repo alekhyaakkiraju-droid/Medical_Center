@@ -10,14 +10,20 @@ namespace AngularApi.Services.impelementation;
 public class DoctorService : IDoctorService
 {
     private readonly MedicalCenterDbContext _context;
-    private readonly AsyncRetryPolicy _retryPolicy;
+    private readonly ResiliencePipeline _retryPipeline;
 
     public DoctorService(MedicalCenterDbContext context)
     {
         _context = context;
-        _retryPolicy = Policy.Handle<Exception>()
-            .WaitAndRetryAsync(3, sleepDurationProvider =>
-                TimeSpan.FromMilliseconds(1000 * sleepDurationProvider));
+        _retryPipeline = new ResiliencePipelineBuilder()
+            .AddRetry(new RetryStrategyOptions
+            {
+                MaxRetryAttempts = 3,
+                DelayGenerator = static args =>
+                    new ValueTask<TimeSpan?>(TimeSpan.FromMilliseconds(1000 * args.AttemptNumber)),
+                ShouldHandle = new PredicateBuilder().Handle<Exception>()
+            })
+            .Build();
     }
 
     public Task<PagedResult<DoctorDTO>> GetDoctorsAsync(PaginationParameters pagination, CancellationToken cancellationToken = default) =>
@@ -27,7 +33,9 @@ public class DoctorService : IDoctorService
         _context.Doctors.SelectDoctorDto().ToPagedResultAsync(pagination, cancellationToken);
 
     public Task<Doctor?> GetDoctorByIdAsync(string doctorId, CancellationToken cancellationToken = default) =>
-        _retryPolicy.ExecuteAsync(() => _context.Doctors.FindAsync([doctorId], cancellationToken).AsTask());
+        _retryPipeline.ExecuteAsync(
+            async ct => await _context.Doctors.FindAsync([doctorId], ct),
+            cancellationToken).AsTask();
 
     public async Task<Doctor> CreateDoctorAsync(Doctor doctor, CancellationToken cancellationToken = default)
     {
@@ -37,12 +45,13 @@ public class DoctorService : IDoctorService
     }
 
     public Task<PagedResult<BookingDTO>> GetBookingsAsync(string doctorId, PaginationParameters pagination, CancellationToken cancellationToken = default) =>
-        _retryPolicy.ExecuteAsync(() =>
-            _context.Appointments
+        _retryPipeline.ExecuteAsync(
+            async ct => await _context.Appointments
                 .Where(a => a.DoctorId == doctorId &&
                             a.AppointmentStatus!.Status == AppointmentStatusEnum.Active)
                 .SelectBookingDto()
-                .ToPagedResultAsync(pagination, cancellationToken));
+                .ToPagedResultAsync(pagination, ct),
+            cancellationToken).AsTask();
 
     public Task<PagedResult<BookingDTO>> GetBookingsByStatusAsync(string doctorId, AppointmentStatusEnum status, PaginationParameters pagination, CancellationToken cancellationToken = default) =>
         _context.Appointments
