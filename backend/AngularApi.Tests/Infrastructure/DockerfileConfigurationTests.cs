@@ -50,6 +50,21 @@ public class DockerfileConfigurationTests
         nginxConfig.Should().Contain("Strict-Transport-Security");
         nginxConfig.Should().Contain("X-Frame-Options");
         nginxConfig.Should().Contain("X-Content-Type-Options");
+        nginxConfig.Should().Contain("X-XSS-Protection");
+        nginxConfig.Should().Contain("Referrer-Policy");
         nginxConfig.Should().Contain("gzip on");
+        nginxConfig.Should().Contain("image/svg+xml");
+    }
+
+    [Fact]
+    public void NginxConfig_IncludesSpaFallbackAndAssetCaching()
+    {
+        var nginxConfig = File.ReadAllText(Path.Combine(RepoRoot, "front-end/nginx.conf"));
+
+        nginxConfig.Should().Contain("try_files $uri $uri/ /index.html");
+        nginxConfig.Should().Contain("proxy_pass http://yarp-proxy:8080/api/");
+        nginxConfig.Should().Contain("Cache-Control \"public, max-age=31536000, immutable\"");
+        nginxConfig.Should().Contain("location = /index.html");
+        nginxConfig.Should().Contain("Cache-Control \"no-cache\"");
     }
 }

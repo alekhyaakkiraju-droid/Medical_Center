@@ -18,7 +18,10 @@ public class SmokeTestScriptTests
         pipelineSmoke.Should().Contain("SMOKE_BASE_URL");
         pipelineSmoke.Should().Contain("SMOKE_API_URL");
         pipelineSmoke.Should().Contain("Image-bearing page validation");
-        pipelineSmoke.Should().Contain("/pages/gallery");
+        pipelineSmoke.Should().Contain("/pages/team");
+        pipelineSmoke.Should().Contain("app-root");
+        pipelineSmoke.Should().Contain("antiforgery-token");
+        pipelineSmoke.Should().Contain("120");
 
         e2eSmoke.Should().Contain("Smoke Test 1");
         e2eSmoke.Should().Contain("Smoke Test 2");
@@ -27,9 +30,12 @@ public class SmokeTestScriptTests
         e2eSmoke.Should().Contain("Smoke Test 5");
         e2eSmoke.Should().Contain("Smoke Test 6");
         e2eSmoke.Should().Contain("401");
+        e2eSmoke.Should().Contain("application/json");
+        e2eSmoke.Should().Contain("antiforgery-token");
 
         pipeline.Should().Contain("Staging E2E Tests");
         pipeline.Should().Contain("run-e2e-smoke.sh");
+        pipeline.Should().Contain("Staging Smoke Tests");
     }
 
     [Fact]
