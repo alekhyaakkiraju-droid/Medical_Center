@@ -9,8 +9,8 @@ public class DockerfileConfigurationTests
 
     [Theory]
     [InlineData("front-end/Dockerfile", "node:22-alpine", "HEALTHCHECK", "nginx:1-alpine-slim", "ng build --configuration production", "npm ci --ignore-scripts")]
-    [InlineData("backend/AngularApi/Dockerfile", "mcr.microsoft.com/dotnet/aspnet:8.0", "HEALTHCHECK", "USER $APP_UID", "/health")]
-    [InlineData("backend/YARPReverseProxy/Dockerfile", "mcr.microsoft.com/dotnet/aspnet:8.0", "HEALTHCHECK", "USER $APP_UID", "${BUILD_CONFIGURATION}")]
+    [InlineData("backend/AngularApi/Dockerfile", "mcr.microsoft.com/dotnet/sdk:10.0", "mcr.microsoft.com/dotnet/aspnet:10.0", "HEALTHCHECK", "USER $APP_UID", "/health", "apt-get install -y --no-install-recommends curl")]
+    [InlineData("backend/YARPReverseProxy/Dockerfile", "mcr.microsoft.com/dotnet/sdk:10.0", "mcr.microsoft.com/dotnet/aspnet:10.0", "HEALTHCHECK", "USER $APP_UID", "${BUILD_CONFIGURATION}", "apt-get install -y --no-install-recommends curl")]
     public void Dockerfiles_ContainProductionRequirements(string relativePath, params string[] requiredSnippets)
     {
         var dockerfile = File.ReadAllText(Path.Combine(RepoRoot, relativePath));
@@ -18,6 +18,19 @@ public class DockerfileConfigurationTests
         foreach (var snippet in requiredSnippets)
         {
             dockerfile.Should().Contain(snippet, because: $"{relativePath} must include {snippet}");
+        }
+    }
+
+    [Fact]
+    public void BackendDockerfiles_UseDotNet10UbuntuBaseImages()
+    {
+        foreach (var relativePath in new[] { "backend/AngularApi/Dockerfile", "backend/YARPReverseProxy/Dockerfile" })
+        {
+            var dockerfile = File.ReadAllText(Path.Combine(RepoRoot, relativePath));
+
+            dockerfile.Should().NotContain(":8.0", because: $"{relativePath} must not reference .NET 8 base images");
+            dockerfile.Should().Contain("mcr.microsoft.com/dotnet/sdk:10.0", because: $"{relativePath} build stage must use .NET 10 SDK");
+            dockerfile.Should().Contain("mcr.microsoft.com/dotnet/aspnet:10.0", because: $"{relativePath} runtime stage must use .NET 10 ASP.NET");
         }
     }
 
