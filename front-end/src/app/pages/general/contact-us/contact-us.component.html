@@ -62,26 +62,78 @@
       <div class="col-md-8">
         <div class="contact-form">
           <!-- contact form start -->
-          <form action="#" class="row">
+          <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="row">
             <!-- name -->
             <div class="col-md-6">
-              <input type="text" name="name" class="form-control main" placeholder="Name" required>
+              <div class="form-group">
+                <input
+                  type="text"
+                  formControlName="name"
+                  aria-label="Full name"
+                  class="form-control main"
+                  placeholder="Name"
+                  [ngClass]="{ 'is-invalid': name?.invalid && name?.touched }"
+                />
+                <div *ngIf="name?.invalid && name?.touched" class="text-danger">
+                  <small *ngIf="name?.hasError('required')">Name is required</small>
+                </div>
+              </div>
             </div>
             <!-- email -->
             <div class="col-md-6">
-              <input type="email" class="form-control main" placeholder="Email" required>
+              <div class="form-group">
+                <input
+                  type="email"
+                  formControlName="email"
+                  aria-label="Email address"
+                  class="form-control main"
+                  placeholder="Email"
+                  [ngClass]="{ 'is-invalid': email?.invalid && email?.touched }"
+                />
+                <div *ngIf="email?.invalid && email?.touched" class="text-danger">
+                  <small *ngIf="email?.hasError('required')">Email is required</small>
+                  <small *ngIf="email?.hasError('email')">Invalid email format</small>
+                </div>
+              </div>
             </div>
             <!-- phone -->
             <div class="col-md-12">
-              <input type="text" class="form-control main" placeholder="Phone" required>
+              <div class="form-group">
+                <input
+                  type="text"
+                  formControlName="phone"
+                  aria-label="Phone number"
+                  class="form-control main"
+                  placeholder="Phone"
+                />
+              </div>
             </div>
             <!-- message -->
             <div class="col-md-12">
-              <textarea name="message" rows="15" class="form-control main" placeholder="Your message"></textarea>
+              <div class="form-group">
+                <textarea
+                  formControlName="message"
+                  aria-label="Your message"
+                  rows="15"
+                  class="form-control main"
+                  placeholder="Your message"
+                  [ngClass]="{ 'is-invalid': message?.invalid && message?.touched }"
+                ></textarea>
+                <div *ngIf="message?.invalid && message?.touched" class="text-danger">
+                  <small *ngIf="message?.hasError('required')">Message is required</small>
+                  <small *ngIf="message?.hasError('maxlength')">Message must be 2000 characters or fewer</small>
+                </div>
+              </div>
             </div>
             <!-- submit button -->
             <div class="col-md-12 text-right">
-              <button class="btn btn-style-one" type="submit">Send Message</button>
+              <button
+                class="btn btn-style-one"
+                type="submit"
+                [disabled]="contactForm.invalid || isSubmitting"
+              >
+                {{ isSubmitting ? 'Sending...' : 'Send Message' }}
+              </button>
             </div>
           </form>
           <!-- contact form end -->
