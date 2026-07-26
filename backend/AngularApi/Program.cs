@@ -1,3 +1,4 @@
+using AngularApi.Infrastructure;
 using AngularApi.Filters;
 using AngularApi.Logging;
 using AngularApi.Middleware;
@@ -62,6 +63,8 @@ namespace WebApiDemo
             });
 
             var app = builder.Build();
+            await DatabaseMigrationStartup.ApplyPendingMigrationsAsync(app.Services);
+
             using (var scope = app.Services.CreateScope())
             {
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
