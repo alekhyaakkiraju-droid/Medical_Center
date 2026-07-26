@@ -4,6 +4,7 @@ import { catchError, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AuthServiceService } from './auth-service.service';
 import { HandleErrorsService } from '../../../shared/service/handle-errors.service';
+import { AuthMessageResponse } from '../../models';
 
 @Injectable({
   providedIn: 'root'
@@ -18,9 +19,13 @@ export class ResetPasswordService {
               ) {}
 
 
-  resetPassword(email: string, token: string, newPassword: string): Observable<any> {
+  resetPassword(email: string, token: string, newPassword: string): Observable<AuthMessageResponse> {
     const payload = { email, token, newPassword };
-    return this.http.post(`${this.apiUrl}/reset-password`, payload, this.authService.getHttpOptions()).pipe(
+    return this.http.post<AuthMessageResponse>(
+      `${this.apiUrl}/reset-password`,
+      payload,
+      this.authService.getHttpOptions()
+    ).pipe(
       catchError(this.handeErrorService.handleError)
     );     
   }

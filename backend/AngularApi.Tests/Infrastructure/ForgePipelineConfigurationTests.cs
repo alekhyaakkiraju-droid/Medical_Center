@@ -241,4 +241,14 @@ public class ForgePipelineConfigurationTests
         yaml[devBlockStart..stagingBlockStart].Should().Contain("- Authorization Regression Gate");
         yaml[stagingBlockStart..productionBlockStart].Should().Contain("- Authorization Regression Gate");
     }
+
+    [Fact]
+    public void ForgePipelineFile_FrontendBuildUsesNpmRunBuildWithOpenApiGeneration()
+    {
+        var yaml = File.ReadAllText(PipelinePath);
+        yaml.Should().Contain("- name: Generate OpenAPI Spec");
+        yaml.Should().Contain("testCommand: ./scripts/generate-openapi.sh");
+        yaml.Should().Contain("npm run build -- --configuration production");
+        yaml.Should().NotContain("./node_modules/.bin/ng build --configuration production");
+    }
 }

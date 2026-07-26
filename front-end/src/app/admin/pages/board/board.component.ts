@@ -108,7 +108,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   fetchPatientLength(): void {
     const patientSub = this.patientService.getAllPatient().subscribe({
       next: (data) => {
-        this.numOfPatients = data.length;
+        this.numOfPatients = data.totalCount ?? data.items?.length ?? 0;
         this.optimizeWidget();
       },
       error: (err) => {
@@ -121,7 +121,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   getTotalEarning(): void {
     const earningSub = this.totalEarningService.getTotalEarnings().subscribe({
       next: (data) => {
-        this.totalAmountEarning = data.totalEarnings;
+        this.totalAmountEarning = data.totalEarnings ?? 0;
         this.optimizeWidget();
       },
       error: (err) => {

@@ -33,8 +33,8 @@ cartItems$ = this.doctorsSubject.asObservable();
       { ...this.authService.getHttpOptions(), params: this.buildParams(page, pageSize) }
     ).pipe(
       tap((result: PagedResult<Doctor>) => {
-        this.doctorsSubject.next(result.items);
-        console.log('Doctors fetched from API:', result.items.length);
+        this.doctorsSubject.next(result.items ?? []);
+        console.log('Doctors fetched from API:', (result.items?.length ?? 0));
       }),
       catchError(this.handeErrorService.handleError)
     );

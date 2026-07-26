@@ -1,17 +1,27 @@
-/* tslint:disable:no-unused-variable */
-
-import { TestBed, waitForAsync, inject } from '@angular/core/testing';
+import { TestBed, inject } from '@angular/core/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { AuthServiceService } from '../../pages/auth/auth-services/auth-service.service';
+import { environment } from '../../../environments/environment';
 import { AppointmentsService } from './appointments.service';
-import { standaloneComponentTestProviders } from '../../testing/standalone-component-test-providers';
 
-describe('Service: Appointments', () => {
+describe('AppointmentsService', () => {
+  let httpMock: HttpTestingController;
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [...standaloneComponentTestProviders, AppointmentsService]
-    });
+    TestBed.configureTestingModule({ providers: [AppointmentsService,         {
+          provide: AuthServiceService,
+          useValue: {
+            getHttpOptions: () => ({
+              headers: { 'Content-Type': 'application/json' },
+              withCredentials: true
+            })
+          }
+        }, provideHttpClient(), provideHttpClientTesting()] });
+    httpMock = TestBed.inject(HttpTestingController);
   });
-
-  it('should ...', inject([AppointmentsService], (service: AppointmentsService) => {
-    expect(service).toBeTruthy();
+  afterEach(() => httpMock.verify());
+  it('getAppointments returns a typed paged result', inject([AppointmentsService], (service: AppointmentsService) => {
+    service.getAppointments().subscribe((result) => { expect(result.items?.[0]?.appointmentId).toBe(1); });
+    httpMock.expectOne(`${environment.api}/Appointments`).flush({ items: [{ appointmentId: 1 }], totalCount: 1, pageCount: 1, currentPage: 1, pageSize: 20 });
   }));
 });

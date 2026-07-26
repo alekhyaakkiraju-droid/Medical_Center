@@ -90,13 +90,18 @@ steps:
       dotnetVersion: "10.0"
       buildCommand: dotnet build backend/AngularApi/AngularApi.csproj -c Release
 
+  - name: Generate OpenAPI Spec
+    variantId: test:generic
+    config:
+      testCommand: ./scripts/generate-openapi.sh
+
   - name: Frontend Build
     variantId: build:node
     config:
       repoFullName: alekhyaakkiraju-droid/Medical_Center
       branch: main
       nodeVersion: "22"
-      buildCommand: cd front-end && npm ci --ignore-scripts && ./node_modules/.bin/ng build --configuration production
+      buildCommand: cd front-end && npm ci --ignore-scripts && npm run build -- --configuration production
 
   # --- Tests ---
   - name: Backend Unit Tests
@@ -337,6 +342,7 @@ environments:
       - SAST Scan
       - NPM Dependency Audit
       - Backend Build
+      - Generate OpenAPI Spec
       - Frontend Build
       - Backend Unit Tests
       - Authorization Regression Gate
@@ -348,6 +354,7 @@ environments:
       - SAST Scan
       - NPM Dependency Audit
       - Backend Build
+      - Generate OpenAPI Spec
       - Frontend Build
       - Backend Unit Tests
       - Authorization Regression Gate
