@@ -36,12 +36,7 @@ export class ChartComponent implements AfterViewInit {
         height: 400,
         type: 'line',
         shadow: {
-          enabled: true,
-          color: '#000',
-          top: 18,
-          left: 7,
-          blur: 10,
-          opacity: 1,
+          enabled: false,
         },
         toolbar: {
           show: false,
@@ -146,12 +141,7 @@ export class ChartComponent implements AfterViewInit {
         type: 'bar',
         height: 400,
         dropShadow: {
-          enabled: true,
-          color: '#000',
-          top: 18,
-          left: 7,
-          blur: 10,
-          opacity: 0.2,
+          enabled: false,
         },
         toolbar: {
           show: false,
@@ -215,23 +205,13 @@ export class ChartComponent implements AfterViewInit {
   cards = [
     {
       id: 'chart1',
-      title: 'CENTER SURVEY',
+      title: 'Appointment Trends',
       size: 'col-md-8',
-      tools: [
-        { icon: 'fa-repeat', action: 'refresh' },
-        { icon: 'fa-chevron-down', action: 'collapse' },
-        { icon: 'fa-times', action: 'close' }
-      ]
     },
     {
       id: 'chart2',
-      title: 'CENTER SURVEY',
+      title: 'Revenue Overview',
       size: 'col-md-4',
-      tools: [
-        { icon: 'fa-repeat', action: 'refresh' },
-        { icon: 'fa-chevron-down', action: 'collapse' },
-        { icon: 'fa-times', action: 'close' }
-      ]
     }
   ];
 }

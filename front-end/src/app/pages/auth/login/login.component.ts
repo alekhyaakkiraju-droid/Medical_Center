@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { SnakebarService } from '../../../shared/service/SnakebarService.service';
 import { ReloadService } from '../../../shared/service/reload.service';
@@ -15,7 +15,7 @@ import { ForgetPasswordComponent } from '../forgetPassword/forgetPassword.compon
     selector: 'app-login',
     changeDetection: ChangeDetectionStrategy.Eager,
     templateUrl: './login.component.html',
-    imports: [ReactiveFormsModule, ForgetPasswordComponent]
+    imports: [ReactiveFormsModule, ForgetPasswordComponent, RouterLink]
 })
 export class LoginComponent implements OnInit, AfterViewInit{
 

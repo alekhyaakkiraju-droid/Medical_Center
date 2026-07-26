@@ -1,0 +1,71 @@
+<section class="demo-hero">
+  <div class="demo-hero__inner">
+    <span class="demo-hero__badge">CareShift Live Demo</span>
+    <h1>See the modernized medical center in action</h1>
+    <p>
+      This is a sandbox environment with seeded doctors, patients, and appointments.
+      Pick a role below for one-click access — ideal for blog readers and video walkthroughs.
+    </p>
+    <div class="demo-hero__actions">
+      <a routerLink="/pages/appointment" class="demo-btn demo-btn--ghost">Browse public site first</a>
+      <button type="button" class="demo-btn demo-btn--secondary" (click)="copyPassword()">
+        Copy demo password
+      </button>
+    </div>
+    <p class="demo-hero__note">
+      UAT only — password <code>{{ demoPassword }}</code>. Do not reuse in production.
+    </p>
+  </div>
+</section>
+
+<section class="demo-roles">
+  <div class="demo-roles__grid">
+    @for (role of roles; track role.id) {
+      <article class="demo-card" [ngClass]="role.accentClass">
+        <div class="demo-card__icon">
+          <i [class]="role.iconClass" aria-hidden="true"></i>
+        </div>
+        <h2>{{ role.title }}</h2>
+        <p>{{ role.subtitle }}</p>
+        <ul>
+          @for (item of role.highlights; track item) {
+            <li>{{ item }}</li>
+          }
+        </ul>
+        <p class="demo-card__email">{{ role.email }}</p>
+        <button
+          type="button"
+          class="demo-btn demo-btn--primary"
+          [disabled]="loadingRole !== null"
+          (click)="enterAs(role)">
+          @if (loadingRole === role.id) {
+            Signing in…
+          } @else {
+            Enter as {{ role.title }}
+          }
+        </button>
+      </article>
+    }
+  </div>
+</section>
+
+<section class="demo-walkthrough">
+  <h2>Recommended 5-minute demo flow</h2>
+  <ol>
+    @for (item of walkthrough; track item.step) {
+      <li>
+        <strong>Step {{ item.step }} — {{ item.title }}</strong>
+        <span>{{ item.detail }}</span>
+      </li>
+    }
+  </ol>
+</section>
+
+<section class="demo-share">
+  <h2>Sharing this demo in your blog</h2>
+  <p>
+    Run the stack locally with Docker, then expose it with Cloudflare Tunnel:
+    <code>cloudflared tunnel --url http://localhost:8090</code>.
+    Full deploy checklist lives in <code>docs/forge-dev-deploy.md</code>.
+  </p>
+</section>

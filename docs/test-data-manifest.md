@@ -42,7 +42,7 @@ Both doctors share the default medical center (`MedicalCenterId = 2`) and the av
 
 | Field | Value |
 |-------|-------|
-| Image | `images/doctors/smith.png` |
+| Image | `images/team/doctor-1.jpg` |
 | Professional statement | Board-certified cardiologist focused on preventive heart care. |
 | Practicing from | 2010-06-01 (UTC) |
 
@@ -58,7 +58,7 @@ Both doctors share the default medical center (`MedicalCenterId = 2`) and the av
 
 | Field | Value |
 |-------|-------|
-| Image | `images/doctors/jones.png` |
+| Image | `images/team/doctor-2.jpg` |
 | Professional statement | Orthopedic surgeon specializing in sports medicine and joint repair. |
 | Practicing from | 2008-03-15 (UTC) |
 
@@ -84,8 +84,8 @@ Doctor bookings after login: `GET /api/Doctors/{doctorId}/bookings`.
 
 | Name | Email | Address | Image |
 |------|-------|---------|-------|
-| Alice Nguyen | `patient.alice@uat.careshift.local` | 123 Maple Street, Springfield, IL 62701 | `images/patients/alice.png` |
-| Bob Martinez | `patient.bob@uat.careshift.local` | 456 Oak Avenue, Portland, OR 97201 | `images/patients/bob.png` |
+| Alice Nguyen | `patient.alice@uat.careshift.local` | 123 Maple Street, Springfield, IL 62701 | `images/patients/patients-1.jpg` |
+| Bob Martinez | `patient.bob@uat.careshift.local` | 456 Oak Avenue, Portland, OR 97201 | `images/patients/patients-2.jpg` |
 
 ## Appointments
 
@@ -121,9 +121,9 @@ Seeded only when the `Specializations` table is empty. Typical ids on a fresh da
 
 | Id (typical) | Name | Image | Services |
 |--------------|------|-------|----------|
-| 1 | Orthopedics | `images/resource/1.png` | Joint Replacement; Sports Injury |
-| 2 | Cardiology | `images/resource/2.png` | ECG Screening; Hypertension Care |
-| 3 | Pediatrics | `images/resource/3.png` | Well-Child Visits; Immunizations |
+| 1 | Orthopedics | `images/services/service-one.jpg` | Joint Replacement; Sports Injury |
+| 2 | Cardiology | `images/services/service-two.jpg` | ECG Screening; Hypertension Care |
+| 3 | Pediatrics | `images/services/service-three.jpg` | Well-Child Visits; Immunizations |
 
 ### MedicalCenters
 

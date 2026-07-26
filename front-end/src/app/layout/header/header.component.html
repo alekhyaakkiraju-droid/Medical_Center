@@ -3,7 +3,7 @@
   <div class="header-top">
     <div class="container clearfix mx-auto max-w-7xl px-5 sm:px-6">
       <div class="top-left">
-        <h6>Opening Hours : Saturday to Tuesday - 8am to 10pm</h6>
+        <h6>CareShift Live Demo — <a routerLink="/demo" class="demo-top-link">Try it now</a></h6>
       </div>
       <div class="top-right">
         <ul class="social-links">
@@ -41,17 +41,16 @@
               <span>+ (88017) - 123 - 4567</span>
             </li>
             @if (!isLoggedIn) {
-              <li class="item">
-                <div class="icon-box">
-                  <a routerLink="/auth/login">
-                    <i class="fa-regular fa-user text-xl text-dark "></i>
-                  </a>
-                </div>
-                <div class="my-auto"><strong>Log In </strong></div>
-                <span>Get Started</span>
-                <br>
-                </li>
-              }
+              <li class="item item--login">
+                <a routerLink="/auth/login" class="login-link" aria-label="Log in">
+                  <div class="icon-box">
+                    <i class="fa-regular fa-user text-xl text-dark"></i>
+                  </div>
+                  <div class="my-auto"><strong>Log In </strong></div>
+                  <span>Get Started</span>
+                </a>
+              </li>
+            }
 
               @if (isLoggedIn) {
                 <li class="item">
@@ -66,6 +65,7 @@
               }
             </ul>
             <div class="link-btn">
+              <a routerLink="/demo" class="btn-style-one btn-style-one--demo">Live Demo</a>
               <a routerLink="/pages/appointment" class="btn-style-one">Appoinment</a>
             </div>
           </div>

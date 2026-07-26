@@ -56,6 +56,7 @@ public static class DevelopmentDataSeeder
 
         await SeedDoctorAvailabilityAsync(context, medicalCenterId);
         await SeedAppointmentsAsync(context, doctors, patients, medicalCenterId);
+        await RepairSeedAssetPathsAsync(context);
     }
 
     private static async Task SeedSpecializationsAsync(MedicalCenterDbContext context)
@@ -68,7 +69,7 @@ public static class DevelopmentDataSeeder
         var orthopedics = new Specialization
         {
             SpecializationName = "Orthopedics",
-            SpecializationImage = "images/resource/1.png",
+            SpecializationImage = "images/services/service-one.jpg",
             Description = "Bone, joint, and muscle care.",
             IsActive = true,
             Services =
@@ -81,7 +82,7 @@ public static class DevelopmentDataSeeder
         var cardiology = new Specialization
         {
             SpecializationName = "Cardiology",
-            SpecializationImage = "images/resource/2.png",
+            SpecializationImage = "images/services/service-two.jpg",
             Description = "Heart and cardiovascular care.",
             IsActive = true,
             Services =
@@ -94,7 +95,7 @@ public static class DevelopmentDataSeeder
         var pediatrics = new Specialization
         {
             SpecializationName = "Pediatrics",
-            SpecializationImage = "images/resource/3.png",
+            SpecializationImage = "images/services/service-three.jpg",
             Description = "Healthcare for children and adolescents.",
             IsActive = true,
             Services =
@@ -198,7 +199,7 @@ public static class DevelopmentDataSeeder
             {
                 Email = DoctorSmithEmail,
                 Name = "Dr. Alice Smith",
-                Image = "images/doctors/smith.png",
+                Image = "images/team/doctor-1.jpg",
                 ProfessionalStatement = "Board-certified cardiologist focused on preventive heart care.",
                 PracticingFrom = new DateTime(2010, 6, 1, 0, 0, 0, DateTimeKind.Utc),
                 SpecializationName = "Cardiology",
@@ -214,7 +215,7 @@ public static class DevelopmentDataSeeder
             {
                 Email = DoctorJonesEmail,
                 Name = "Dr. Robert Jones",
-                Image = "images/doctors/jones.png",
+                Image = "images/team/doctor-2.jpg",
                 ProfessionalStatement = "Orthopedic surgeon specializing in sports medicine and joint repair.",
                 PracticingFrom = new DateTime(2008, 3, 15, 0, 0, 0, DateTimeKind.Utc),
                 SpecializationName = "Orthopedics",
@@ -302,14 +303,14 @@ public static class DevelopmentDataSeeder
                 Email = PatientAliceEmail,
                 Name = "Alice Nguyen",
                 Address = "123 Maple Street, Springfield, IL 62701",
-                Image = "images/patients/alice.png",
+                Image = "images/patients/patients-1.jpg",
             },
             new
             {
                 Email = PatientBobEmail,
                 Name = "Bob Martinez",
                 Address = "456 Oak Avenue, Portland, OR 97201",
-                Image = "images/patients/bob.png",
+                Image = "images/patients/patients-2.jpg",
             }
         };
 
@@ -503,17 +504,25 @@ public static class DevelopmentDataSeeder
     {
         if (context.Database.IsSqlServer())
         {
-            await context.Database.OpenConnectionAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [AppointmentStatus] ON");
-                context.AppointmentStatus.AddRange(statuses);
-                await context.SaveChangesAsync();
+                foreach (var status in statuses)
+                {
+                    await context.Database.ExecuteSqlInterpolatedAsync(
+                        $"""
+                        SET IDENTITY_INSERT [AppointmentStatus] ON;
+                        INSERT INTO [AppointmentStatus] ([Id], [Status]) VALUES ({status.Id}, {(int)status.Status!});
+                        SET IDENTITY_INSERT [AppointmentStatus] OFF;
+                        """);
+                }
+
+                await transaction.CommitAsync();
             }
-            finally
+            catch
             {
-                await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [AppointmentStatus] OFF");
-                await context.Database.CloseConnectionAsync();
+                await transaction.RollbackAsync();
+                throw;
             }
 
             return;
@@ -533,23 +542,83 @@ public static class DevelopmentDataSeeder
     {
         if (context.Database.IsSqlServer())
         {
-            await context.Database.OpenConnectionAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
                 await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [MedicalCenter] ON");
-                context.MedicalCenter.Add(center);
+                var entry = context.MedicalCenter.Add(center);
+                entry.Property(c => c.Id).IsTemporary = false;
                 await context.SaveChangesAsync();
-            }
-            finally
-            {
                 await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [MedicalCenter] OFF");
-                await context.Database.CloseConnectionAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
 
             return;
         }
 
         context.MedicalCenter.Add(center);
+        await context.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Updates canonical UAT asset paths when seed data was created with legacy placeholders.
+    /// Safe to run on every Development startup.
+    /// </summary>
+    private static async Task RepairSeedAssetPathsAsync(MedicalCenterDbContext context)
+    {
+        var specializationImages = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Orthopedics"] = "images/services/service-one.jpg",
+            ["Cardiology"] = "images/services/service-two.jpg",
+            ["Pediatrics"] = "images/services/service-three.jpg",
+        };
+
+        foreach (var specialization in await context.Specializations.ToListAsync())
+        {
+            if (specializationImages.TryGetValue(specialization.SpecializationName, out var image)
+                && specialization.SpecializationImage != image)
+            {
+                specialization.SpecializationImage = image;
+            }
+        }
+
+        var doctorImages = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            [DoctorSmithEmail] = "images/team/doctor-1.jpg",
+            [DoctorJonesEmail] = "images/team/doctor-2.jpg",
+        };
+
+        foreach (var doctor in await context.Doctors.ToListAsync())
+        {
+            if (doctor.Email != null
+                && doctorImages.TryGetValue(doctor.Email, out var image)
+                && doctor.Image != image)
+            {
+                doctor.Image = image;
+            }
+        }
+
+        var patientImages = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            [PatientAliceEmail] = "images/patients/patients-1.jpg",
+            [PatientBobEmail] = "images/patients/patients-2.jpg",
+        };
+
+        foreach (var patient in await context.Patients.ToListAsync())
+        {
+            if (patient.Email != null
+                && patientImages.TryGetValue(patient.Email, out var image)
+                && patient.Image != image)
+            {
+                patient.Image = image;
+            }
+        }
+
         await context.SaveChangesAsync();
     }
 }

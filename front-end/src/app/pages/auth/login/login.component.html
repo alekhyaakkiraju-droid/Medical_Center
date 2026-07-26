@@ -17,7 +17,7 @@
       <form [formGroup]="loginForm"  (ngSubmit)="onSubmit()">
         <div class="mb-8">
           <h3 class="text-gray-800 text-3xl font-extrabold">Sign in</h3>
-          <p class="text-sm mt-4 text-gray-800">Don't have an account <a href="/auth/register" class="text-blue-600 font-semibold hover:underline hover:text-blue-700 ml-1 whitespace-nowrap">Register here</a></p>
+          <p class="text-sm mt-4 text-gray-800">Don't have an account <a routerLink="/auth/register" class="text-blue-600 font-semibold hover:underline hover:text-blue-700 ml-1 whitespace-nowrap">Register here</a></p>
         </div>
         <div>
           <label for="login-email" class="text-gray-800 text-[15px] mb-2 block">Email</label>

@@ -1,18 +1,23 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { AssetUrlPipe } from '../../../shared/asset-url.pipe';
+import { ImageLightboxComponent } from '../../../shared/image-lightbox/image-lightbox.component';
+import { resolveAssetUrl } from '../../../shared/asset-url.util';
 
 @Component({
     selector: 'app-collected-shots',
     changeDetection: ChangeDetectionStrategy.Eager,
     templateUrl: './collected-shots.component.html',
-    imports: [AssetUrlPipe]
+    imports: [AssetUrlPipe, ImageLightboxComponent]
 })
 export class CollectedShotsComponent implements OnInit {
+
+  @ViewChild(ImageLightboxComponent) lightbox!: ImageLightboxComponent;
 
   constructor() { }
 
   ngOnInit() {
   }
+
   galleryItems = [
     {
       image: 'images/gallery/gallery-01.jpg',
@@ -46,4 +51,7 @@ export class CollectedShotsComponent implements OnInit {
     },
   ];
 
+  openImage(item: (typeof this.galleryItems)[number]): void {
+    this.lightbox.open(resolveAssetUrl(item.image), item.title);
+  }
 }

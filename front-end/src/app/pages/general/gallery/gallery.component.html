@@ -17,7 +17,7 @@
 </section>
 <!--End Page Title-->
 
-
+<app-image-lightbox />
 
 <section class="video-gallery max-w-screen-xl px-4 mx-auto">
   <div class="container">
@@ -32,16 +32,21 @@
         </div>
       </div>
 
-      @for (video of videoGallery; track video) {
+      @for (item of mediaGallery; track item.title) {
         <div class="col-sm-6">
           <div class="video-gallery-item">
-            <div class="image-holder">
-              <img [src]="video.thumbnail | assetUrl" class="img-responsive" alt="video-gallery" />
-              <a data-fancybox [href]="video.videoUrl">
-                <i class="fa fa-play"></i>
-              </a>
+            <div
+              class="image-holder"
+              role="button"
+              tabindex="0"
+              [attr.aria-label]="'View ' + item.title"
+              (click)="openMedia(item)"
+              (keydown.enter)="openMedia(item)"
+            >
+              <img [src]="item.thumbnail | assetUrl" class="img-responsive" [alt]="item.title" />
+              <span class="media-view-btn">View photo</span>
             </div>
-            <h3>{{ video.title }}</h3>
+            <h3>{{ item.title }}</h3>
           </div>
         </div>
       }
