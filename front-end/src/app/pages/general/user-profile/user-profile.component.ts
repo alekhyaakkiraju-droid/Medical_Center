@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SnakebarService } from '../../../shared/service/SnakebarService.service';
 import { ReloadService } from '../../../shared/service/reload.service';
@@ -12,6 +12,7 @@ import { Profile, ProfileDetails } from '../../models';
 @Component({
   standalone: false,
   selector: 'app-user-profile',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './user-profile.component.html'
 })
 export class UserProfileComponent implements OnInit {

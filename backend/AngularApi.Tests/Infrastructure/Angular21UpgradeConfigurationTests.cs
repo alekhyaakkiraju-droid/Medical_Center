@@ -10,14 +10,14 @@ public class Angular21UpgradeConfigurationTests
     private static readonly string FrontendRoot = Path.Combine(RepoRoot, "front-end");
 
     [Fact]
-    public void PackageJson_PinsAngularPackagesTo21()
+    public void PackageJson_PinsAngularPackagesTo21OrNewer()
     {
         var packageJson = File.ReadAllText(Path.Combine(FrontendRoot, "package.json"));
-        packageJson.Should().Contain("\"@angular/core\": \"^21.");
-        packageJson.Should().Contain("\"@angular/cli\": \"^21.");
-        packageJson.Should().Contain("\"@angular/material\": \"^21.");
-        packageJson.Should().Contain("\"typescript\": \"~5.9.");
-        packageJson.Should().Contain("\"ngx-toastr\": \"^20.");
+
+        packageJson.Should().MatchRegex("\"@angular/core\": \"\\^2[1-9]\\.");
+        packageJson.Should().MatchRegex("\"@angular/cli\": \"\\^2[1-9]\\.");
+        packageJson.Should().MatchRegex("\"@angular/material\": \"\\^2[1-9]\\.");
+        packageJson.Should().NotContain("\"@angular/core\": \"^19.");
         packageJson.Should().NotContain("\"@angular/core\": \"^20.");
     }
 

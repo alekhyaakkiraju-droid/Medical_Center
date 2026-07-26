@@ -31,122 +31,138 @@
               <h3>Location</h3>
               <p>PO Box 16122 Collins Street West
                 <br>Victoria 8007 Canada
-              </p>
+                </p>
+              </div>
             </div>
-          </div>
-          <!-- Phone -->
-          <div class="media">
-            <i class="fa fa-phone"></i>
-            <div class="media-body">
-              <h3>Phone</h3>
-              <p>
-                (+48) 564-334-21-22-34
-                <br>(+48) 564-334-21-22-38
-              </p>
+            <!-- Phone -->
+            <div class="media">
+              <i class="fa fa-phone"></i>
+              <div class="media-body">
+                <h3>Phone</h3>
+                <p>
+                  (+48) 564-334-21-22-34
+                  <br>(+48) 564-334-21-22-38
+                  </p>
+                </div>
+              </div>
+              <!-- Email -->
+              <div class="media">
+                <i class="fa fa-envelope-o"></i>
+                <div class="media-body">
+                  <h3>Email</h3>
+                  <p>
+                    infotemplatepath.com
+                    <br>infocleanxer.com
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <!-- address end -->
             </div>
-          </div>
-          <!-- Email -->
-          <div class="media">
-            <i class="fa fa-envelope-o"></i>
-            <div class="media-body">
-              <h3>Email</h3>
-              <p>
-                infotemplatepath.com
-                <br>infocleanxer.com
-              </p>
+            <div class="col-md-8">
+              <div class="contact-form">
+                <!-- contact form start -->
+                <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="row">
+                  <!-- name -->
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <input
+                        type="text"
+                        formControlName="name"
+                        aria-label="Full name"
+                        class="form-control main"
+                        placeholder="Name"
+                        [ngClass]="{ 'is-invalid': name?.invalid && name?.touched }"
+                        />
+                      @if (name?.invalid && name?.touched) {
+                        <div class="text-danger">
+                          @if (name?.hasError('required')) {
+                            <small>Name is required</small>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                  <!-- email -->
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <input
+                        type="email"
+                        formControlName="email"
+                        aria-label="Email address"
+                        class="form-control main"
+                        placeholder="Email"
+                        [ngClass]="{ 'is-invalid': email?.invalid && email?.touched }"
+                        />
+                      @if (email?.invalid && email?.touched) {
+                        <div class="text-danger">
+                          @if (email?.hasError('required')) {
+                            <small>Email is required</small>
+                          }
+                          @if (email?.hasError('email')) {
+                            <small>Invalid email format</small>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                  <!-- phone -->
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <input
+                        type="text"
+                        formControlName="phone"
+                        aria-label="Phone number"
+                        class="form-control main"
+                        placeholder="Phone"
+                        />
+                    </div>
+                  </div>
+                  <!-- message -->
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <textarea
+                        formControlName="message"
+                        aria-label="Your message"
+                        rows="15"
+                        class="form-control main"
+                        placeholder="Your message"
+                        [ngClass]="{ 'is-invalid': message?.invalid && message?.touched }"
+                      ></textarea>
+                      @if (message?.invalid && message?.touched) {
+                        <div class="text-danger">
+                          @if (message?.hasError('required')) {
+                            <small>Message is required</small>
+                          }
+                          @if (message?.hasError('maxlength')) {
+                            <small>Message must be 2000 characters or fewer</small>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                  <!-- submit button -->
+                  <div class="col-md-12 text-right">
+                    <button
+                      class="btn btn-style-one"
+                      type="submit"
+                      [disabled]="contactForm.invalid || isSubmitting"
+                      >
+                      {{ isSubmitting ? 'Sending...' : 'Send Message' }}
+                    </button>
+                  </div>
+                </form>
+                <!-- contact form end -->
+              </div>
             </div>
           </div>
         </div>
-        <!-- address end -->
-      </div>
-      <div class="col-md-8">
-        <div class="contact-form">
-          <!-- contact form start -->
-          <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="row">
-            <!-- name -->
-            <div class="col-md-6">
-              <div class="form-group">
-                <input
-                  type="text"
-                  formControlName="name"
-                  aria-label="Full name"
-                  class="form-control main"
-                  placeholder="Name"
-                  [ngClass]="{ 'is-invalid': name?.invalid && name?.touched }"
-                />
-                <div *ngIf="name?.invalid && name?.touched" class="text-danger">
-                  <small *ngIf="name?.hasError('required')">Name is required</small>
-                </div>
-              </div>
-            </div>
-            <!-- email -->
-            <div class="col-md-6">
-              <div class="form-group">
-                <input
-                  type="email"
-                  formControlName="email"
-                  aria-label="Email address"
-                  class="form-control main"
-                  placeholder="Email"
-                  [ngClass]="{ 'is-invalid': email?.invalid && email?.touched }"
-                />
-                <div *ngIf="email?.invalid && email?.touched" class="text-danger">
-                  <small *ngIf="email?.hasError('required')">Email is required</small>
-                  <small *ngIf="email?.hasError('email')">Invalid email format</small>
-                </div>
-              </div>
-            </div>
-            <!-- phone -->
-            <div class="col-md-12">
-              <div class="form-group">
-                <input
-                  type="text"
-                  formControlName="phone"
-                  aria-label="Phone number"
-                  class="form-control main"
-                  placeholder="Phone"
-                />
-              </div>
-            </div>
-            <!-- message -->
-            <div class="col-md-12">
-              <div class="form-group">
-                <textarea
-                  formControlName="message"
-                  aria-label="Your message"
-                  rows="15"
-                  class="form-control main"
-                  placeholder="Your message"
-                  [ngClass]="{ 'is-invalid': message?.invalid && message?.touched }"
-                ></textarea>
-                <div *ngIf="message?.invalid && message?.touched" class="text-danger">
-                  <small *ngIf="message?.hasError('required')">Message is required</small>
-                  <small *ngIf="message?.hasError('maxlength')">Message must be 2000 characters or fewer</small>
-                </div>
-              </div>
-            </div>
-            <!-- submit button -->
-            <div class="col-md-12 text-right">
-              <button
-                class="btn btn-style-one"
-                type="submit"
-                [disabled]="contactForm.invalid || isSubmitting"
-              >
-                {{ isSubmitting ? 'Sending...' : 'Send Message' }}
-              </button>
-            </div>
-          </form>
-          <!-- contact form end -->
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- container end -->
-</section>
+        <!-- container end -->
+      </section>
 
-<div class="relative w-full h-96">
-  <iframe class="absolute top-0 left-0 w-full h-full"
-      src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d12080.73732861526!2d-74.0059418!3d40.7127847!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zM40zMDA2JzEwLjAiTiA3NMKwMjUnMzcuNyJX!5e0!3m2!1sen!2sus!4v1648482801994!5m2!1sen!2sus"
-      frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0">
-  </iframe>
-</div>
+      <div class="relative w-full h-96">
+        <iframe class="absolute top-0 left-0 w-full h-full"
+          src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d12080.73732861526!2d-74.0059418!3d40.7127847!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zM40zMDA2JzEwLjAiTiA3NMKwMjUnMzcuNyJX!5e0!3m2!1sen!2sus!4v1648482801994!5m2!1sen!2sus"
+          frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0">
+        </iframe>
+      </div>

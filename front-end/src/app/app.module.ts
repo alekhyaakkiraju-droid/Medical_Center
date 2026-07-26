@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
+import { BrowserModule, provideClientHydration, withNoIncrementalHydration } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { FooterComponent } from './layout/footer/footer.component';
@@ -39,7 +39,7 @@ import { provideToastr, ToastrModule } from 'ngx-toastr';
     }),
   ],
   providers: [
-    provideClientHydration(),  
+    provideClientHydration(withNoIncrementalHydration()),  
     provideAnimationsAsync(), 
     provideToastr(),
     provideHttpClient(withFetch(), withInterceptors([credentialsInterceptor])),

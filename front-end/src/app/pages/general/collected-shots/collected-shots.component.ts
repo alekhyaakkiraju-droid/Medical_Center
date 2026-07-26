@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   standalone: false,
   selector: 'app-collected-shots',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './collected-shots.component.html'
 })
 export class CollectedShotsComponent implements OnInit {

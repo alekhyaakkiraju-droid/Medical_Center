@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AppointmentService } from '../../../pages/general/services/appointment.service';
 import { ReloadService } from '../../../shared/service/reload.service';
 import { Subscription } from 'rxjs';
@@ -7,6 +7,7 @@ import { MENU } from '../../menu';
 @Component({
   standalone: false,
   selector: 'app-appointments',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './appointments.component.html'
 })
 export class AppointmentsComponent implements OnInit, OnDestroy {

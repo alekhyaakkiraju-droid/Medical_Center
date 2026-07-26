@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { DoctorService } from '../services/doctor.service';
 import { Doctor } from '../../models';
 import { Subscription } from 'rxjs';
@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
   standalone: false,
   selector: 'app-doctorcs',
   templateUrl: './doctorcs.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./doctorcs.component.css']
 })
 export class DoctorcsComponent implements OnInit, OnDestroy {

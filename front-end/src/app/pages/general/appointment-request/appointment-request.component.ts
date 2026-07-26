@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { SpecializationService } from '../services/specialization.service';
 import { DoctorService } from '../services/doctor.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -12,6 +12,7 @@ import { Subscription } from 'rxjs';
   standalone: false,
   selector: 'app-appointment-request',
   templateUrl: './appointment-request.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./appointment-request.component.css']
 })
 export class AppointmentRequestComponent implements OnInit, OnDestroy {

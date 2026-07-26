@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ReloadService } from '../../../shared/service/reload.service';
 import { DoctorAppointmentsService } from '../../services/doctor-appointments.service';
 import { AuthServiceService } from '../../../pages/auth/auth-services/auth-service.service';
@@ -12,6 +12,7 @@ import { Booking } from '../../../pages/models';
 @Component({
   standalone: false,
   selector: 'app-related-appointments',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './related-appointments.component.html'
 })
 

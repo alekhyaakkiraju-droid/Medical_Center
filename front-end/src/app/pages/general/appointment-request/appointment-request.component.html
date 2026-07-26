@@ -1,33 +1,39 @@
 <div class="contact-area style-two">
-    <div class="section-title">
-      <h3>Request <span>Appointment</span></h3>
-    </div>
-    <form
-      [formGroup]="appointmentForm"
-      (ngSubmit)="onSubmit()"
-      class="default-form contact-form"
+  <div class="section-title">
+    <h3>Request <span>Appointment</span></h3>
+  </div>
+  <form
+    [formGroup]="appointmentForm"
+    (ngSubmit)="onSubmit()"
+    class="default-form contact-form"
     >
-      <div class="row">
-        <!-- Name Field -->
-        <div class="col-md-6 col-sm-12 col-xs-12">
-          <div class="form-group">
-            <input
-              type="text"
-              formControlName="name"
-              aria-label="Full name"
-              class="form-control main"
-              placeholder="Name"
-              [ngClass]="{ 'is-invalid': name?.invalid && name?.touched }"
+    <div class="row">
+      <!-- Name Field -->
+      <div class="col-md-6 col-sm-12 col-xs-12">
+        <div class="form-group">
+          <input
+            type="text"
+            formControlName="name"
+            aria-label="Full name"
+            class="form-control main"
+            placeholder="Name"
+            [ngClass]="{ 'is-invalid': name?.invalid && name?.touched }"
             />
-            <div *ngIf="name?.invalid && name?.touched" class="text-danger">
-              <small *ngIf="name?.hasError('required')">Name is required</small>
-              <small *ngIf="name?.hasError('pattern')"
-                >Name must contain only letters</small
-              >
-            </div>
+          @if (name?.invalid && name?.touched) {
+            <div class="text-danger">
+              @if (name?.hasError('required')) {
+                <small>Name is required</small>
+              }
+              @if (name?.hasError('pattern')) {
+                <small
+                  >Name must contain only letters</small
+                  >
+                }
+              </div>
+            }
           </div>
         </div>
-  
+
         <!-- Email Field -->
         <div class="col-md-6 col-sm-12 col-xs-12">
           <div class="form-group">
@@ -38,14 +44,20 @@
               class="form-control main"
               placeholder="Email"
               [ngClass]="{ 'is-invalid': email?.invalid && email?.touched }"
-            />
-            <div *ngIf="email?.invalid && email?.touched" class="text-danger">
-              <small *ngIf="email?.hasError('required')">Email is required</small>
-              <small *ngIf="email?.hasError('email')">Invalid email format</small>
-            </div>
+              />
+            @if (email?.invalid && email?.touched) {
+              <div class="text-danger">
+                @if (email?.hasError('required')) {
+                  <small>Email is required</small>
+                }
+                @if (email?.hasError('email')) {
+                  <small>Invalid email format</small>
+                }
+              </div>
+            }
           </div>
         </div>
-  
+
         <!-- Phone Field -->
         <div class="col-md-6 col-sm-12 col-xs-12">
           <div class="form-group">
@@ -56,164 +68,200 @@
               class="form-control main"
               placeholder="Phone"
               [ngClass]="{ 'is-invalid': phone?.invalid && phone?.touched }"
-            />
-            <div *ngIf="phone?.invalid && phone?.touched" class="text-danger">
-              <small *ngIf="phone?.hasError('required')">Phone is required</small>
-              <small *ngIf="phone?.hasError('pattern')"
-                >Phone must contain 10–15 digits</small
-              >
+              />
+            @if (phone?.invalid && phone?.touched) {
+              <div class="text-danger">
+                @if (phone?.hasError('required')) {
+                  <small>Phone is required</small>
+                }
+                @if (phone?.hasError('pattern')) {
+                  <small
+                    >Phone must contain 10–15 digits</small
+                    >
+                  }
+                </div>
+              }
             </div>
           </div>
-        </div>
-  
-        <!-- Date Field -->
-        <div class="col-md-6 col-sm-12 col-xs-12">
-          <div class="form-group">
-            <input
-              type="date"
-              formControlName="date"
-              aria-label="Preferred appointment date"
-              class="form-control main"
-              placeholder="Date"
-              id="datepicker"
-              [ngClass]="{ 'is-invalid': date?.invalid && date?.touched }"
-            />
-            <div *ngIf="date?.invalid && date?.touched" class="text-danger">
-              <small *ngIf="date?.hasError('required')">Date is required</small>
-            </div>
-            <!-- <i class="fa fa-calendar" aria-hidden="true"></i> -->
-          </div>
-        </div>
-  
-        <!-- Department Dropdown -->
-        <div class="col-md-6 col-sm-12 col-xs-12">
-          <div class="form-group">
-            <select
-              formControlName="department"
-              aria-label="Department"
-              [(ngModel)]="selectedDepartment"
-              (change)="filterDoctorsByDepartment()"
-              class="form-control main"
-              [ngClass]="{ 'is-invalid': department?.invalid && department?.touched }"
-            >
-              <option value="">Select Department</option>
-              <option *ngFor="let x of specializations" [value]="x.specializationName">
-                {{ x.specializationName }}
-              </option>
-            </select>
-            <div *ngIf="department?.invalid && department?.touched" class="text-danger">
-              <small *ngIf="department?.hasError('required')"
-                >Department is required</small
-              >
-            </div>
-          </div>
-        </div>  
-  
-        <!-- Doctor Dropdown -->
-        <div class="col-md-6 col-sm-12 col-xs-12">
-          <div class="form-group">
-            <select
-              formControlName="doctor"
-              aria-label="Doctor"
-              class="form-control main"
-              [ngClass]="{ 'is-invalid': doctor?.invalid && doctor?.touched }"
-            >
-              <option value="">Select Doctor</option>
-              <option *ngFor="let x of filteredDoctors" [value]="x.id">
-                {{ x.name }}
-              </option>
-            </select>
-            <div *ngIf="doctor?.invalid && doctor?.touched" class="text-danger">
-              <small *ngIf="doctor?.hasError('required')">Doctor is required</small>
-            </div>
-          </div>
-        </div>
-  
-        <!-- Message Field -->
-        <div class="col-md-12 col-sm-12 col-xs-12">
-          <div class="form-group">
-            <textarea
-              formControlName="message"
-              aria-label="Appointment message"
-              class="form-control main"
-              placeholder="Your Message"
-              [ngClass]="{ 'is-invalid': message?.invalid && message?.touched }"
-            ></textarea>
-            <div *ngIf="message?.invalid && message?.touched" class="text-danger">
-              <small *ngIf="message?.hasError('required')">Message is required</small>
-              <small *ngIf="message?.hasError('minlength')"
-                >Message must be at least 10 characters long</small
-              >
-            </div>
-          </div>
-        </div>
-  
-        <!-- Submit Button -->
-        <div class="col-md-12 col-sm-12 col-xs-12">
-          <div class="form-group text-center ">
-            <button  
-              type="submit"
-              class="btn-style-one" [attr.data-content]="'Book now for ' + (appointmentFee | currency:'USD':'symbol':'1.2-2') + ' before prices change. Don\'t miss out!'" data-toggle="popover" title="Special Offer!"
-              [disabled]="appointmentForm.invalid">            
-              Submit Now
-            </button>
-          </div>
-        </div>
-      </div>
-    </form>
-  </div>
 
+          <!-- Date Field -->
+          <div class="col-md-6 col-sm-12 col-xs-12">
+            <div class="form-group">
+              <input
+                type="date"
+                formControlName="date"
+                aria-label="Preferred appointment date"
+                class="form-control main"
+                placeholder="Date"
+                id="datepicker"
+                [ngClass]="{ 'is-invalid': date?.invalid && date?.touched }"
+                />
+              @if (date?.invalid && date?.touched) {
+                <div class="text-danger">
+                  @if (date?.hasError('required')) {
+                    <small>Date is required</small>
+                  }
+                </div>
+              }
+              <!-- <i class="fa fa-calendar" aria-hidden="true"></i> -->
+            </div>
+          </div>
 
-<div class="contact-area style-two">
-  <div class="section-title">
-    <div class="text-right mb-3">
-      <button type="button" class="btn-style-one" (click)="toggleAppointmentsTable()" [attr.aria-expanded]="showAppointments">
-        {{ showAppointments ? 'Hide My Appointments' : 'Show My Appointments' }}
-      </button>
-    </div>
-  </div>
+          <!-- Department Dropdown -->
+          <div class="col-md-6 col-sm-12 col-xs-12">
+            <div class="form-group">
+              <select
+                formControlName="department"
+                aria-label="Department"
+                [(ngModel)]="selectedDepartment"
+                (change)="filterDoctorsByDepartment()"
+                class="form-control main"
+                [ngClass]="{ 'is-invalid': department?.invalid && department?.touched }"
+                >
+                <option value="">Select Department</option>
+                @for (x of specializations; track x) {
+                  <option [value]="x.specializationName">
+                    {{ x.specializationName }}
+                  </option>
+                }
+              </select>
+              @if (department?.invalid && department?.touched) {
+                <div class="text-danger">
+                  @if (department?.hasError('required')) {
+                    <small
+                      >Department is required</small
+                      >
+                    }
+                  </div>
+                }
+              </div>
+            </div>
 
- <div class="appointments-table-container" *ngIf="showAppointments">
-    <div class="card shadow">
-      <div class="card-header text-white"  style="background-color: #48bdc5;">
-        <h5 class="mb-0">My Appointments</h5>
-      </div>
-      <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th>Doctor</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngIf="userAppointments.length === 0">
-                <td colspan="6" class="text-center">No appointments found</td>
-              </tr>
-              <tr *ngFor="let appointment of userAppointments">
-                <td>{{ appointment.doctorName }}</td>
-                <td>{{ appointment.probableStartTime | date:'mediumDate' }}</td>
-                <td>{{ appointment.probableStartTime | date:'shortTime' }}</td>
-                <td>
-                  <span class="badge" [ngClass]="getStatusBadgeClass(appointment.status)">
-                    {{ appointment.appointmentStatus }}
-                  </span>
-                </td>
-                <td>
-                  <button class="btn btn-sm btn-danger" (click)="cancelAppointment(appointment.id)">
-                    Cancel
+            <!-- Doctor Dropdown -->
+            <div class="col-md-6 col-sm-12 col-xs-12">
+              <div class="form-group">
+                <select
+                  formControlName="doctor"
+                  aria-label="Doctor"
+                  class="form-control main"
+                  [ngClass]="{ 'is-invalid': doctor?.invalid && doctor?.touched }"
+                  >
+                  <option value="">Select Doctor</option>
+                  @for (x of filteredDoctors; track x) {
+                    <option [value]="x.id">
+                      {{ x.name }}
+                    </option>
+                  }
+                </select>
+                @if (doctor?.invalid && doctor?.touched) {
+                  <div class="text-danger">
+                    @if (doctor?.hasError('required')) {
+                      <small>Doctor is required</small>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Message Field -->
+            <div class="col-md-12 col-sm-12 col-xs-12">
+              <div class="form-group">
+                <textarea
+                  formControlName="message"
+                  aria-label="Appointment message"
+                  class="form-control main"
+                  placeholder="Your Message"
+                  [ngClass]="{ 'is-invalid': message?.invalid && message?.touched }"
+                ></textarea>
+                @if (message?.invalid && message?.touched) {
+                  <div class="text-danger">
+                    @if (message?.hasError('required')) {
+                      <small>Message is required</small>
+                    }
+                    @if (message?.hasError('minlength')) {
+                      <small
+                        >Message must be at least 10 characters long</small
+                        >
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="form-group text-center ">
+                  <button
+                    type="submit"
+                    class="btn-style-one" [attr.data-content]="'Book now for ' + (appointmentFee | currency:'USD':'symbol':'1.2-2') + ' before prices change. Don\'t miss out!'" data-toggle="popover" title="Special Offer!"
+                    [disabled]="appointmentForm.invalid">
+                    Submit Now
                   </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                </div>
+              </div>
+            </div>
+          </form>
         </div>
-      </div>
-    </div>
-  </div>
-  
-  <app-Payment  (paymentSuccess)="handlePaymentStatus($event)"  *ngIf="showModal" (close)="showModal = false"></app-Payment>
+
+
+        <div class="contact-area style-two">
+          <div class="section-title">
+            <div class="text-right mb-3">
+              <button type="button" class="btn-style-one" (click)="toggleAppointmentsTable()" [attr.aria-expanded]="showAppointments">
+                {{ showAppointments ? 'Hide My Appointments' : 'Show My Appointments' }}
+              </button>
+            </div>
+          </div>
+
+          @if (showAppointments) {
+            <div class="appointments-table-container">
+              <div class="card shadow">
+                <div class="card-header text-white"  style="background-color: #48bdc5;">
+                  <h5 class="mb-0">My Appointments</h5>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Doctor</th>
+                          <th>Date</th>
+                          <th>Time</th>
+                          <th>Status</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @if (userAppointments.length === 0) {
+                          <tr>
+                            <td colspan="6" class="text-center">No appointments found</td>
+                          </tr>
+                        }
+                        @for (appointment of userAppointments; track appointment) {
+                          <tr>
+                            <td>{{ appointment.doctorName }}</td>
+                            <td>{{ appointment.probableStartTime | date:'mediumDate' }}</td>
+                            <td>{{ appointment.probableStartTime | date:'shortTime' }}</td>
+                            <td>
+                              <span class="badge" [ngClass]="getStatusBadgeClass(appointment.status)">
+                                {{ appointment.appointmentStatus }}
+                              </span>
+                            </td>
+                            <td>
+                              <button class="btn btn-sm btn-danger" (click)="cancelAppointment(appointment.id)">
+                                Cancel
+                              </button>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+          @if (showModal) {
+            <app-Payment  (paymentSuccess)="handlePaymentStatus($event)"  (close)="showModal = false"></app-Payment>
+          }

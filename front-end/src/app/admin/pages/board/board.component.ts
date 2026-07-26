@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MENU } from '../../menu';
 import { PatientService } from '../../services/patient.service';
@@ -18,6 +18,7 @@ import * as XLSX from 'xlsx';
   standalone: false,
   selector: 'app-board',
   templateUrl: './board.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./board.component.css']
 })
 export class BoardComponent implements OnInit, OnDestroy {

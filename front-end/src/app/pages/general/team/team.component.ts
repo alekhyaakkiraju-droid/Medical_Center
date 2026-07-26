@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { DoctorService } from '../services/doctor.service';
 import { Doctor } from '../../models';
 import { ReloadService } from '../../../shared/service/reload.service';
@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
   standalone: false,
   selector: 'app-team',
   templateUrl: './team.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./team.component.css']
 })
 

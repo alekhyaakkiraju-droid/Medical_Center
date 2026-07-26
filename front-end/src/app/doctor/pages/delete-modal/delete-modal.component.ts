@@ -1,8 +1,9 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   standalone: false,
   selector: 'app-delete-modal',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './delete-modal.component.html'
 })
 export class DeleteModalComponent {
