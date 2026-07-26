@@ -37,7 +37,7 @@ namespace AngularApi.Controllers
         [HttpPut("{id}")]
         [ValidateOwnership(ResourceType.PatientReview)]
         public async Task<IActionResult> PutPatientReview(int id, [FromBody] UpdatePatientReviewDTO dto) =>
-            await _patientReviewService.UpdateAsync(id, dto, User) ? NoContent() : NotFound();
+            return (await _patientReviewService.UpdateAsync(id, dto, User)) switch { ResourceMutationResult.Success => NoContent(), ResourceMutationResult.Forbidden => Forbid(), _ => NotFound(), };
 
         [HttpPost]
         public async Task<ActionResult<PatientReview>> PostPatientReview([FromBody] CreatePatientReviewDTO dto)
@@ -49,6 +49,6 @@ namespace AngularApi.Controllers
         [HttpDelete("{id}")]
         [ValidateOwnership(ResourceType.PatientReview)]
         public async Task<IActionResult> DeletePatientReview(int id) =>
-            await _patientReviewService.DeleteAsync(id) ? NoContent() : NotFound();
+            return (await _patientReviewService.DeleteAsync(id, User)) switch { ResourceMutationResult.Success => NoContent(), ResourceMutationResult.Forbidden => Forbid(), _ => NotFound(), };
     }
 }
