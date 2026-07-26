@@ -13,7 +13,7 @@ Last reviewed: 2026-07-25
 | Workforce security | In Progress | Role-based access via ASP.NET Identity (`admin`, `doctor`, `user` policies) |
 | Information access management | In Progress | `OwnershipValidator`, role policies; minimum-necessary review ongoing |
 | Security awareness training | Pending | No LMS integration yet |
-| Security incident procedures | Pending | Breach notification infra pending (see data-subject-rights.md) |
+| Security incident procedures | In Progress | `BreachNotificationService`, `POST /api/admin/breach-assessment`, and `BreachNotification.html` template (see data-subject-rights.md) |
 | Contingency plan | Pending | Backup/DR runbooks not yet documented |
 | Evaluation | In Progress | Forge CI/CD provides change audit trail; authorization regression gate in `.forge/pipeline.yaml` runs Phase 1 auth integration tests on every build; HIPAA-to-test mapping in [`authorization-test-manifest.md`](authorization-test-manifest.md); annual evaluation schedule TBD |
 
@@ -58,7 +58,7 @@ Last reviewed: 2026-07-25
 
 ## Next Actions
 
-1. Finalize breach notification automation (currently **Pending** — infrastructure not deployed).
+1. Complete breach notification automation (currently **In Progress** — interim service and admin endpoint deployed).
 2. Execute BAAs with hosting and email providers.
 3. Publish Notice of Privacy Practices in the patient-facing UI.
 4. Harden CORS to explicit origins with credentials in production.
