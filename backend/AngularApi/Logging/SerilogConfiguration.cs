@@ -7,10 +7,10 @@ namespace AngularApi.Logging
     {
         public static void ConfigureSerilog(this WebApplicationBuilder builder)
         {
-            builder.Host.UseSerilog((context, services, configuration) =>
+            builder.Services.AddSerilog((services, configuration) =>
             {
                 configuration
-                    .ReadFrom.Configuration(context.Configuration)
+                    .ReadFrom.Configuration(builder.Configuration)
                     .ReadFrom.Services(services)
                     .Enrich.FromLogContext()
                     .Enrich.WithProperty("Application", "MedicalCenter")
