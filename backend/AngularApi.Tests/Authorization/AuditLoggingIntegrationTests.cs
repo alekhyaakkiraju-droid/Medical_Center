@@ -73,5 +73,70 @@ public class AuditLoggingIntegrationTests : IClassFixture<MedicalCenterWebApplic
         auditLog.Should().NotBeNull();
         auditLog!.Action.Should().Be("POST");
         auditLog.Actor.Should().Be("patient1");
+        auditLog.EntityType.Should().Be("Appointment");
+    }
+
+    [Fact]
+    public async Task GetProtectedEndpoint_DoesNotCreateAuditLogEntry()
+    {
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            await roleManager.EnsureRolesCreatedAsync();
+        }
+
+        int countBefore;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+            countBefore = await context.AuditLogs.CountAsync();
+        }
+
+        var client = _factory.CreateClient();
+        var token = TestJwtFactory.CreateToken(
+            _factory.Services.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>(),
+            "admin");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.GetAsync("/api/Appointments/GetAllAppointments");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        using var queryScope = _factory.Services.CreateScope();
+        var queryContext = queryScope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+        var countAfter = await queryContext.AuditLogs.CountAsync();
+        countAfter.Should().Be(countBefore);
+    }
+
+    [Fact]
+    public async Task AuditLogEntry_CannotBeModifiedOrDeleted()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+
+        context.AuditLogs.Add(new AuditLog
+        {
+            Actor = "append-only-user",
+            Action = "POST",
+            EntityType = "AppendOnlyTest",
+            Timestamp = DateTime.UtcNow,
+        });
+        await context.SaveChangesAsync();
+
+        var auditLog = await context.AuditLogs.SingleAsync(log => log.EntityType == "AppendOnlyTest");
+        auditLog.Action = "PUT";
+
+        var modifyAct = async () => await context.SaveChangesAsync();
+        await modifyAct.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*append-only*");
+
+        using var deleteScope = _factory.Services.CreateScope();
+        var deleteContext = deleteScope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+        var deleteTarget = await deleteContext.AuditLogs.SingleAsync(log => log.EntityType == "AppendOnlyTest");
+        deleteContext.AuditLogs.Remove(deleteTarget);
+
+        var deleteAct = async () => await deleteContext.SaveChangesAsync();
+        await deleteAct.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*append-only*");
     }
 }

@@ -28,6 +28,7 @@ public class AuthorizationComplianceTests
         "AuthorizationPolicyIntegrationTests",
         "ControllerAuthorizationIntegrationTests",
         "CookieAuthIntegrationTests",
+        "CsrfProtectionIntegrationTests",
         "DoctorsControllerAuthorizationIntegrationTests",
         "MedicalCenterDoctorAvailabilitiesControllerAuthorizationIntegrationTests",
         "MedicalCentersControllerAuthorizationIntegrationTests",
@@ -86,6 +87,7 @@ public class AuthorizationComplianceTests
 
         checklist.Should().Contain("authorization-test-manifest.md");
         checklist.Should().Contain("authorization regression gate");
+        checklist.Should().Contain("run-security-regression.sh");
     }
 
     [Fact]

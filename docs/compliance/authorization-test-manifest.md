@@ -6,7 +6,17 @@ Phase 1 authorization integration tests verify HIPAA Technical and Administrativ
 dotnet test backend/AngularApi.Tests/AngularApi.Tests.csproj --filter FullyQualifiedName~Authorization -c Release
 ```
 
-Last verified: 2026-07-26 (WO-041)
+Last verified: 2026-07-26 (WO-044)
+
+## Security Controls Regression
+
+Run the focused security regression suite before compliance reviews or after auth/security changes:
+
+```bash
+./scripts/run-security-regression.sh
+```
+
+This script executes audit logging, rate limiting, CSRF, cookie auth, and audit service unit tests and prints a pass/fail summary.
 
 ## Test Infrastructure
 
@@ -29,6 +39,7 @@ Last verified: 2026-07-26 (WO-041)
 | `AuthorizationPolicyIntegrationTests` | Technical | Access control — global authorization policies reject unauthenticated access |
 | `ControllerAuthorizationIntegrationTests` | Technical | Access control — admin-only endpoints reject non-admin roles |
 | `CookieAuthIntegrationTests` | Technical | Person or entity authentication — HttpOnly secure cookies, no tokens in response body |
+| `CsrfProtectionIntegrationTests` | Technical | Integrity controls — mutating requests require valid `X-XSRF-TOKEN`; safe methods do not |
 | `DoctorsControllerAuthorizationIntegrationTests` | Technical | Access control — doctor-scoped endpoints enforce role and ownership |
 | `MedicalCenterDoctorAvailabilitiesControllerAuthorizationIntegrationTests` | Technical | Access control — availability mutations restricted to authorized roles |
 | `MedicalCentersControllerAuthorizationIntegrationTests` | Administrative | Information access management — medical center data limited to owning users |

@@ -24,7 +24,19 @@ public class ValidateAntiforgeryForMutatingRequestsFilter : IAsyncActionFilter
         if (requiresValidation
             && !context.ActionDescriptor.EndpointMetadata.Any(metadata => metadata is IgnoreAntiforgeryTokenAttribute))
         {
-            await _antiforgery.ValidateRequestAsync(context.HttpContext);
+            try
+            {
+                await _antiforgery.ValidateRequestAsync(context.HttpContext);
+            }
+            catch (AntiforgeryValidationException)
+            {
+                context.Result = new BadRequestObjectResult(new
+                {
+                    error = "Antiforgery validation failed.",
+                    message = "Mutating requests require a valid X-XSRF-TOKEN header.",
+                });
+                return;
+            }
         }
 
         await next();

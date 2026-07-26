@@ -49,4 +49,58 @@ public class AuditServiceTests
         auditLog.Action.Should().Be("LoginSuccess");
         auditLog.NewValues.Should().Be("Succeeded");
     }
+
+    [Fact]
+    public async Task RecordAsync_WithNullActor_UsesAnonymousActor()
+    {
+        var options = new DbContextOptionsBuilder<MedicalCenterDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        await using var context = new MedicalCenterDbContext(options);
+
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        httpContextAccessor.Setup(accessor => accessor.HttpContext).Returns((HttpContext?)null);
+
+        var service = new AuditService(context, httpContextAccessor.Object);
+
+        await service.RecordAsync("POST", "Appointment", "1", actor: null);
+
+        var auditLog = await context.AuditLogs.SingleAsync();
+        auditLog.Actor.Should().Be("anonymous");
+    }
+
+    [Fact]
+    public async Task RecordAsync_WithEmptyEntityType_PersistsEmptyEntityType()
+    {
+        var options = new DbContextOptionsBuilder<MedicalCenterDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        await using var context = new MedicalCenterDbContext(options);
+
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        var service = new AuditService(context, httpContextAccessor.Object);
+
+        await service.RecordAsync("POST", string.Empty, "1", actor: "user1");
+
+        var auditLog = await context.AuditLogs.SingleAsync();
+        auditLog.EntityType.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task RecordAsync_WithLargeRequestBody_PersistsFullPayload()
+    {
+        var options = new DbContextOptionsBuilder<MedicalCenterDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        await using var context = new MedicalCenterDbContext(options);
+
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        var service = new AuditService(context, httpContextAccessor.Object);
+        var largePayload = new string('x', 16_384);
+
+        await service.RecordAsync("POST", "Appointment", "1", newValues: largePayload, actor: "user1");
+
+        var auditLog = await context.AuditLogs.SingleAsync();
+        auditLog.NewValues.Should().Be(largePayload);
+    }
 }
