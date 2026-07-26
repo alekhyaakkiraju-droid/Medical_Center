@@ -15,7 +15,7 @@ Last reviewed: 2026-07-25
 | Security awareness training | Pending | No LMS integration yet |
 | Security incident procedures | Pending | Breach notification infra pending (see data-subject-rights.md) |
 | Contingency plan | Pending | Backup/DR runbooks not yet documented |
-| Evaluation | In Progress | Forge CI/CD provides change audit trail; annual evaluation schedule TBD |
+| Evaluation | In Progress | Forge CI/CD provides change audit trail; authorization regression gate in `.forge/pipeline.yaml` runs Phase 1 auth integration tests on every build; HIPAA-to-test mapping in [`authorization-test-manifest.md`](authorization-test-manifest.md); annual evaluation schedule TBD |
 
 ## Physical Safeguards
 
@@ -45,7 +45,7 @@ Last reviewed: 2026-07-25
 | Notice of privacy practices | Pending | NPP not published in application UI |
 | Individual rights (access, amendment) | In Progress | Procedures in `data-subject-rights.md` |
 | Minimum necessary | In Progress | DTO projections limit exposed fields; ongoing review |
-| Business associate agreements | Pending | BAAs with SMTP, cloud, analytics vendors not finalized |
+| Business associate agreements | In Progress | BAA register in [`docs/compliance/baa-tracking.md`](baa-tracking.md); SMTP and AWS BAAs pending execution |
 
 ## DevSecOps Alignment
 
