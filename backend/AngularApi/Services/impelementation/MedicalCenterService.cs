@@ -22,8 +22,11 @@ public class MedicalCenterService : IMedicalCenterService
     public Task<PagedResult<MedicalCenterListItemDTO>> GetMedicalCentersAsync(PaginationParameters pagination, CancellationToken cancellationToken = default) =>
         _context.MedicalCenter.Select(m => new MedicalCenterListItemDTO { Id = m.Id, HospitalAffiliationId = m.HospitalAffiliationId, TimeSlotPerClientInMin = m.TimeSlotPerClientInMin, FirstConsultationFee = m.FirstConsultationFee, FollowupConsultationFee = m.FollowupConsultationFee, StreetAddress = m.StreetAddress, City = m.City, State = m.State, Zip = m.Zip }).ToPagedResultAsync(pagination, cancellationToken);
 
-    public Task<MedicalCenter?> GetMedicalCenterByIdAsync(int id, CancellationToken cancellationToken = default) =>
-        _context.MedicalCenter.FindAsync([id], cancellationToken).AsTask();
+    public Task<MedicalCenterDetailDTO?> GetMedicalCenterByIdAsync(int id, CancellationToken cancellationToken = default) =>
+        _context.MedicalCenter
+            .Where(m => m.Id == id)
+            .SelectMedicalCenterDetailDto()
+            .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<(MedicalCenter? Center, ResourceMutationResult Result)> CreateMedicalCenterAsync(CreateMedicalCenterDTO dto, ClaimsPrincipal user, CancellationToken cancellationToken = default)
     {

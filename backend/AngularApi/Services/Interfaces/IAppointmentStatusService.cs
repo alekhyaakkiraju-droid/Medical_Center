@@ -7,7 +7,7 @@ public interface IAppointmentStatusService
 {
     Task<PagedResult<AppointmentStatusListItemDTO>> GetAllAsync(PaginationParameters pagination, CancellationToken cancellationToken = default);
 
-    Task<AppointmentStatus?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<AppointmentStatusDetailDTO?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
     Task<AppointmentStatus> CreateAsync(CreateAppointmentStatusDTO dto, CancellationToken cancellationToken = default);
 

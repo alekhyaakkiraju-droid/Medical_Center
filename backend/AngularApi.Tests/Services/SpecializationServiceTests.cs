@@ -29,12 +29,13 @@ public class SpecializationServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task GetSpecializationByIdAsync_ExistingId_IncludesServices()
+    public async Task GetSpecializationByIdAsync_ExistingId_ReturnsDetailDtoWithServices()
     {
         _context.Specializations.Add(new Specialization { Id = 1, SpecializationName = "Cardiology", Services = new List<Service> { new() { Id = 1, Name = "Heart Checkup" } } });
         await _context.SaveChangesAsync();
         var result = await _service.GetSpecializationByIdAsync(1);
         result!.Services.Should().ContainSingle(s => s.Name == "Heart Checkup");
+        result.SpecializationName.Should().Be("Cardiology");
     }
 
     [Fact]

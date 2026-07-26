@@ -20,8 +20,11 @@ public class SpecializationService : ISpecializationService
             IsActive = s.IsActive
         }).ToPagedResultAsync(pagination, cancellationToken);
 
-    public Task<Specialization?> GetSpecializationByIdAsync(int id, CancellationToken cancellationToken = default) =>
-        _context.Specializations.Include(s => s.Services).FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+    public Task<SpecializationDetailDTO?> GetSpecializationByIdAsync(int id, CancellationToken cancellationToken = default) =>
+        _context.Specializations
+            .Where(s => s.Id == id)
+            .SelectSpecializationDetailDto()
+            .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<Specialization> CreateSpecializationAsync(CreateSpecializationDTO dto, CancellationToken cancellationToken = default)
     {

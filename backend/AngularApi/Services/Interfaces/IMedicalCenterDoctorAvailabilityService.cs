@@ -7,7 +7,7 @@ public interface IMedicalCenterDoctorAvailabilityService
 {
     Task<PagedResult<MedicalCenterDoctorAvailabilityDTO>> GetAllAsync(PaginationParameters pagination, CancellationToken cancellationToken = default);
 
-    Task<MedicalCenterDoctorAvailability?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<MedicalCenterDoctorAvailabilityDetailDTO?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
     Task<MedicalCenterDoctorAvailability?> CreateAsync(CreateMedicalCenterDoctorAvailabilityDTO dto, CancellationToken cancellationToken = default);
 

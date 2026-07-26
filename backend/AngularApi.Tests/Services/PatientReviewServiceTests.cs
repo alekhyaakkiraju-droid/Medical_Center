@@ -3,6 +3,7 @@ namespace AngularApi.Tests.Services;
 public class PatientReviewServiceTests : IDisposable {
   private readonly MedicalCenterDbContext _context; private readonly PatientReviewService _service;
   public PatientReviewServiceTests(){_context=new MedicalCenterDbContext(new DbContextOptionsBuilder<MedicalCenterDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options); _service=new PatientReviewService(_context,new OwnershipValidator(),NullLogger<PatientReviewService>.Instance);}
+  [Fact] public async Task GetByIdAsync_ExistingId_ReturnsDetailDto(){Seed(1,"p1",5); (await _service.GetByIdAsync(1))!.OverallRating.Should().Be(5);}
   [Fact] public async Task UpdateAsync_OtherPatientReview_Denied(){Seed(1,"p2",3); (await _service.UpdateAsync(1,new UpdatePatientReviewDTO{OverallRating=5},User("p1","user"))).Should().Be(ResourceMutationResult.Forbidden);}
   [Fact] public async Task DeleteAsync_OtherPatientReview_Denied(){Seed(1,"p2",5); (await _service.DeleteAsync(1,User("p1","user"))).Should().Be(ResourceMutationResult.Forbidden);}
   void Seed(int id,string pid,int rating){_context.PatientReviews.Add(new PatientReview{Id=id,PatientId=pid,DoctorId="d1",OverallRating=rating}); _context.SaveChanges();}

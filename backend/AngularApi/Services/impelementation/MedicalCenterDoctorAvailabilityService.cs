@@ -36,8 +36,11 @@ public class MedicalCenterDoctorAvailabilityService : IMedicalCenterDoctorAvaila
             })
             .ToPagedResultAsync(pagination, cancellationToken);
 
-    public Task<MedicalCenterDoctorAvailability?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
-        _context.MedicalCenterDoctorAvailability.FindAsync([id], cancellationToken).AsTask();
+    public Task<MedicalCenterDoctorAvailabilityDetailDTO?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
+        _context.MedicalCenterDoctorAvailability
+            .Where(a => a.Id == id)
+            .SelectMedicalCenterDoctorAvailabilityDetailDto()
+            .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<MedicalCenterDoctorAvailability?> CreateAsync(CreateMedicalCenterDoctorAvailabilityDTO dto, CancellationToken cancellationToken = default)
     { if (!await MedicalCenterExistsAsync(dto.MedicalCenterId, cancellationToken)) return null; var availability = MapToEntity(dto); _context.MedicalCenterDoctorAvailability.Add(availability); await _context.SaveChangesAsync(cancellationToken); return availability; }

@@ -23,8 +23,11 @@ public class AppointmentStatusService : IAppointmentStatusService
             })
             .ToPagedResultAsync(pagination, cancellationToken);
 
-    public Task<AppointmentStatus?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
-        _context.AppointmentStatus.FindAsync([id], cancellationToken).AsTask();
+    public Task<AppointmentStatusDetailDTO?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
+        _context.AppointmentStatus
+            .Where(s => s.Id == id)
+            .SelectAppointmentStatusDetailDto()
+            .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<AppointmentStatus> CreateAsync(CreateAppointmentStatusDTO dto, CancellationToken cancellationToken = default)
     {

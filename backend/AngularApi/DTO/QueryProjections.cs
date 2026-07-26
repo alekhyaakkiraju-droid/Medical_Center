@@ -55,5 +55,72 @@ namespace AngularApi.DTO
                     Email = a.Patient != null ? a.Patient.Email : a.Email
                 }
             });
+
+        public static IQueryable<SpecializationDetailDTO> SelectSpecializationDetailDto(this IQueryable<Specialization> query) =>
+            query.Select(s => new SpecializationDetailDTO
+            {
+                Id = s.Id,
+                SpecializationName = s.SpecializationName,
+                SpecializationImage = s.SpecializationImage,
+                Description = s.Description,
+                IsActive = s.IsActive,
+                Services = s.Services!
+                    .Select(svc => new SpecializationServiceItemDTO
+                    {
+                        Id = svc.Id,
+                        Name = svc.Name,
+                        Description = svc.Description
+                    })
+                    .ToList()
+            });
+
+        public static IQueryable<AppointmentStatusDetailDTO> SelectAppointmentStatusDetailDto(this IQueryable<AppointmentStatus> query) =>
+            query.Select(s => new AppointmentStatusDetailDTO
+            {
+                Id = s.Id,
+                Status = s.Status
+            });
+
+        public static IQueryable<MedicalCenterDetailDTO> SelectMedicalCenterDetailDto(this IQueryable<MedicalCenter> query) =>
+            query.Select(m => new MedicalCenterDetailDTO
+            {
+                Id = m.Id,
+                HospitalAffiliationId = m.HospitalAffiliationId,
+                TimeSlotPerClientInMin = m.TimeSlotPerClientInMin,
+                FirstConsultationFee = m.FirstConsultationFee,
+                FollowupConsultationFee = m.FollowupConsultationFee,
+                StreetAddress = m.StreetAddress,
+                City = m.City,
+                State = m.State,
+                Zip = m.Zip
+            });
+
+        public static IQueryable<MedicalCenterDoctorAvailabilityDetailDTO> SelectMedicalCenterDoctorAvailabilityDetailDto(
+            this IQueryable<MedicalCenterDoctorAvailability> query) =>
+            query.Select(a => new MedicalCenterDoctorAvailabilityDetailDTO
+            {
+                Id = a.Id,
+                MedicalCenterId = a.MedicalCenterId,
+                DayOfWeek = a.DayOfWeek,
+                StartTime = a.StartTime,
+                EndTime = a.EndTime,
+                IsAvailable = a.IsAvailable,
+                ReasonOfUnavailability = a.ReasonOfUnavailability
+            });
+
+        public static IQueryable<PatientReviewDetailDTO> SelectPatientReviewDetailDto(this IQueryable<PatientReview> query) =>
+            query.Select(r => new PatientReviewDetailDTO
+            {
+                Id = r.Id,
+                PatientId = r.IsReviewAnonymous == true ? null : r.PatientId,
+                DoctorId = r.DoctorId,
+                IsReviewAnonymous = r.IsReviewAnonymous,
+                WaitTimeRating = r.WaitTimeRating,
+                BedsideMannerRating = r.BedsideMannerRating,
+                OverallRating = r.OverallRating,
+                Review = r.Review,
+                IsDoctorRecommended = r.IsDoctorRecommended,
+                ReviewDate = r.ReviewDate
+            });
     }
 }
