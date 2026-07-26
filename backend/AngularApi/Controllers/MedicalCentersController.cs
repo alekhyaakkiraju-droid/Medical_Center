@@ -1,4 +1,5 @@
 using AngularApi.DTO;
+using AngularApi.Filters;
 using AngularApi.Models;
 using AngularApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -33,6 +34,7 @@ namespace AngularApi.Controllers
         }
 
         [HttpPut("{id}")]
+        [ValidateOwnership(ResourceType.MedicalCenter)]
         public async Task<IActionResult> PutMedicalCenter(int id, UpdateMedicalCenterDTO dto)
         {
             var updated = await _medicalCenterService.UpdateMedicalCenterAsync(id, dto);
@@ -47,6 +49,7 @@ namespace AngularApi.Controllers
         }
 
         [HttpDelete("{id}")]
+        [ValidateOwnership(ResourceType.MedicalCenter)]
         public async Task<IActionResult> DeleteMedicalCenter(int id)
         {
             var deleted = await _medicalCenterService.DeleteMedicalCenterAsync(id);

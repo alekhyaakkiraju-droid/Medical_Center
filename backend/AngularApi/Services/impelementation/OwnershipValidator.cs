@@ -30,4 +30,16 @@ public class OwnershipValidator : IOwnershipValidator
         return !string.IsNullOrEmpty(userId)
             && string.Equals(userId, doctorId, StringComparison.Ordinal);
     }
+
+    public bool CanAccessPatientReviewResource(ClaimsPrincipal user, string reviewPatientId)
+    {
+        if (string.IsNullOrEmpty(reviewPatientId))
+        {
+            return false;
+        }
+
+        return CanAccessPatientResource(user, reviewPatientId);
+    }
+
+    public bool CanAccessMedicalCenterResource(ClaimsPrincipal user) => IsAdmin(user);
 }

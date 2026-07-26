@@ -34,9 +34,11 @@ namespace WebApiDemo
             });
 
             builder.Services.AddScoped<ValidateAntiforgeryForMutatingRequestsFilter>();
+            builder.Services.AddScoped<OwnershipValidationFilter>();
             builder.Services.AddControllers(options =>
             {
                 options.Filters.AddService<ValidateAntiforgeryForMutatingRequestsFilter>();
+                options.Filters.AddService<OwnershipValidationFilter>();
             });
             builder.Services.AddFluentValidationAutoValidation();
             builder.Services.AddValidatorsFromAssemblyContaining<RegisterUserDTOValidator>();
