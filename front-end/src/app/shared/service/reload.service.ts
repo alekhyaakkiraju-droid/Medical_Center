@@ -1,11 +1,17 @@
-import { Injectable } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReloadService {
 
+  constructor(@Inject(PLATFORM_ID) private readonly platformId: object) {}
+
   initializeLoader(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
     const loader = document.querySelector('.loader');
     const preloader = document.getElementById('preloader');
 
@@ -28,6 +34,9 @@ export class ReloadService {
   }
 
   resetLoader(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
     const loader = document.querySelector('.loader');
     const preloader = document.getElementById('preloader');
 

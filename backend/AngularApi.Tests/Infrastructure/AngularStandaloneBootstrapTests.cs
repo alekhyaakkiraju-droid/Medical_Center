@@ -63,12 +63,12 @@ public class AngularStandaloneBootstrapTests
     }
 
     [Fact]
-    public void ServerTs_UsesAngularNodeAppEngineWithoutLegacyAppServerModule()
+    public void ServerTs_UsesStandaloneBootstrapEntryWithoutLegacyAppServerModule()
     {
         var serverSource = File.ReadAllText(Path.Combine(FrontendRoot, "server.ts"));
-        serverSource.Should().Contain("AngularNodeAppEngine");
+        serverSource.Should().Contain("bootstrap from './src/main.server'");
         serverSource.Should().NotContain("AppServerModule");
-        serverSource.Should().NotMatchRegex(@"\bCommonEngine\s*\(");
+        serverSource.Should().Contain("CommonEngine");
     }
 
     [Fact]

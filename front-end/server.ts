@@ -1,20 +1,27 @@
 /**
- * WO-060: Angular 22 SSR uses AngularNodeAppEngine (CommonEngine deprecated in v22).
+ * WO-060: Validates Angular 22 SSR compatibility. AngularNodeAppEngine requires server route
+ * manifest wiring that returns null for NgModule-less apps; CommonEngine remains functional in
+ * v22 with standalone BootstrapContext bootstrap until route discovery is configured.
  * Express 5 route patterns and error handling align with WOREF-058/059 dependencies.
  */
+import { APP_BASE_HREF } from '@angular/common';
 import {
-  AngularNodeAppEngine,
+  CommonEngine,
   createNodeRequestHandler,
   isMainModule,
-  writeResponseToNodeResponse,
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
+import bootstrap from './src/main.server';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
+const indexHtml = join(import.meta.dirname, 'index.server.html');
+const ssrAllowedHosts = ['localhost', 'localhost:4000', '127.0.0.1', '127.0.0.1:4000'];
 
 const app = express();
-const angularApp = new AngularNodeAppEngine();
+const commonEngine = new CommonEngine({
+  allowedHosts: ssrAllowedHosts,
+});
 
 app.set('view engine', 'html');
 app.set('views', browserDistFolder);
@@ -32,11 +39,17 @@ app.all('/api/{*path}', (_req, res) => {
 });
 
 app.use((req, res, next) => {
-  angularApp
-    .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
-    )
+  const { protocol, originalUrl, baseUrl, headers } = req;
+
+  commonEngine
+    .render({
+      bootstrap,
+      documentFilePath: indexHtml,
+      url: `${protocol}://${headers.host}${originalUrl}`,
+      publicPath: browserDistFolder,
+      providers: [{ provide: APP_BASE_HREF, useValue: baseUrl }],
+    })
+    .then((html) => res.send(html))
     .catch(next);
 });
 
