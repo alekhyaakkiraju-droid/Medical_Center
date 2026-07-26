@@ -14,5 +14,5 @@ services:
   - yarp
   - api
   - frontend
-public_ingress_service: yarp
+public_ingress_service: frontend
 public_url_pattern: "https://medical-center-yarp-{env}.agent.opsera.dev"
