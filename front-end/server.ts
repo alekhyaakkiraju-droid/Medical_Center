@@ -1,57 +1,68 @@
-import { APP_BASE_HREF } from '@angular/common';
-import { CommonEngine } from '@angular/ssr/node';
+/**
+ * WO-060: Angular 22 SSR uses AngularNodeAppEngine (CommonEngine deprecated in v22).
+ * Express 5 route patterns and error handling align with WOREF-058/059 dependencies.
+ */
+import {
+  AngularNodeAppEngine,
+  createNodeRequestHandler,
+  isMainModule,
+  writeResponseToNodeResponse,
+} from '@angular/ssr/node';
 import express from 'express';
-import { fileURLToPath } from 'node:url';
-import { dirname, join, resolve } from 'node:path';
-import AppServerModule from './src/main.server';
+import { join } from 'node:path';
 
-// The Express app is exported so that it can be used by serverless Functions.
-export function app(): express.Express {
-  const server = express();
-  const serverDistFolder = dirname(fileURLToPath(import.meta.url));
-  const browserDistFolder = resolve(serverDistFolder, '../browser');
-  const indexHtml = join(serverDistFolder, 'index.server.html');
+const browserDistFolder = join(import.meta.dirname, '../browser');
 
-  const commonEngine = new CommonEngine();
+const app = express();
+const angularApp = new AngularNodeAppEngine();
 
-  server.set('view engine', 'html');
-  server.set('views', browserDistFolder);
+app.set('view engine', 'html');
+app.set('views', browserDistFolder);
 
-  // Example Express Rest API endpoints
-  // server.get('/api/**', (req, res) => { });
-  // Serve static files from /browser
-  server.get('**', express.static(browserDistFolder, {
+app.use(
+  express.static(browserDistFolder, {
     maxAge: '1y',
-    index: 'index.html',
-  }));
+    index: false,
+    redirect: false,
+  }),
+);
 
-  // All regular routes use the Angular engine
-  server.get('**', (req, res, next) => {
-    const { protocol, originalUrl, baseUrl, headers } = req;
+app.all('/api/{*path}', (_req, res) => {
+  res.status(404).json({ error: 'API endpoint not found' });
+});
 
-    commonEngine
-      .render({
-        bootstrap: AppServerModule,
-        documentFilePath: indexHtml,
-        url: `${protocol}://${headers.host}${originalUrl}`,
-        publicPath: browserDistFolder,
-        providers: [{ provide: APP_BASE_HREF, useValue: baseUrl }],
-      })
-      .then((html) => res.send(html))
-      .catch((err) => next(err));
-  });
+app.use((req, res, next) => {
+  angularApp
+    .handle(req)
+    .then((response) =>
+      response ? writeResponseToNodeResponse(response, res) : next(),
+    )
+    .catch(next);
+});
 
-  return server;
-}
+app.use(
+  (
+    err: unknown,
+    _req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    console.error(
+      'SSR rendering error:',
+      err instanceof Error ? err.message : err,
+    );
+    if (res.headersSent) {
+      return next(err);
+    }
+    res.status(500).send('Internal Server Error');
+  },
+);
 
-function run(): void {
+if (isMainModule(import.meta.url) || process.env['pm_id']) {
   const port = process.env['PORT'] || 4000;
-
-  // Start up the Node server
-  const server = app();
-  server.listen(port, () => {
+  app.listen(port, () => {
     console.log(`Node Express server listening on http://localhost:${port}`);
   });
 }
 
-run();
+export default createNodeRequestHandler(app);
