@@ -2,7 +2,7 @@ FROM node:22-alpine AS build
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json .npmrc ./
 RUN npm ci --ignore-scripts
 
 COPY . .
@@ -12,10 +12,12 @@ ARG ASSET_BASE_URL=
 RUN sed -i "s|api: \"/api\"|api: \"${API_BASE_URL}\"|g" src/environments/environment.ts \
     && sed -i "s|assetBaseUrl: \"\"|assetBaseUrl: \"${ASSET_BASE_URL}\"|g" src/environments/environment.ts
 
-RUN ./node_modules/.bin/ng build --configuration production
+RUN ./node_modules/.bin/ng build --configuration production \
+    && cp dist/medical-center/browser/index.csr.html dist/medical-center/browser/index.html
 
 FROM nginx:1-alpine-slim
 
+RUN rm -rf /usr/share/nginx/html/*
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist/medical-center/browser /usr/share/nginx/html
 

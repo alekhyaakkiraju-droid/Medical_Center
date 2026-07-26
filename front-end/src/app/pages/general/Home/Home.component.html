@@ -94,9 +94,7 @@
                   <div class="item">
                     <div class="icon-box">
                       <figure>
-                        <a [href]="service.link">
-                          <img [src]="service.image | assetUrl" alt="Service Image" />
-                        </a>
+                        <img [src]="service.image | assetUrl" [alt]="service.title" />
                       </figure>
                     </div>
                     <h6>{{ service.title }}</h6>

@@ -3,9 +3,11 @@ import { Injectable } from '@angular/core';
 import {
   BehaviorSubject,
   catchError,
+  finalize,
   map,
   Observable,
   of,
+  shareReplay,
   switchMap,
   throwError
 } from 'rxjs';
@@ -28,6 +30,7 @@ export class AuthServiceService {
   public isLoggedSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   private currentUser: CurrentUser | null = null;
+  private sessionResolve$: Observable<CurrentUser | null> | null = null;
   usernameTakenError = false;
 
   private readonly loginUrl = `${environment.api}/Account/login`;
@@ -66,6 +69,24 @@ export class AuthServiceService {
         return of(null);
       })
     );
+  }
+
+  /** Waits for the cookie session to be validated before protected API calls. */
+  resolveSession(): Observable<CurrentUser | null> {
+    if (this.currentUser) {
+      return of(this.currentUser);
+    }
+
+    if (!this.sessionResolve$) {
+      this.sessionResolve$ = this.loadCurrentUser().pipe(
+        finalize(() => {
+          this.sessionResolve$ = null;
+        }),
+        shareReplay(1)
+      );
+    }
+
+    return this.sessionResolve$;
   }
 
   login(email: string, password: string): Observable<CurrentUser | null> {

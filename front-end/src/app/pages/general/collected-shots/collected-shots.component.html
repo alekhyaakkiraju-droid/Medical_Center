@@ -1,3 +1,5 @@
+<app-image-lightbox />
+
 <section class="gallery bg-gray ">
   <div class="container max-w-screen-xl px-4 mx-auto">
     <div class="row">
@@ -11,11 +13,17 @@
         </div>
       </div>
 
-      @for (item of galleryItems; track item) {
+      @for (item of galleryItems; track item.title) {
         <div class="col-md-4 col-sm-6">
-          <div class="gallery-item">
-            <img [src]="item.image | assetUrl" class="img-responsive" alt="gallery-image" />
-            <a data-fancybox="images" [href]="item.image | assetUrl"></a>
+          <div
+            class="gallery-item"
+            role="button"
+            tabindex="0"
+            [attr.aria-label]="'View ' + item.title"
+            (click)="openImage(item)"
+            (keydown.enter)="openImage(item)"
+          >
+            <img [src]="item.image | assetUrl" class="img-responsive" [alt]="item.title" />
             <h3>{{ item.title }}</h3>
             <p>{{ item.description }}</p>
           </div>

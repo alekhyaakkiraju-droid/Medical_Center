@@ -1,19 +1,10 @@
 <div class="row mb-4">
-  @for (card of cards; track card) {
+  @for (card of cards; track card.id) {
     <div [class]="card.size">
-      <div class="card card-box">
-        <div class="card-head">
-          <header>{{ card.title }}</header>
-          <div class="tools">
-            @for (tool of card.tools; track tool) {
-              <a class="fa {{ tool.icon }} btn-color" href="javascript:;"></a>
-            }
-          </div>
-        </div>
-        <div class="card-body no-padding height-9">
-          <div class="recent-report__chart">
-            <div #chartHost [id]="card.id"></div>
-          </div>
+      <div class="admin-chart-card">
+        <div class="admin-chart-card__header">{{ card.title }}</div>
+        <div class="admin-chart-card__body">
+          <div #chartHost [id]="card.id"></div>
         </div>
       </div>
     </div>

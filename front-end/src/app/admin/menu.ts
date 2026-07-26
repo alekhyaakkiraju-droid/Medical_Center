@@ -2,30 +2,30 @@ export const MENU = [
     {
       title: 'Dashboard',
       path: '/admin/dashboard',
-      icon: 'fas fa-tachometer-alt'
+      icon: 'fa-solid fa-gauge-high'
     },
     {
       title: 'Appointment',
       path: '/admin/appointments',
-      icon: 'fas fa-calendar-check',
+      icon: 'fa-solid fa-calendar-check',
       badge: '0'
     },
     {
       title: 'Doctors',
       path: '/admin/doctors',
-      icon: 'fas fa-user-md'
+      icon: 'fa-solid fa-user-doctor'
     },
     {
       title: 'Patients',
       path: '/admin/patients',
-      icon: 'fas fa-user-injured'
+      icon: 'fa-solid fa-hospital-user'
     },
     {
       title: 'Sign Out',
       path: '#',
       toggle:'modal',
       target:'#logoutModal',
-      icon: 'fas fa-sign-out-alt'
+      icon: 'fa-solid fa-right-from-bracket'
     }
   ];
 
@@ -34,23 +34,23 @@ export const MENU = [
     {
       title: 'Appointment',
       path: '/doctor/doctor-appointments',
-      icon: 'fas fa-tachometer-alt'
+      icon: 'fa-solid fa-calendar-check'
     },
     {
       title: 'Patients Review',
       path: '/doctor/patient-reviews',
-      icon: 'fa fa-comments'
+      icon: 'fa-solid fa-comments'
     },
     {
       title: 'Profile',
       path: '/doctor/doctor-profile',
-      icon: 'fa fa-user'
+      icon: 'fa-solid fa-user'
     },
     {
       title: 'Sign Out',
       path: '#',
       toggle:'modal',
       target:'#logoutModal',
-      icon: 'fas fa-sign-out-alt'
+      icon: 'fa-solid fa-right-from-bracket'
     }
   ];

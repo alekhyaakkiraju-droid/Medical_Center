@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ReloadService } from '../../../shared/service/reload.service';
 import { RouterLink } from '@angular/router';
+import { AssetUrlPipe } from '../../../shared/asset-url.pipe';
 import { AppointmentRequestComponent } from '../appointment-request/appointment-request.component';
 
 @Component({
@@ -8,7 +9,7 @@ import { AppointmentRequestComponent } from '../appointment-request/appointment-
     templateUrl: './request-appointment.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./request-appointment.component.css'],
-    imports: [RouterLink, AppointmentRequestComponent]
+    imports: [RouterLink, AppointmentRequestComponent, AssetUrlPipe]
 })
 export class RequestAppointmentComponent implements OnInit,AfterViewInit {
 

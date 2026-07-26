@@ -1,22 +1,27 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { DoctorMENU, MENU } from '../../menu';
 import { LogoutComponent } from '../../../pages/auth/logout/logout.component';
+import { AuthServiceService } from '../../../pages/auth/auth-services/auth-service.service';
 
 @Component({
     selector: 'app-side-bar',
     changeDetection: ChangeDetectionStrategy.Eager,
     templateUrl: './side-bar.component.html',
-    imports: [LogoutComponent]
+    imports: [LogoutComponent, RouterLink, RouterLinkActive]
 })
 export class SideBarComponent implements OnInit {
-  menuItems: any;
-  isDropdownOpen = false;
+  menuItems: typeof MENU = MENU;
+  userLabel = 'Administrator';
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthServiceService
+  ) {}
 
   ngOnInit(): void {
     this.checkIfDoctorRoute();
+    this.userLabel = this.authService.getUserName() ?? this.authService.getUsernameFromToken() ?? 'Administrator';
   }
 
   checkIfDoctorRoute(): void {
@@ -27,11 +32,7 @@ export class SideBarComponent implements OnInit {
     }
   }
 
-  toggleDropdown(): void {
-    this.isDropdownOpen = !this.isDropdownOpen;
-  }
-
-  closeDropdown(): void {
-    this.isDropdownOpen = false;
+  isModalItem(item: (typeof MENU)[number]): boolean {
+    return item.toggle === 'modal';
   }
 }

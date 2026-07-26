@@ -318,4 +318,35 @@ public class DevelopmentDataSeederTests
             (await context.Appointments.CountAsync()).Should().Be(appointmentCount);
         }
     }
+
+    [Fact]
+    public async Task SeedAsync_RepairsLegacyAssetPathsOnRepeatRun()
+    {
+        await using var provider = CreateProvider();
+        await DevelopmentDataSeeder.SeedAsync(provider);
+
+        await using (var scope = provider.CreateAsyncScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+
+            var orthopedics = await context.Specializations.SingleAsync(s => s.SpecializationName == "Orthopedics");
+            orthopedics.SpecializationImage = "images/resource/1.png";
+
+            var doctorSmith = await context.Doctors.SingleAsync(d => d.Email == DevelopmentDataSeeder.DoctorSmithEmail);
+            doctorSmith.Image = "images/doctors/smith.png";
+
+            await context.SaveChangesAsync();
+        }
+
+        await DevelopmentDataSeeder.SeedAsync(provider);
+
+        await using var verifyScope = provider.CreateAsyncScope();
+        var verifyContext = verifyScope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+
+        (await verifyContext.Specializations.SingleAsync(s => s.SpecializationName == "Orthopedics"))
+            .SpecializationImage.Should().Be("images/services/service-one.jpg");
+
+        (await verifyContext.Doctors.SingleAsync(d => d.Email == DevelopmentDataSeeder.DoctorSmithEmail))
+            .Image.Should().Be("images/team/doctor-1.jpg");
+    }
 }

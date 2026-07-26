@@ -7,6 +7,7 @@ import { Doctor } from '../../../pages/models';
 import { AppointmentService } from '../../../pages/general/services/appointment.service';
 import { DoctorService } from '../../../pages/general/services/doctor.service';
 import { ReloadService } from '../../../shared/service/reload.service';
+import { AuthServiceService } from '../../../pages/auth/auth-services/auth-service.service';
 import { DeleteModalComponent } from '../../../doctor/pages/delete-modal/delete-modal.component';
 import { TotalEarningsService } from '../../services/total-earnings.service';
 import jsPDF from 'jspdf';
@@ -16,6 +17,7 @@ import { SideBarComponent } from '../side-bar/side-bar.component';
 import { NgClass, CurrencyPipe, DatePipe } from '@angular/common';
 import { ChartComponent } from '../chart/chart.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { AssetUrlPipe } from '../../../shared/asset-url.pipe';
 
 
 @Component({
@@ -23,7 +25,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
     templateUrl: './board.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./board.component.css'],
-    imports: [SideBarComponent, NgClass, ChartComponent, DeleteModalComponent, ReactiveFormsModule, FormsModule, CurrencyPipe, DatePipe]
+    imports: [SideBarComponent, NgClass, ChartComponent, DeleteModalComponent, ReactiveFormsModule, FormsModule, CurrencyPipe, DatePipe, AssetUrlPipe]
 })
 export class BoardComponent implements OnInit, OnDestroy {
 
@@ -49,7 +51,8 @@ export class BoardComponent implements OnInit, OnDestroy {
     private reload: ReloadService,
     private toaster: ToastrService,
     private patientService: PatientService,
-    private totalEarningService: TotalEarningsService
+    private totalEarningService: TotalEarningsService,
+    private authService: AuthServiceService
   ) {}
 
   ngAfterViewInit(): void {
@@ -57,11 +60,18 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const sessionSub = this.authService.resolveSession().subscribe((user) => {
+      if (user && this.authService.isRole('admin')) {
+        this.loadDashboardData();
+      }
+    });
+    this.subscriptions.push(sessionSub);
+  }
+
+  private loadDashboardData(): void {
     this.loadAppointments();
     this.loadDoctor();
     this.fetchPatientLength();
-    this.optimizeWidget();
-    this.setBadgeForAppointments();
     this.getTotalEarning();
   }
 
@@ -141,27 +151,27 @@ export class BoardComponent implements OnInit, OnDestroy {
   optimizeWidget(): void {
     this.infoBoxes = [
       {
-        bgClass: 'bg-blue',
-        iconClass: 'fas fa-users',
+        accentClass: 'admin-stat-card--blue',
+        iconClass: 'fa-solid fa-calendar-check',
         text: 'Appointments',
         number: this.numOfAppointments,
       },
       {
-        bgClass: 'bg-orange',
-        iconClass: 'fas fa-user',
-        text: 'New Patients',
+        accentClass: 'admin-stat-card--orange',
+        iconClass: 'fa-solid fa-hospital-user',
+        text: 'Patients',
         number: this.numOfPatients,
       },
       {
-        bgClass: 'bg-purple',
-        iconClass: 'fas fa-syringe',
+        accentClass: 'admin-stat-card--purple',
+        iconClass: 'fa-solid fa-user-doctor',
         text: 'Doctors',
         number: this.numOfDoctors,
       },
       {
-        bgClass: 'bg-success',
-        iconClass: 'fas fa-dollar-sign',
-        text: 'PrimeCare Earning',
+        accentClass: 'admin-stat-card--green',
+        iconClass: 'fa-solid fa-sack-dollar',
+        text: 'Total Earnings',
         number: this.totalAmountEarning,
         isCurrency: true,
       },

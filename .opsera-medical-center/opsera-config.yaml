@@ -1,0 +1,18 @@
+# Opsera Code-to-Cloud configuration — Medical Center (CareShift)
+# Matches shared Opsera dev platform (same account/clusters as UBR NMS).
+tenant: opsera
+app: medical-center
+region: us-west-2
+hub_cluster: argocd-usw2
+spoke_cluster: opsera-usw2-np
+argocd_server: argocd-usw2.agent.opsera.dev
+namespace_pattern: "opsera-medical-center-{env}"
+branch: main
+environments:
+  - dev
+services:
+  - yarp
+  - api
+  - frontend
+public_ingress_service: yarp
+public_url_pattern: "https://medical-center-yarp-{env}.agent.opsera.dev"

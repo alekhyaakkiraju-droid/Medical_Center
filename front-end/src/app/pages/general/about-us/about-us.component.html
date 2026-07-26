@@ -20,7 +20,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-6">
-                <img src="images/services/service-one.jpg" class="responsive" alt="story">
+                <img [src]="'images/gallery/gallery-01.jpg' | assetUrl" class="responsive" alt="PrimeCare Center care team">
             </div>
             <div class="col-md-6">
                 <div class="story-content">
@@ -51,9 +51,7 @@
                     <h1>The World <br>
                         Class Hospitality
                     </h1>
-                    <a data-fancybox
-                        href="https://www.youtube.com/watch?v=_sI_Ps7JSEk&amp;autoplay=1&amp;rel=0&amp;controls=0&amp;showinfo=0"><i
-                            class="fa fa-play"></i></a>
+                    <span class="promo-video-badge" aria-hidden="true">PrimeCare Center</span>
                 </div>
             </div>
         </div>

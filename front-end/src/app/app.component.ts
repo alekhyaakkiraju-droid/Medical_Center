@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { filter, take } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { ReloadService } from './shared/service/reload.service';
 import { NgIf } from '@angular/common';
 import { HeaderComponent } from './layout/header/header.component';
@@ -19,8 +19,11 @@ export class AppComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void { this.hideRoutePreloader(); }
   ngOnInit(): void {
     this.updateChromeVisibility(this.router.url);
-    this.router.events.pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd), take(1))
-      .subscribe((event) => { this.updateChromeVisibility(event.urlAfterRedirects); setTimeout(() => this.hideRoutePreloader(), 0); });
+    this.router.events.pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        this.updateChromeVisibility(event.urlAfterRedirects);
+        setTimeout(() => this.hideRoutePreloader(), 0);
+      });
   }
   private updateChromeVisibility(url: string): void {
     this.showHeaderAndNavbar = !url.includes('/admin') && !url.includes('/doctor') && !url.includes('/error') && !url.includes('/auth');

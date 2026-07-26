@@ -143,6 +143,23 @@
     padding-left: 70px;
     margin-right: 40px;
   }
+
+  .header-uper .contact-info .item.item--login {
+    padding-left: 0;
+  }
+
+  .header-uper .contact-info .item .login-link {
+    position: relative;
+    display: inline-block;
+    padding-left: 70px;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .header-uper .contact-info .item .login-link:hover strong {
+    color: #5ec5cc;
+  }
   
   .header-uper .contact-info .item .icon-box {
     position: absolute;
