@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import { ReloadService } from './shared/service/reload.service';
 
 @Component({
@@ -25,7 +25,8 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.updateChromeVisibility(this.router.url);
 
     this.router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      take(1)
     ).subscribe((event) => {
       this.updateChromeVisibility(event.urlAfterRedirects);
       setTimeout(() => this.hideRoutePreloader(), 0);
