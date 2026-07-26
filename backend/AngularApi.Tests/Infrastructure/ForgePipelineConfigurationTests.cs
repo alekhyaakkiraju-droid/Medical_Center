@@ -67,7 +67,10 @@ public class ForgePipelineConfigurationTests
         var yaml = File.ReadAllText(PipelinePath);
 
         yaml.Should().Contain("Staging Smoke Tests");
+        yaml.Should().Contain("Expanded Smoke Tests");
+        yaml.Should().Contain("Patient Journey E2E");
         yaml.Should().Contain("./scripts/run-e2e-smoke.sh");
+        yaml.Should().Contain("./scripts/e2e-patient-journey.sh");
         yaml.Should().Contain("./scripts/smoke-tests.sh");
         yaml.Should().Contain("engine: opsera");
     }
@@ -85,8 +88,10 @@ public class ForgePipelineConfigurationTests
         yaml.Should().Contain("Push Frontend Image to Registry");
         yaml.Should().Contain("tag: \"$GIT_SHA\"");
         yaml.Should().Contain("tag: latest");
-        yaml.Should().Contain("Staging E2E Tests");
+        yaml.Should().Contain("Expanded Smoke Tests");
+        yaml.Should().Contain("Patient Journey E2E");
         yaml.Should().Contain("./scripts/run-e2e-smoke.sh");
+        yaml.Should().Contain("./scripts/e2e-patient-journey.sh");
         yaml.Should().Contain("Production Promotion Gate");
         yaml.Should().Contain("variantId: gate:idp-approval");
         yaml.Should().Contain("Production Deploy API");
@@ -109,10 +114,10 @@ public class ForgePipelineConfigurationTests
         yaml.Should().Contain("archiveArtifacts:");
 
         var dastIndex = yaml.IndexOf("DAST Scan", StringComparison.Ordinal);
-        var e2eIndex = yaml.IndexOf("Staging E2E Tests", StringComparison.Ordinal);
+        var patientJourneyIndex = yaml.IndexOf("Patient Journey E2E", StringComparison.Ordinal);
         var gateIndex = yaml.IndexOf("Production Promotion Gate", StringComparison.Ordinal);
 
-        dastIndex.Should().BeGreaterThan(e2eIndex, because: "DAST must run after staging E2E");
+        dastIndex.Should().BeGreaterThan(patientJourneyIndex, because: "DAST must run after patient journey E2E");
         dastIndex.Should().BeLessThan(gateIndex, because: "DAST must complete before production promotion");
 
         var stagingBlockStart = yaml.IndexOf("staging:", StringComparison.Ordinal);

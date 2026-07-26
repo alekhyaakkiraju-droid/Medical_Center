@@ -53,11 +53,48 @@ public class SmokeTestScriptTests
         patientJourney.Should().Contain("patient.alice@uat.careshift.local");
         patientJourney.Should().Contain("UatSeed123!");
 
-        pipeline.Should().Contain("Staging E2E Tests");
+        pipeline.Should().Contain("Expanded Smoke Tests");
         pipeline.Should().Contain("run-e2e-smoke.sh");
         pipeline.Should().Contain("Staging Smoke Tests");
         pipeline.Should().Contain("Patient Journey E2E");
         pipeline.Should().Contain("e2e-patient-journey.sh");
+        pipeline.Should().Contain("./scripts/smoke-tests.sh");
+    }
+
+    [Fact]
+    public void PatientJourneyScript_ExistsAndDefinesAuthenticatedFlowSteps()
+    {
+        var patientJourneyPath = Path.Combine(RepoRoot, "scripts", "e2e-patient-journey.sh");
+        File.Exists(patientJourneyPath).Should().BeTrue();
+
+        var patientJourney = File.ReadAllText(patientJourneyPath);
+        patientJourney.Should().Contain("login");
+        patientJourney.Should().Contain("Profile");
+        patientJourney.Should().Contain("Appointment");
+    }
+
+    [Fact]
+    public void ForgePipeline_StagingEnvironmentOrdersExpandedSmokeAndPatientJourneyAfterBasicSmoke()
+    {
+        var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
+        var devBlockStart = pipeline.IndexOf("dev:", StringComparison.Ordinal);
+        var stagingBlockStart = pipeline.IndexOf("staging:", StringComparison.Ordinal);
+        var productionBlockStart = pipeline.IndexOf("production:", StringComparison.Ordinal);
+        var devSteps = pipeline[devBlockStart..stagingBlockStart];
+        var stagingSteps = pipeline[stagingBlockStart..productionBlockStart];
+
+        var smokeIndex = stagingSteps.IndexOf("- Staging Smoke Tests", StringComparison.Ordinal);
+        var expandedIndex = stagingSteps.IndexOf("- Expanded Smoke Tests", StringComparison.Ordinal);
+        var patientIndex = stagingSteps.IndexOf("- Patient Journey E2E", StringComparison.Ordinal);
+        var dastIndex = stagingSteps.IndexOf("- DAST Scan", StringComparison.Ordinal);
+
+        smokeIndex.Should().BeGreaterThan(-1);
+        expandedIndex.Should().BeGreaterThan(smokeIndex);
+        patientIndex.Should().BeGreaterThan(expandedIndex);
+        dastIndex.Should().BeGreaterThan(patientIndex);
+
+        devSteps.Should().NotContain("Expanded Smoke Tests");
+        devSteps.Should().NotContain("Patient Journey E2E");
     }
 
     [Fact]

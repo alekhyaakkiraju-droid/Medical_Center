@@ -235,18 +235,19 @@ steps:
     variantId: test:generic
     config:
       # WO-031: passing /health confirms API started with IDP SMTP env vars from Staging Deploy API
-      # WO-038: expanded image, routerLink navigation, and structured 401 assertions
+      testCommand: SMOKE_BASE_URL="${STAGING_BASE_URL}" SMOKE_API_URL="${STAGING_API_URL}" ./scripts/smoke-tests.sh
+
+  - name: Expanded Smoke Tests
+    variantId: test:generic
+    config:
+      # WO-038/WO-040: expanded image, routerLink navigation, and structured 401 assertions
       testCommand: SMOKE_BASE_URL="${STAGING_BASE_URL}" SMOKE_API_URL="${STAGING_API_URL}" ./scripts/run-e2e-smoke.sh
 
   - name: Patient Journey E2E
     variantId: test:generic
     config:
+      # WO-039/WO-040: authenticated patient login, profile, appointments, logout
       testCommand: SMOKE_API_URL="${STAGING_API_URL}" ./scripts/e2e-patient-journey.sh
-
-  - name: Staging E2E Tests
-    variantId: test:generic
-    config:
-      testCommand: SMOKE_BASE_URL="${STAGING_BASE_URL}" SMOKE_API_URL="${STAGING_API_URL}" ./scripts/run-e2e-smoke.sh
 
   # --- DAST (OWASP ZAP) — runs against live staging; high+ findings block production promotion ---
   - name: DAST Scan
@@ -358,7 +359,8 @@ environments:
       - Staging Deploy YARP
       - Staging Deploy Frontend
       - Staging Smoke Tests
-      - Staging E2E Tests
+      - Expanded Smoke Tests
+      - Patient Journey E2E
       - DAST Scan
   production:
     description: Production — IDP-governed promotion, deploy, post-deploy verification, rollback
