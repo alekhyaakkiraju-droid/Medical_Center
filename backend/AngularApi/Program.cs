@@ -64,6 +64,9 @@ namespace WebApiDemo
             });
 
             var app = builder.Build();
+            JwtSecretStartupValidation.Validate(
+                app.Configuration,
+                app.Services.GetRequiredService<ILogger<Program>>());
             await DatabaseMigrationStartup.ApplyPendingMigrationsAsync(app.Services);
 
             using (var scope = app.Services.CreateScope())
