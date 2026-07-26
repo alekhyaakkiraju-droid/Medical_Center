@@ -4,7 +4,7 @@
         <div class="row">
             <div class="col-md-4 col-sm-6 col-xs-12" *ngFor="let doctor of doctorsData">
                 <div class="team-member">
-                    <img [src]="doctor.image" alt="doctor" class="img-responsive">
+                    <img [src]="doctor.image | assetUrl" alt="doctor" class="img-responsive">
                     <div class="contents text-center mx-auto">
                         <h4 class="text-base mt-2">{{ doctor.name }}</h4>
                         <p>{{ doctor.professionalStatement }}</p>

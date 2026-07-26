@@ -49,6 +49,13 @@ else
 fi
 
 echo "=== Smoke Test 4: Image-bearing page validation ==="
+TEAM_BODY="$(curl -sf "${BASE_URL}/pages/team" || true)"
+if [[ -n "${TEAM_BODY}" ]] && echo "${TEAM_BODY}" | grep -qi '<img'; then
+  pass "Team page contains at least one image tag"
+else
+  fail "Team page contains at least one image tag" "HTTP 200 body containing <img"
+fi
+
 GALLERY_BODY="$(curl -sf "${BASE_URL}/pages/gallery" || true)"
 if [[ -n "${GALLERY_BODY}" ]] && echo "${GALLERY_BODY}" | grep -qi '<img'; then
   pass "Gallery page contains at least one image tag"

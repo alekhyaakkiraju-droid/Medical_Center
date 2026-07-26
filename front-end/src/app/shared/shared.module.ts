@@ -6,6 +6,7 @@ import { DeleteModalComponent } from '../doctor/pages/delete-modal/delete-modal.
 import { PaymentComponent } from '../pages/general/Payment/Payment.component';
 import { SideBarComponent } from '../admin/pages/side-bar/side-bar.component';
 import { AuthModule } from '../pages/auth/auth.module';
+import { AssetUrlPipe } from './asset-url.pipe';
 
 @NgModule({
   imports: [
@@ -19,11 +20,13 @@ import { AuthModule } from '../pages/auth/auth.module';
     DeleteModalComponent,
     PaymentComponent,
     SideBarComponent,
+    AssetUrlPipe,
   ],
   exports: [
     DeleteModalComponent,
     PaymentComponent,
     SideBarComponent,
+    AssetUrlPipe,
   ],
 })
 export class SharedModule { }

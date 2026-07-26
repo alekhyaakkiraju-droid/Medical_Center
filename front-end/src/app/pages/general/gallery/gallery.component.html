@@ -2,7 +2,7 @@
     <div class="loader"></div>
 </div>
 <!--Page Title-->
-<section class="page-title text-center" style="background-image:url(images/background/3.jpg);">
+<section class="page-title text-center" [style.background-image]="'url(' + ('images/background/3.jpg' | assetUrl) + ')'">
     <div class="container">
         <div class="title-text">
             <h1>gallery</h1>
@@ -35,7 +35,7 @@
             <div class="col-sm-6" *ngFor="let video of videoGallery">
               <div class="video-gallery-item">
                 <div class="image-holder">
-                  <img [src]="video.thumbnail" class="img-responsive" alt="video-gallery" />
+                  <img [src]="video.thumbnail | assetUrl" class="img-responsive" alt="video-gallery" />
                   <a data-fancybox [href]="video.videoUrl">
                     <i class="fa fa-play"></i>
                   </a>

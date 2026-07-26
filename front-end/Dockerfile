@@ -8,8 +8,10 @@ RUN npm ci --ignore-scripts
 COPY . .
 
 ARG API_BASE_URL=/api
+ARG ASSET_BASE_URL=
 RUN sed -i "s|http://localhost:5004/api|${API_BASE_URL}|g" src/environments/environment.ts src/environments/environment.development.ts \
-    && find src -type f \( -name '*.ts' -o -name '*.html' \) -exec grep -l 'localhost:5004/api' {} + | xargs -r sed -i "s|http://localhost:5004/api|${API_BASE_URL}|g"
+    && find src -type f \( -name '*.ts' -o -name '*.html' \) -exec grep -l 'localhost:5004/api' {} + | xargs -r sed -i "s|http://localhost:5004/api|${API_BASE_URL}|g" \
+    && sed -i "s|assetBaseUrl: \"\"|assetBaseUrl: \"${ASSET_BASE_URL}\"|g" src/environments/environment.ts src/environments/environment.development.ts
 
 RUN ./node_modules/.bin/ng build --configuration production
 

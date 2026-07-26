@@ -3,7 +3,7 @@
 </div>
 
 <!--Page Title-->
-<section class="page-title text-center" style="background-image:url(images/background/3.jpg);">
+<section class="page-title text-center" [style.background-image]="'url(' + ('images/background/3.jpg' | assetUrl) + ')'">
     <div class="container">
         <div class="title-text">
             <h1>Team</h1>
@@ -53,7 +53,7 @@
                     >
                       <div class="col-md-4 col-sm-6" *ngFor="let member of tab.members">
                         <div class="team-person text-center">
-                          <img [src]="member.image" class="img-responsive" alt="team">
+                          <img [src]="member.image | assetUrl" class="img-responsive" alt="team">
                           <h6>{{ member.name }}</h6>
                           <p>{{ member.role }}</p>
                         </div>

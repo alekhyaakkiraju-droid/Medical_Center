@@ -13,8 +13,8 @@
 
           <div class="col-md-4 col-sm-6" *ngFor="let item of galleryItems">
               <div class="gallery-item">
-                  <img [src]="item.image" class="img-responsive" alt="gallery-image" />
-                  <a data-fancybox="images" [href]="item.image"></a>
+                  <img [src]="item.image | assetUrl" class="img-responsive" alt="gallery-image" />
+                  <a data-fancybox="images" [href]="item.image | assetUrl"></a>
                   <h3>{{ item.title }}</h3>
                   <p>{{ item.description }}</p>
               </div>
