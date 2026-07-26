@@ -27,7 +27,7 @@ public class AngularStandaloneSpecTests
             .EnumerateFiles(FrontendAppRoot, "*.spec.ts", SearchOption.AllDirectories)
             .ToList();
 
-        specFiles.Should().HaveCountGreaterOrEqualTo(28);
+        specFiles.Should().HaveCountGreaterThanOrEqualTo(28);
 
         foreach (var file in specFiles)
         {
