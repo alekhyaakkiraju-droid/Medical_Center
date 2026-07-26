@@ -20,7 +20,7 @@ describe('BoardComponent', () => {
         ...standaloneComponentTestProviders,
         { provide: AppointmentService, useValue: { getAppointments: () => of(mockPagedResult([mockAppointmentDTO()])) } },
         { provide: DoctorService, useValue: { getAllDoctors: () => of(mockPagedResult([mockDoctorDTO()], { totalCount: 1 })) } },
-        { provide: PatientService, useValue: { getAllPatient: () => of([mockPatientDTO(), mockPatientDTO({ patientId: 'patient-2' })]) } },
+        { provide: PatientService, useValue: { getAllPatient: () => of(mockPagedResult([mockPatientDTO(), mockPatientDTO({ patientId: 'patient-2' })], { totalCount: 2 })) } },
         { provide: TotalEarningsService, useValue: { getTotalEarnings: () => of({ totalEarnings: 5000 }) } },
         { provide: ReloadService, useValue: { initializeLoader: () => undefined } },
         { provide: ToastrService, useValue: { success: () => undefined, error: () => undefined } },

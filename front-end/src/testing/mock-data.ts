@@ -41,8 +41,15 @@ export function mockPatientDTO(overrides: Partial<Patient> = {}): Patient {
 export function mockReviewDTO(overrides: Partial<ReviewDTO> = {}): ReviewDTO {
   return {
     id: 1,
-    rating: 5,
-    comment: 'Excellent care',
+    patientId: 'patient-1',
+    doctorId: 'doctor-1',
+    isReviewAnonymous: false,
+    waitTimeRating: 5,
+    bedsideMannerRating: 5,
+    overallRating: 5,
+    review: 'Excellent care',
+    isDoctorRecommended: true,
+    reviewDate: '2026-07-26T00:00:00Z',
     ...overrides,
   };
 }
