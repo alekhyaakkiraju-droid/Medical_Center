@@ -26,6 +26,7 @@ public class MedicalCenterWebApplicationFactory : WebApplicationFactory<Program>
                 ["Jwt:AuthCookieName"] = "MedCenter.Auth",
                 ["Jwt:RefreshCookieName"] = "MedCenter.Refresh",
                 ["Jwt:CookiePath"] = "/api",
+                ["Jwt:FrontendBaseUrl"] = "http://localhost:8081",
                 ["GoogleAuth:ClientId"] = "test-client-id",
                 ["GoogleAuth:ClientSecret"] = "test-client-secret",
                 ["CorsSettings:AllowedOrigins:0"] = "http://localhost:4200",

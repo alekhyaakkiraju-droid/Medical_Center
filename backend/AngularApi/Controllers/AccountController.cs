@@ -98,10 +98,11 @@ namespace AngularApi.Controllers
                     var confirmationLink = Url.Action(nameof(ConfirmEmail), "Account",
                         new { userId = appUser.Id, token }, Request.Scheme);
 
-                    var confirmtionLinkForFront = $"http://localhost:4200/auth/confirm-email?userId={appUser.Id}&token={WebUtility.UrlEncode(token)}";
+                    var confirmtionLinkForFront =
+                        $"{_authCookieOptions.FrontendBaseUrl}/auth/confirm-email?userId={appUser.Id}&token={WebUtility.UrlEncode(token)}";
 
                     var emailBody = _emailTemplateService.GetConfirmationEmail(appUser.UserName, confirmtionLinkForFront);
-                    var message = new Message(new[] { appUser.Email }, "Confirm Your Email", "emailBody");
+                    var message = new Message(new[] { appUser.Email }, "Confirm Your Email", emailBody);
 
                     try
                     {
@@ -246,13 +247,8 @@ namespace AngularApi.Controllers
                 var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var encodedToken = WebUtility.UrlEncode(resetToken);
 
-                var resetLink = Url.Action(
-                    nameof(ResetPassword),
-                    "Account",
-                    new { token = encodedToken, email = user.Email },
-                    Request.Scheme);
-
-                // var resetLink = $"http://localhost:4200/auth/reset-password?token={resetToken}&email={user.Email}";
+                var resetLink =
+                    $"{_authCookieOptions.FrontendBaseUrl}/auth/reset-password?token={encodedToken}&email={WebUtility.UrlEncode(user.Email)}";
                 var message = new Message(new[] { user.Email }, "Forgot Password Link", resetLink);
 
                 try
@@ -284,7 +280,8 @@ namespace AngularApi.Controllers
 
             // Return success response for valid tokens
             //return Ok(new { Status = "Success", Message = "Password reset link is valid.", Token = token, Email = email }); 
-            return Redirect($"http://localhost:4200/auth/reset-password?token={token}&email={email}");
+            return Redirect(
+                $"{_authCookieOptions.FrontendBaseUrl}/auth/reset-password?token={token}&email={email}");
         }
 
 
@@ -400,8 +397,6 @@ namespace AngularApi.Controllers
             var result = await _userManager.ConfirmEmailAsync(user, token);
             if (!result.Succeeded) return BadRequest("Email confirmation failed");
 
-            var confirmtionLinkForFront = $"http://localhost:4200/auth/confirm-email?userId={userId}&token={token}";
-            // return Redirect(confirmtionLinkForFront);
             return Ok(new { Message = "Email confirmed successfully." });
         }
 
