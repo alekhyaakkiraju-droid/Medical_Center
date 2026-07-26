@@ -31,6 +31,24 @@ namespace AngularApi.Services
                 .Replace("{{date}}", date);
         }
 
+
+        public string GetBreachNotificationEmail(
+            string affectedIndividualName,
+            string breachDescription,
+            string dateDiscovered,
+            string recommendedActions,
+            string contactInformation)
+        {
+            var emailTemplate = LoadTemplate("BreachNotification.html");
+
+            return emailTemplate
+                .Replace("{{AffectedIndividualName}}", affectedIndividualName)
+                .Replace("{{BreachDescription}}", breachDescription)
+                .Replace("{{DateDiscovered}}", dateDiscovered)
+                .Replace("{{RecommendedActions}}", recommendedActions)
+                .Replace("{{ContactInformation}}", contactInformation);
+        }
+
         private string LoadTemplate(string templateFileName)
         {
             return _templateCache.GetOrAdd(templateFileName, fileName =>

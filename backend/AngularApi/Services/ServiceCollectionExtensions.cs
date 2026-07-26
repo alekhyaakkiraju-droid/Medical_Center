@@ -22,6 +22,7 @@ namespace AngularApi.Services
             services.Configure<AppointmentSettings>(configuration.GetSection(AppointmentSettings.SectionName));
             services.Configure<SmtpSettings>(configuration.GetSection(SmtpSettings.SectionName));
             services.Configure<CorsSettings>(configuration.GetSection(CorsSettings.SectionName));
+            services.Configure<BreachDetectionOptions>(configuration.GetSection(BreachDetectionOptions.SectionName));
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>(); // should be addTrasient
@@ -41,6 +42,7 @@ namespace AngularApi.Services
             services.AddScoped<IMedicalCenterDoctorAvailabilityService, MedicalCenterDoctorAvailabilityService>();
             services.AddScoped<IPatientReviewService, PatientReviewService>();
             services.AddScoped<IContactService, ContactService>();
+            services.AddScoped<IBreachNotificationService, BreachNotificationService>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 

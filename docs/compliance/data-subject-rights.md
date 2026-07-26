@@ -76,27 +76,27 @@ Escalation: unresolved requests at day 25 escalate to Privacy Officer and Engine
 
 ## Breach Notification Procedures
 
-> **Status: Pending (infrastructure not deployed)**
+> **Status: In Progress (interim automation deployed)**
 
-The following procedures are documented for operational readiness but automated breach detection and notification workflows are **not yet implemented**:
+Interim breach detection and notification automation is deployed via `BreachNotificationService` and the admin-only `POST /api/admin/breach-assessment` endpoint. Full SIEM integration remains planned:
 
-### Detection (Pending)
+### Detection (In Progress)
 
-- Automated anomaly detection on `AuditLog` and authentication failures
+- Automated anomaly detection on `AuditLog` and authentication failures via `BreachNotificationService.DetectAnomaliesAsync`
 - SIEM integration for correlated alerts
 - Workforce reporting hotline
 
-### Assessment (Pending)
+### Assessment (In Progress)
 
-- Privacy Officer triage within 24 hours of suspected breach
+- Privacy Officer triage within 24 hours of suspected breach via `POST /api/admin/breach-assessment`
 - Risk assessment: nature of PHI, individuals affected, mitigation steps
 
-### Notification (Pending)
+### Notification (In Progress)
 
 | Audience | Timeline | Method |
 |----------|----------|--------|
 | Internal leadership | 24 hours | Secure incident channel |
-| Affected individuals | Without unreasonable delay, max 60 days | Written notice (email/letter) |
+| Affected individuals | Without unreasonable delay, max 60 days | Written notice via `BreachNotification.html` email template |
 | HHS OCR | Within 60 days if ≥500 individuals | HHS breach portal |
 | Media | If ≥500 individuals in one state | Press release |
 
@@ -105,7 +105,7 @@ The following procedures are documented for operational readiness but automated 
 - Maintain breach register with root cause, remediation, and notification dates
 - Post-incident review within 14 days of closure
 
-Until notification infrastructure is deployed, manual procedures above apply with Engineering + Privacy joint runbooks.
+Until full SIEM integration is deployed, the interim automation above supplements manual procedures with Engineering + Privacy joint runbooks.
 
 ## Related Documents
 
