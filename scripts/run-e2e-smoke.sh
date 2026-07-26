@@ -122,6 +122,17 @@ else
   fail "Public pages expose routerLink-based SPA navigation"     "about-us and gallery contain routerLink attributes (about=${ABOUT_ROUTER_COUNT}, gallery=${GALLERY_ROUTER_COUNT})"
 fi
 
+
+echo "=== Smoke Test 8: Invalid login returns client error ==="
+LOGIN_TMP="$(mktemp)"
+LOGIN_CODE="$(curl -s -o "${LOGIN_TMP}" -w '%{http_code}' -H "Content-Type: application/json" -X POST "${API_URL%/api}/api/Account/login" -d '{"email":"invalid@example.com","password":"wrong-password"}')"
+if [[ "${LOGIN_CODE}" == "401" || "${LOGIN_CODE}" == "400" ]]; then
+  pass "Invalid login credentials return HTTP ${LOGIN_CODE}"
+else
+  fail "Invalid login credentials return HTTP 401 or 400" "got status=${LOGIN_CODE}"
+fi
+rm -f "${LOGIN_TMP}"
+
 echo "=== Summary: ${PASS} passed, ${FAIL} failed ==="
 if [[ "${FAIL}" -gt 0 ]]; then
   exit 1
