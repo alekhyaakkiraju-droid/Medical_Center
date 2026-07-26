@@ -10,12 +10,10 @@ Target URL: `https://medical-center-yarp-dev.agent.opsera.dev`
    ```bash
    bash .opsera-medical-center/scripts/bootstrap-ecr.sh
    ```
-2. **Namespace secrets** (one-time):
-   ```bash
-   cp .opsera-medical-center/k8s/secrets.example.yaml /tmp/secrets.yaml
-   # edit values, then:
-   kubectl apply -f /tmp/secrets.yaml -n opsera-medical-center-dev
-   ```
+2. **Dev secrets + backing services** — applied automatically by the Forge `deploy-dev-eks` step from:
+   - `dev-secrets.yaml` (JWT, SQL connection, SMTP placeholders)
+   - `sqlserver-dev.yaml` (in-cluster SQL Server for UAT)
+   - `mailhog-dev.yaml` (captured outbound email)
 3. **Render image tags** at deploy time:
    ```bash
    IMAGE_TAG=<git-sha-short> bash .opsera-medical-center/scripts/render-k8s-manifests.sh

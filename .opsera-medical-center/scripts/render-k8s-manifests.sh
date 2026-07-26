@@ -15,11 +15,12 @@ for file in \
   "${K8S_DIR}/api-deployment.yaml" \
   "${K8S_DIR}/yarp-deployment.yaml" \
   "${K8S_DIR}/frontend-deployment.yaml"; do
+  out="${file%.yaml}.rendered.yaml"
   sed \
     -e "s|PLACEHOLDER_API_ECR_URI|${API_IMAGE}|g" \
     -e "s|PLACEHOLDER_YARP_ECR_URI|${YARP_IMAGE}|g" \
     -e "s|PLACEHOLDER_FRONTEND_ECR_URI|${FRONTEND_IMAGE}|g" \
-    "${file}" > "${file}.rendered"
+    "${file}" > "${out}"
 done
 
 echo "Rendered manifests with tag ${TAG}"

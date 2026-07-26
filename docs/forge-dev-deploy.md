@@ -27,18 +27,17 @@ Forge stores AWS credentials in the **connector**. Pipelines use that connector 
 | 1 | `front-end/package-lock.json` tracked (PR #98) | Done on `main` |
 | 2 | `front-end/src/app/api/generated/api.ts` + `openapi/swagger.json` tracked (PR #99) | Done on `main` |
 | 3 | ECR repos exist: `medical-center-api`, `-yarp`, `-frontend` | Run `bootstrap-ecr.sh` once |
-| 4 | K8s secret `medical-center-app-secrets` in namespace | Apply `secrets.example.yaml` once |
-| 5 | Trigger run from **Forge UI** (not MCP — MCP runs can stay queued) | Required |
+| 4 | K8s secret `medical-center-app-secrets` + SQL/MailHog in namespace | Applied by deploy step from `dev-secrets.yaml` |
+| 5 | Deploy step enabled on pipeline | `deploy-dev-eks` after push |
+| 6 | Trigger **new** run from Forge UI — do **not** retry a failed run (Docker images are lost between retries) | Required |
 
 ### Pipeline phases
 
 **Phase 1 — Build + push (target: green)**  
 scan → sync/build api → build yarp → build frontend → bootstrap ECR → push all three images
 
-**Phase 2 — Deploy (after secrets exist)**  
-render manifests with `$GIT_SHA_SHORT` → kubectl apply (see `.opsera-medical-center/k8s/README.md`)
-
-Deploy is intentionally deferred until namespace secrets exist — applying API manifests without SQL/JWT secrets causes crash loops, not a useful failure mode.
+**Phase 2 — Deploy (secrets + SQL/MailHog applied by pipeline)**  
+render manifests with `$GIT_SHA_SHORT` → kubectl apply → rollout wait
 
 ### Trigger from Forge UI
 
