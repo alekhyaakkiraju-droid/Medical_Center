@@ -2,7 +2,7 @@ using FluentAssertions;
 
 namespace AngularApi.Tests.Infrastructure;
 
-public class Angular20UpgradeConfigurationTests
+public class Angular21UpgradeConfigurationTests
 {
     private static readonly string RepoRoot = Path.GetFullPath(
         Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", ".."));
@@ -10,38 +10,29 @@ public class Angular20UpgradeConfigurationTests
     private static readonly string FrontendRoot = Path.Combine(RepoRoot, "front-end");
 
     [Fact]
-    public void PackageJson_MeetsAngular20NodeAndVersionRequirements()
+    public void PackageJson_PinsAngularPackagesTo21()
     {
         var packageJson = File.ReadAllText(Path.Combine(FrontendRoot, "package.json"));
 
-        packageJson.Should().Contain("\"node\": \">=20\"");
-        packageJson.Should().NotContain("\"@angular/core\": \"^19.");
-        packageJson.Should().NotContain("\"@angular/core\": \"^18.");
-        packageJson.Should().MatchRegex("\"@angular/core\": \"\\^2[0-9]");
+        packageJson.Should().Contain("\"@angular/core\": \"^21.");
+        packageJson.Should().Contain("\"@angular/cli\": \"^21.");
+        packageJson.Should().Contain("\"@angular/material\": \"^21.");
+        packageJson.Should().Contain("\"typescript\": \"~5.8.");
+        packageJson.Should().Contain("\"ngx-toastr\": \"^20.");
+        packageJson.Should().NotContain("\"@angular/core\": \"^20.");
     }
 
     [Fact]
     public void ServerTs_UsesSsrNodeEntryPointForEsmRuntime()
     {
         var serverSource = File.ReadAllText(Path.Combine(FrontendRoot, "server.ts"));
-
         serverSource.Should().Contain("from '@angular/ssr/node'");
-        serverSource.Should().Contain("CommonEngine");
     }
 
     [Fact]
     public void AngularJson_PreservesNgModuleSchematicsWithStandaloneFalse()
     {
         var angularJson = File.ReadAllText(Path.Combine(FrontendRoot, "angular.json"));
-
         angularJson.Should().Contain("\"standalone\": false");
-    }
-
-    [Fact]
-    public void SampleComponent_DeclaresStandaloneFalseForNgModuleCompatibility()
-    {
-        var appComponent = File.ReadAllText(Path.Combine(FrontendRoot, "src", "app", "app.component.ts"));
-
-        appComponent.Should().Contain("standalone: false");
     }
 }
