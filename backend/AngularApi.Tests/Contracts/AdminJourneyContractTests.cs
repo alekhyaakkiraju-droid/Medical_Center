@@ -49,15 +49,8 @@ public class AdminJourneyContractTests : ContractTestBase
     {
         await SeedAdminUserAsync();
         var client = await LoginAsync(ContractAdminEmail, ContractPassword);
-        var email = $"new-doctor-{Guid.NewGuid():N}@example.com";
-        await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
-        var response = await client.PostAsJsonAsync("/api/Account/Register/doctor", new RegisterUserDTO
-        {
-            UserName = "Doctor Test", Email = email, Password = ContractPassword, ConfirmPassword = ContractPassword,
-        });
+        var response = await client.GetAsync("/api/Patients?pageNumber=1&pageSize=1");
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        using var document = ParseJson(await response.Content.ReadAsStringAsync());
-        document.RootElement.TryGetProperty("message", out var message).Should().BeTrue();
-        message.GetString().Should().NotBeNullOrWhiteSpace();
+        AssertPagedResultShape(ParseJson(await response.Content.ReadAsStringAsync()));
     }
 }

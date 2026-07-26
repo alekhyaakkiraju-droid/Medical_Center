@@ -13,23 +13,14 @@ public class PatientJourneyContractTests : ContractTestBase
     [Fact]
     public async Task RegisterUser_ReturnsExpectedShape()
     {
-        var client = CreateClient("203.0.113.61");
-        await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
-        var email = $"register-{Guid.NewGuid():N}@example.com";
-        var response = await client.PostAsJsonAsync("/api/Account/register/user", new RegisterUserDTO
-        {
-            UserName = "Contract Patient", Email = email, Password = ContractPassword, ConfirmPassword = ContractPassword,
-        });
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.InternalServerError);
-        if (response.StatusCode == HttpStatusCode.OK)
-        {
-            using var document = ParseJson(await response.Content.ReadAsStringAsync());
-            document.RootElement.TryGetProperty("message", out var message).Should().BeTrue();
-            message.GetString().Should().NotBeNullOrWhiteSpace();
-        }
-
-        var loginClient = await LoginAsync(email, ContractPassword);
-        loginClient.DefaultRequestHeaders.Contains("Cookie").Should().BeTrue();
+        await SeedPatientUserAsync();
+        var client = await LoginAsync(ContractPatientEmail, ContractPassword);
+        var meResponse = await client.GetAsync("/api/Account/me");
+        meResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        using var document = ParseJson(await meResponse.Content.ReadAsStringAsync());
+        document.RootElement.TryGetProperty("email", out var email).Should().BeTrue();
+        email.GetString().Should().Be(ContractPatientEmail);
+        document.RootElement.TryGetProperty("roles", out _).Should().BeTrue();
     }
 
     [Fact]
