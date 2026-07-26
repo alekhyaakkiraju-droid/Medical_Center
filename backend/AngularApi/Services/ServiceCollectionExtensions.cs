@@ -38,7 +38,7 @@ namespace AngularApi.Services
 
             services.AddDbContext<MedicalCenterDbContext>(option =>
             {
-                option.UseSqlServer(configuration.GetConnectionString("connection"));
+                option.UseSqlServer(ResolveSqlConnectionString(configuration));
             });
 
 
@@ -205,6 +205,28 @@ namespace AngularApi.Services
                     await roleManager.CreateAsync(new IdentityRole(role));
                 }
             }
+        }
+
+        public static string ResolveSqlConnectionString(IConfiguration configuration)
+        {
+            var connectionString = configuration.GetConnectionString("connection")
+                ?? throw new InvalidOperationException("ConnectionStrings:connection is not configured.");
+
+            if (connectionString.Contains("Password=", StringComparison.OrdinalIgnoreCase))
+            {
+                return connectionString;
+            }
+
+            var saPassword = configuration["ConnectionStrings:SaPassword"]
+                ?? Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD");
+
+            if (string.IsNullOrWhiteSpace(saPassword))
+            {
+                throw new InvalidOperationException(
+                    "SQL Server password is not configured. Mount /run/secrets/mssql_sa_password or set MSSQL_SA_PASSWORD.");
+            }
+
+            return $"{connectionString.TrimEnd(';')};Password={saPassword}";
         }
     }
 }

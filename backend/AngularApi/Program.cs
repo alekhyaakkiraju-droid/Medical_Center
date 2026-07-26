@@ -1,3 +1,4 @@
+using AngularApi.Infrastructure;
 using AngularApi.Filters;
 using AngularApi.Logging;
 using AngularApi.Middleware;
@@ -17,6 +18,7 @@ namespace WebApiDemo
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Configuration.AddDockerSecrets();
             builder.ConfigureSerilog();
 
             builder.Services.AddAntiforgery(options =>

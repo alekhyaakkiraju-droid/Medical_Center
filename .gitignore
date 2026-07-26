@@ -45,6 +45,8 @@ appsettings.json
 docker-compose.override.yml
 credentials.json
 secrets.json
+/secrets/
+!secrets.example/
 **/local.settings.json
 **/launchSettings.json
 

@@ -19,14 +19,31 @@ public class DockerComposeConfigurationTests
     }
 
     [Fact]
-    public void DockerComposeFile_UsesEnvironmentVariablesInsteadOfHardcodedSecrets()
+    public void DockerComposeFile_UsesDockerSecretsInsteadOfPlainSecretEnvironmentVariables()
     {
         var compose = File.ReadAllText(Path.Combine(RepoRoot, "docker-compose.yml"));
 
-        compose.Should().Contain("${MSSQL_SA_PASSWORD}");
-        compose.Should().Contain("${JWT_SECRET}");
-        compose.Should().Contain("${API_PUBLIC_URL");
-        compose.Should().NotContain("Password=SuperSecret");
+        compose.Should().Contain("secrets:");
+        compose.Should().Contain("jwt_secret:");
+        compose.Should().Contain("mssql_sa_password:");
+        compose.Should().Contain("smtp_email_username:");
+        compose.Should().Contain("smtp_email_password:");
+        compose.Should().NotContain("Jwt__Secret: ${JWT_SECRET}");
+        compose.Should().NotContain("EmailSettings__EmailUsername: ${SMTP_EMAIL_USERNAME}");
+        compose.Should().NotContain("EmailSettings__EmailPassword: ${SMTP_EMAIL_PASSWORD}");
+        compose.Should().NotContain("MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}");
+    }
+
+    [Fact]
+    public void DockerComposeFile_MountsSecretsOnApiService()
+    {
+        var compose = File.ReadAllText(Path.Combine(RepoRoot, "docker-compose.yml"));
+
+        compose.Should().Contain("secrets:");
+        compose.Should().Contain("- jwt_secret");
+        compose.Should().Contain("- mssql_sa_password");
+        compose.Should().Contain("- smtp_email_username");
+        compose.Should().Contain("- smtp_email_password");
     }
 
     [Fact]
@@ -57,12 +74,13 @@ public class DockerComposeConfigurationTests
     }
 
     [Fact]
-    public void EnvExample_DocumentsRequiredVariables()
+    public void EnvExample_DocumentsDockerSecretsWorkflow()
     {
         var envExample = File.ReadAllText(Path.Combine(RepoRoot, ".env.example"));
 
-        envExample.Should().Contain("MSSQL_SA_PASSWORD=");
-        envExample.Should().Contain("JWT_SECRET=");
+        envExample.Should().Contain("secrets.example");
+        envExample.Should().NotContain("JWT_SECRET=ChangeMe");
+        envExample.Should().NotContain("MSSQL_SA_PASSWORD=ChangeMe");
         envExample.Should().Contain("API_PUBLIC_URL=");
         envExample.Should().Contain("YARP_HOST_PORT=");
         envExample.Should().Contain("FRONTEND_HOST_PORT=");
