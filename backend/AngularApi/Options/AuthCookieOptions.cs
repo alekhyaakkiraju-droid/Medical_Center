@@ -10,5 +10,21 @@ public class AuthCookieOptions
 
     public string CookiePath { get; set; } = "/api";
 
-    public string FrontendLoginSuccessUrl { get; set; } = "http://localhost:4200/auth/login-success";
+    private string _frontendBaseUrl = "http://localhost:8081";
+
+    public string FrontendBaseUrl
+    {
+        get => _frontendBaseUrl;
+        set => _frontendBaseUrl = string.IsNullOrWhiteSpace(value)
+            ? _frontendBaseUrl
+            : value.TrimEnd('/');
+    }
+
+    private string? _frontendLoginSuccessUrl;
+
+    public string FrontendLoginSuccessUrl
+    {
+        get => _frontendLoginSuccessUrl ?? $"{FrontendBaseUrl}/auth/login-success";
+        set => _frontendLoginSuccessUrl = string.IsNullOrWhiteSpace(value) ? null : value;
+    }
 }

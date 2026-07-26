@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using System.Net;
 using System.Security.Claims;
 
 namespace AngularApi.Tests.Controllers
@@ -54,7 +55,17 @@ namespace AngularApi.Tests.Controllers
                 .Returns(Path.Combine(AppContext.BaseDirectory, "wwwroot"));
             _emailTemplateService = new EmailTemplateService(webHostEnvironmentMock.Object);
 
-            _controller = new AccountController(
+            _controller = CreateController(new AuthCookieOptions());
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext(),
+            };
+        }
+
+        private AccountController CreateController(AuthCookieOptions authCookieOptions)
+        {
+            return new AccountController(
                 _userManagerMock.Object,
                 _configurationMock.Object,
                 _emailServiceMock.Object,
@@ -63,14 +74,9 @@ namespace AngularApi.Tests.Controllers
                 _googleServiceMock.Object,
                 _authCookieServiceMock.Object,
                 _antiforgeryMock.Object,
-                Microsoft.Extensions.Options.Options.Create(new AuthCookieOptions()),
+                Microsoft.Extensions.Options.Options.Create(authCookieOptions),
                 _auditServiceMock.Object,
                 _loggerMock.Object);
-
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext(),
-            };
         }
 
 
@@ -331,6 +337,104 @@ namespace AngularApi.Tests.Controllers
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
             okResult.Value.Should().BeEquivalentTo(new { message = "Logged out successfully" });
             _authCookieServiceMock.Verify(x => x.ClearAuthCookies(), Times.Once);
+        }
+
+        [Fact]
+        public async Task Register_SendsConfirmationEmailWithConfiguredFrontendBaseUrl()
+        {
+            const string frontendBaseUrl = "https://staging.example.com";
+            var apiWwwRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "AngularApi", "wwwroot"));
+            var registerWebHostMock = new Mock<IWebHostEnvironment>();
+            registerWebHostMock.Setup(env => env.WebRootPath).Returns(apiWwwRoot);
+            var registerEmailTemplateService = new EmailTemplateService(registerWebHostMock.Object);
+            var controller = new AccountController(
+                _userManagerMock.Object,
+                _configurationMock.Object,
+                _emailServiceMock.Object,
+                registerEmailTemplateService,
+                _jwtServiceMock.Object,
+                _googleServiceMock.Object,
+                _authCookieServiceMock.Object,
+                _antiforgeryMock.Object,
+                Microsoft.Extensions.Options.Options.Create(new AuthCookieOptions { FrontendBaseUrl = frontendBaseUrl }),
+                _auditServiceMock.Object,
+                _loggerMock.Object);
+            controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
+
+            var registerDto = new RegisterUserDTO
+            {
+                UserName = "testuser",
+                Email = "test@example.com",
+                Password = "Password123!"
+            };
+            const string userId = "user-123";
+            Message? capturedMessage = null;
+
+            _userManagerMock.Setup(x => x.CreateAsync(It.IsAny<AppUser>(), registerDto.Password))
+                .ReturnsAsync(IdentityResult.Success)
+                .Callback<AppUser, string>((user, _) => user.Id = userId);
+            _userManagerMock.Setup(x => x.AddToRoleAsync(It.IsAny<AppUser>(), "user"))
+                .ReturnsAsync(IdentityResult.Success);
+            _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(It.IsAny<AppUser>()))
+                .ReturnsAsync("confirm-token");
+            _emailServiceMock.Setup(x => x.SendEmailAsync(It.IsAny<Message>()))
+                .Callback<Message>(message => capturedMessage = message)
+                .Returns(Task.CompletedTask);
+
+            var urlHelperMock = new Mock<IUrlHelper>();
+            urlHelperMock
+                .Setup(x => x.Action(It.IsAny<UrlActionContext>()))
+                .Returns("https://api.example.com/api/Account/confirm-email");
+            controller.Url = urlHelperMock.Object;
+
+            var result = await controller.Register(registerDto);
+
+            result.Should().BeOfType<OkObjectResult>();
+            capturedMessage.Should().NotBeNull();
+            capturedMessage!.Body.Should().Contain($"{frontendBaseUrl}/auth/confirm-email?userId={userId}");
+            capturedMessage.Body.Should().NotContain("localhost:4200");
+        }
+
+        [Fact]
+        public async Task ForgotPassword_SendsResetEmailWithConfiguredFrontendBaseUrl()
+        {
+            const string frontendBaseUrl = "https://staging.example.com";
+            var controller = CreateController(new AuthCookieOptions { FrontendBaseUrl = frontendBaseUrl });
+            controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
+
+            var forgotPasswordDto = new ForgotPasswordDTO { Email = SeedData.TestUserEmail };
+            var user = new AppUser { Email = forgotPasswordDto.Email };
+            Message? capturedMessage = null;
+
+            _userManagerMock.Setup(x => x.FindByEmailAsync(forgotPasswordDto.Email))
+                .ReturnsAsync(user);
+            _userManagerMock.Setup(x => x.GeneratePasswordResetTokenAsync(user))
+                .ReturnsAsync("reset-token");
+            _emailServiceMock.Setup(x => x.SendEmailAsync(It.IsAny<Message>()))
+                .Callback<Message>(message => capturedMessage = message)
+                .Returns(Task.CompletedTask);
+
+            var result = await controller.ForgotPassword(forgotPasswordDto);
+
+            result.Should().BeOfType<OkObjectResult>();
+            capturedMessage.Should().NotBeNull();
+            capturedMessage!.Body.Should().Contain($"{frontendBaseUrl}/auth/reset-password?token=");
+            capturedMessage.Body.Should().Contain($"email={WebUtility.UrlEncode(user.Email)}");
+            capturedMessage.Body.Should().NotContain("localhost:4200");
+        }
+
+        [Fact]
+        public void ResetPasswordGet_RedirectsToConfiguredFrontendBaseUrl()
+        {
+            const string frontendBaseUrl = "https://staging.example.com";
+            var controller = CreateController(new AuthCookieOptions { FrontendBaseUrl = frontendBaseUrl });
+            controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
+
+            var result = controller.ResetPassword("reset-token", "user@example.com");
+
+            var redirect = result.Should().BeOfType<RedirectResult>().Subject;
+            redirect.Url.Should().Be($"{frontendBaseUrl}/auth/reset-password?token=reset-token&email=user@example.com");
+            redirect.Url.Should().NotContain("localhost:4200");
         }
     }
 }
