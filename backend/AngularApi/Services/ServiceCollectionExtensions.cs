@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using System.Text;
 
 namespace AngularApi.Services
@@ -189,30 +189,10 @@ namespace AngularApi.Services
                         "Set automatically on login; include cookies and X-XSRF-TOKEN for mutating requests."
                 });
 
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
                 {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        Array.Empty<string>()
-                    },
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "AuthCookie"
-                            }
-                        },
-                        Array.Empty<string>()
-                    }
+                    [new OpenApiSecuritySchemeReference("Bearer", document)] = [],
+                    [new OpenApiSecuritySchemeReference("AuthCookie", document)] = []
                 });
 
                 c.TagActionsBy(api =>
