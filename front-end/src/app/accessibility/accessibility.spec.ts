@@ -171,7 +171,7 @@ describe('WCAG 2.1 AA accessibility', () => {
                 editeBooking: () => of({}),
             } },
         { provide: DoctorService, useValue: { getAllDoctors: () => of({ items: [], totalCount: 0 }) } },
-        { provide: PatientService, useValue: { getAllPatient: () => of([]) } },
+        { provide: PatientService, useValue: { getAllPatient: () => of({ items: [], totalCount: 0, pageCount: 0, currentPage: 1, pageSize: 20 }) } },
         { provide: TotalEarningsService, useValue: { getTotalEarnings: () => of({ totalEarnings: 12500 }) } },
         { provide: AuthServiceService, useValue: jasmine.createSpyObj('AuthServiceService', ['isRole', 'getUsernameFromToken', 'getloggedStatus']) },
     ],

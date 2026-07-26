@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { throwError } from 'rxjs';
 
@@ -7,7 +8,7 @@ import { throwError } from 'rxjs';
 export class HandleErrorsService {
 
 constructor() { }
-public handleError(error: any) {
+public handleError(error: HttpErrorResponse) {
   let errorMessage = '';
   if (error.error instanceof ErrorEvent) {
     // Client-side error

@@ -49,7 +49,7 @@ export class PatientReviewsComponent implements OnInit, OnDestroy {
     }
     this.patientReviewsSubscribtion = this.patientsReviewService.getPatientsReview(this.doctorId).subscribe({
       next: (data) => {
-        this.reviews = data;
+        this.reviews = data.items ?? [];
         console.log("reviews", this.reviews);
       },
       error: (error) => {
