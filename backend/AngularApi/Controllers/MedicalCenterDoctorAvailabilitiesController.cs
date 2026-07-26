@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AngularApi.DTO;
+﻿using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace AngularApi.Controllers
 {
@@ -16,36 +11,25 @@ namespace AngularApi.Controllers
     [Authorize(Policy = "AdminPolicy")]
     public class MedicalCenterDoctorAvailabilitiesController : ControllerBase
     {
-        private readonly MedicalCenterDbContext _context;
+        private readonly IMedicalCenterDoctorAvailabilityService _availabilityService;
 
-        public MedicalCenterDoctorAvailabilitiesController(MedicalCenterDbContext context)
+        public MedicalCenterDoctorAvailabilitiesController(IMedicalCenterDoctorAvailabilityService availabilityService)
         {
-            _context = context;
+            _availabilityService = availabilityService;
         }
 
         // GET: api/MedicalCenterDoctorAvailabilities
         [HttpGet]
         public async Task<ActionResult<PagedResult<MedicalCenterDoctorAvailabilityDTO>>> GetMedicalCenterDoctorAvailability([FromQuery] PaginationParameters pagination)
         {
-            return await _context.MedicalCenterDoctorAvailability
-                .Select(a => new MedicalCenterDoctorAvailabilityDTO
-                {
-                    Id = a.Id,
-                    MedicalCenterId = a.MedicalCenterId,
-                    DayOfWeek = a.DayOfWeek,
-                    StartTime = a.StartTime,
-                    EndTime = a.EndTime,
-                    IsAvailable = a.IsAvailable,
-                    ReasonOfUnavailability = a.ReasonOfUnavailability
-                })
-                .ToPagedResultAsync(pagination);
+            return await _availabilityService.GetAllAsync(pagination);
         }
 
         // GET: api/MedicalCenterDoctorAvailabilities/5
         [HttpGet("{id}")]
         public async Task<ActionResult<MedicalCenterDoctorAvailability>> GetMedicalCenterDoctorAvailability(int id)
         {
-            var medicalCenterDoctorAvailability = await _context.MedicalCenterDoctorAvailability.FindAsync(id);
+            var medicalCenterDoctorAvailability = await _availabilityService.GetByIdAsync(id);
 
             if (medicalCenterDoctorAvailability == null)
             {
@@ -65,25 +49,8 @@ namespace AngularApi.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(medicalCenterDoctorAvailability).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MedicalCenterDoctorAvailabilityExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var updated = await _availabilityService.UpdateAsync(id, medicalCenterDoctorAvailability);
+            return updated ? NoContent() : NotFound();
         }
 
         // POST: api/MedicalCenterDoctorAvailabilities
@@ -91,31 +58,21 @@ namespace AngularApi.Controllers
         [HttpPost]
         public async Task<ActionResult<MedicalCenterDoctorAvailability>> PostMedicalCenterDoctorAvailability(MedicalCenterDoctorAvailability medicalCenterDoctorAvailability)
         {
-            _context.MedicalCenterDoctorAvailability.Add(medicalCenterDoctorAvailability);
-            await _context.SaveChangesAsync();
+            var created = await _availabilityService.CreateAsync(medicalCenterDoctorAvailability);
+            if (created == null)
+            {
+                return BadRequest();
+            }
 
-            return CreatedAtAction("GetMedicalCenterDoctorAvailability", new { id = medicalCenterDoctorAvailability.Id }, medicalCenterDoctorAvailability);
+            return CreatedAtAction("GetMedicalCenterDoctorAvailability", new { id = created.Id }, created);
         }
 
         // DELETE: api/MedicalCenterDoctorAvailabilities/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMedicalCenterDoctorAvailability(int id)
         {
-            var medicalCenterDoctorAvailability = await _context.MedicalCenterDoctorAvailability.FindAsync(id);
-            if (medicalCenterDoctorAvailability == null)
-            {
-                return NotFound();
-            }
-
-            _context.MedicalCenterDoctorAvailability.Remove(medicalCenterDoctorAvailability);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool MedicalCenterDoctorAvailabilityExists(int id)
-        {
-            return _context.MedicalCenterDoctorAvailability.Any(e => e.Id == id);
+            var deleted = await _availabilityService.DeleteAsync(id);
+            return deleted ? NoContent() : NotFound();
         }
     }
 }
