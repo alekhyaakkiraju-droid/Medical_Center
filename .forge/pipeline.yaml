@@ -237,6 +237,11 @@ steps:
       # WO-031: passing /health confirms API started with IDP SMTP env vars from Staging Deploy API
       testCommand: SMOKE_BASE_URL="${STAGING_BASE_URL}" SMOKE_API_URL="${STAGING_API_URL}" ./scripts/run-e2e-smoke.sh
 
+  - name: Patient Journey E2E
+    variantId: test:generic
+    config:
+      testCommand: SMOKE_API_URL="${STAGING_API_URL}" ./scripts/e2e-patient-journey.sh
+
   - name: Staging E2E Tests
     variantId: test:generic
     config:
