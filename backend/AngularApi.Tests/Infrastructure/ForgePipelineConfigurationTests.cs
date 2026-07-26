@@ -67,6 +67,7 @@ public class ForgePipelineConfigurationTests
         var yaml = File.ReadAllText(PipelinePath);
 
         yaml.Should().Contain("Staging Smoke Tests");
+        yaml.Should().Contain("./scripts/run-e2e-smoke.sh");
         yaml.Should().Contain("./scripts/smoke-tests.sh");
         yaml.Should().Contain("engine: opsera");
     }

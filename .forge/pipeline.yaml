@@ -217,7 +217,7 @@ steps:
   - name: Staging Smoke Tests
     variantId: test:generic
     config:
-      testCommand: SMOKE_BASE_URL="${STAGING_BASE_URL}" SMOKE_API_URL="${STAGING_API_URL}" ./scripts/smoke-tests.sh
+      testCommand: SMOKE_BASE_URL="${STAGING_BASE_URL}" SMOKE_API_URL="${STAGING_API_URL}" ./scripts/run-e2e-smoke.sh
 
   - name: Staging E2E Tests
     variantId: test:generic
