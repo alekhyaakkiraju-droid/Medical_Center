@@ -13,6 +13,7 @@ public class SmokeTestScriptTests
         var pipelineSmoke = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "smoke-tests.sh"));
         var e2eSmoke = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "run-e2e-smoke.sh"));
         var patientJourney = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "e2e-patient-journey.sh"));
+        var ssrSmoke = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "ssr-smoke-tests.sh"));
         var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
 
         pipelineSmoke.Should().Contain("/health");
@@ -59,6 +60,10 @@ public class SmokeTestScriptTests
         pipeline.Should().Contain("Patient Journey E2E");
         pipeline.Should().Contain("e2e-patient-journey.sh");
         pipeline.Should().Contain("./scripts/smoke-tests.sh");
+
+        ssrSmoke.Should().Contain("WO-059");
+        ssrSmoke.Should().Contain("/api/nonexistent");
+        ssrSmoke.Should().Contain("/pages/about-us");
     }
 
     [Fact]
@@ -107,5 +112,22 @@ public class SmokeTestScriptTests
         pipelineSmoke.Exists.Should().BeTrue();
         e2eSmoke.Exists.Should().BeTrue();
         patientJourney.Exists.Should().BeTrue();
+    }
+
+    [Fact]
+    public void OpenApiGenerationScripts_ContainOutputValidation()
+    {
+        var generateOpenApi = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "generate-openapi.sh"));
+        var generateApiTypes = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "generate-api-types.sh"));
+        generateOpenApi.Should().Contain("exit 1").And.Contain("json.tool").And.Contain("ERROR:");
+        generateApiTypes.Should().Contain("exit 1").And.Contain("ERROR:").And.Contain("export statements");
+    }
+    [Fact]
+    public void ForgePipeline_FrontendBuildRunsGenerateApiTypesBeforeNgBuild()
+    {
+        var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
+        pipeline.Should().Contain("- name: Generate OpenAPI Spec");
+        pipeline.Should().Contain("npm run build -- --configuration production");
+        pipeline.Should().NotContain("./node_modules/.bin/ng build --configuration production");
     }
 }
