@@ -21,6 +21,7 @@ namespace AngularApi.Services
             services.Configure<AuthCookieOptions>(configuration.GetSection(AuthCookieOptions.SectionName));
             services.Configure<AppointmentSettings>(configuration.GetSection(AppointmentSettings.SectionName));
             services.Configure<SmtpSettings>(configuration.GetSection(SmtpSettings.SectionName));
+            services.Configure<CorsSettings>(configuration.GetSection(CorsSettings.SectionName));
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>(); // should be addTrasient
@@ -101,11 +102,19 @@ namespace AngularApi.Services
             });
 
 
+            var corsSettings = configuration.GetSection(CorsSettings.SectionName).Get<CorsSettings>();
+            var allowedOrigins = corsSettings?.AllowedOrigins is { Length: > 0 }
+                ? corsSettings.AllowedOrigins
+                : CorsSettings.DefaultOrigins;
+
             services.AddCors(options =>
             {
                 options.AddPolicy("MyPolicy", builder =>
                 {
-                    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    builder.WithOrigins(allowedOrigins)
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                 });
             });
         }

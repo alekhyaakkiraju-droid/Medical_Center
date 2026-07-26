@@ -80,6 +80,25 @@ public class DockerComposeConfigurationTests
     }
 
     [Fact]
+    public void DockerComposeFile_ConfiguresCorsAllowedOrigins()
+    {
+        var compose = File.ReadAllText(Path.Combine(RepoRoot, "docker-compose.yml"));
+
+        compose.Should().Contain("CorsSettings__AllowedOrigins__0:");
+        compose.Should().Contain("CorsSettings__AllowedOrigins__1:");
+    }
+
+    [Fact]
+    public void EnvExample_DocumentsCorsAllowedOrigins()
+    {
+        var envExample = File.ReadAllText(Path.Combine(RepoRoot, ".env.example"));
+
+        envExample.Should().Contain("CORS_ALLOWED_ORIGINS_0=");
+        envExample.Should().Contain("CORS_ALLOWED_ORIGINS_1=");
+        envExample.Should().Contain("CorsSettings__AllowedOrigins__N");
+    }
+
+    [Fact]
     public void EnvExample_DocumentsDockerSecretsWorkflow()
     {
         var envExample = File.ReadAllText(Path.Combine(RepoRoot, ".env.example"));

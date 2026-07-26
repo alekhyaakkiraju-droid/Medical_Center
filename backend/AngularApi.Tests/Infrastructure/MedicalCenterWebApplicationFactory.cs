@@ -28,6 +28,8 @@ public class MedicalCenterWebApplicationFactory : WebApplicationFactory<Program>
                 ["Jwt:CookiePath"] = "/api",
                 ["GoogleAuth:ClientId"] = "test-client-id",
                 ["GoogleAuth:ClientSecret"] = "test-client-secret",
+                ["CorsSettings:AllowedOrigins:0"] = "http://localhost:4200",
+                ["CorsSettings:AllowedOrigins:1"] = "http://localhost:8081",
             });
         });
 
