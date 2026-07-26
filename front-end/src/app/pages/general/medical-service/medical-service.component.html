@@ -2,7 +2,7 @@
     <div class="loader"></div>
 </div>
 <!--Page Title-->
-<section class="page-title text-center" style="background-image:url(images/background/3.jpg);">
+<section class="page-title text-center" [style.background-image]="'url(' + ('images/background/3.jpg' | assetUrl) + ')'">
     <div class="container">
         <div class="title-text">
             <h1>service</h1>
@@ -44,7 +44,7 @@
             <div class="service-box col-md-12">
                 <div class="row">
                     <div class="col-md-6">
-                        <img class="img-responsive" src="images/services/service-one.jpg" alt="service-image">
+                        <img class="img-responsive" [src]="'images/services/service-one.jpg' | assetUrl" alt="service-image">
                     </div>
                     <div class="col-md-6">
                         <div class="contents">

@@ -10,21 +10,21 @@
     </div>
     <div class="carousel-inner">
       <div class="carousel-item active">
-        <img src="images/slider/slider-bg-1.jpg" class="d-block w-100" alt="...">
+        <img [src]="'images/slider/slider-bg-1.jpg' | assetUrl" class="d-block w-100" alt="...">
         <div class="carousel-caption d-none d-md-block">
           <h1 class="fs-2">Your Health, Our Priority</h1>
           <p> Expert doctors, modern technology, and personalized medical solutions for every patient.</p>
         </div>
       </div>
       <div class="carousel-item">
-        <img src="images/slider/slider-bg-2.jpg" class="d-block w-100" alt="...">
+        <img [src]="'images/slider/slider-bg-2.jpg' | assetUrl" class="d-block w-100" alt="...">
         <div class="carousel-caption d-none d-md-block">
           <h1 class="fs-2">Excellence in Healthcare</h1>
           <p>Expert doctors, modern technology, and personalized medical solutions for every patient..</p>
         </div>
       </div>
       <div class="carousel-item">
-        <img src="images/slider/slider-bg-3.jpg" class="d-block w-100" alt="...">
+        <img [src]="'images/slider/slider-bg-3.jpg' | assetUrl" class="d-block w-100" alt="...">
         <div class="carousel-caption d-none d-md-block">
           <h1 class="fs-2">Caring for You, Every Step of the Way</h1>
           <p> From prevention to recovery, we are here to provide the best medical care for you and your family.</p>
@@ -94,7 +94,7 @@
                                 <div class="icon-box">
                                     <figure>
                                         <a [href]="service.link">
-                                            <img [src]="service.image" alt="Service Image" />
+                                            <img [src]="service.image | assetUrl" alt="Service Image" />
                                         </a>
                                     </figure>
                                 </div>
@@ -134,7 +134,7 @@
                             [attr.id]="specialize.specializationName.toLowerCase()">
                             <div class="row ">
                                 <div class="col-md-6">
-                                    <img class="img-responsive" [src]="specialize.specializationImage"
+                                    <img class="img-responsive" [src]="specialize.specializationImage | assetUrl"
                                         alt="service-image">
                                 </div>
                                 <div class="col-md-6">
@@ -183,7 +183,7 @@
 
 
 <!--testimonial-section-->
-<section class="testimonial-section" style="background: url(images/testimonials/1.jpg);">
+<section class="testimonial-section" [style.background-image]="'url(' + ('images/testimonials/1.jpg' | assetUrl) + ')'">
     <div class="container max-w-screen-xl px-4 mx-auto">
         <div class="section-title text-center">
             <h3>What Our
@@ -196,7 +196,7 @@
                 <div class="inner-box text-center">
                     <div class="image-box">
                         <figure>
-                            <img [src]="patient.image" alt="">
+                            <img [src]="patient.image | assetUrl" alt="">
                         </figure>
                     </div>
                     <h6>{{patient.name}}</h6>
