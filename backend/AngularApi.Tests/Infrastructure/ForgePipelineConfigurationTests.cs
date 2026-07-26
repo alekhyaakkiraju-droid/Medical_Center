@@ -114,4 +114,32 @@ public class ForgePipelineConfigurationTests
         runbook.Should().Contain("5 minutes");
         runbook.Should().Contain("$PREVIOUS_GIT_SHA");
     }
+
+    [Fact]
+    public void DeploymentRunbook_ContainsRequiredSectionHeadings()
+    {
+        var runbook = File.ReadAllText(Path.Combine(RepoRoot, "docs", "deployment-runbook.md"));
+
+        runbook.Should().Contain("## Prerequisites");
+        runbook.Should().Contain("## Pre-Deployment Checklist");
+        runbook.Should().Contain("## Staging-to-Production Promotion");
+        runbook.Should().Contain("## Rollback Procedure (5 min)");
+        runbook.Should().Contain("## Environment Configuration");
+        runbook.Should().Contain("## Database Migration Verification");
+        runbook.Should().Contain("## Secrets Management (Docker Secrets from WO-003)");
+        runbook.Should().Contain("## Health Check Validation");
+        runbook.Should().Contain("## Troubleshooting");
+    }
+
+    [Fact]
+    public void DeploymentRunbook_ReferencesPipelineAndOperationalFiles()
+    {
+        var runbook = File.ReadAllText(Path.Combine(RepoRoot, "docs", "deployment-runbook.md"));
+
+        runbook.Should().Contain(".forge/pipeline.yaml");
+        runbook.Should().Contain("docker-compose.yml");
+        runbook.Should().Contain("scripts/smoke-tests.sh");
+        runbook.Should().Contain("scripts/run-e2e-smoke.sh");
+        runbook.Should().Contain("secrets.example/");
+    }
 }
