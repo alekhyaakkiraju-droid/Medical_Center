@@ -58,9 +58,9 @@ public class AppointmentStatusServiceTests : IDisposable
     [Fact]
     public async Task CreateAsync_ValidInput_PersistsAppointmentStatus()
     {
-        var appointmentStatus = new AppointmentStatus { Status = AppointmentStatusEnum.Active };
+        var dto = new CreateAppointmentStatusDTO { Status = AppointmentStatusEnum.Active };
 
-        var created = await _service.CreateAsync(appointmentStatus);
+        var created = await _service.CreateAsync(dto);
 
         created.Id.Should().BeGreaterThan(0);
         created.Status.Should().Be(AppointmentStatusEnum.Active);
@@ -70,9 +70,9 @@ public class AppointmentStatusServiceTests : IDisposable
     [Fact]
     public async Task UpdateAsync_ValidInput_UpdatesAppointmentStatus()
     {
-        var appointmentStatus = new AppointmentStatus { Id = 1, Status = AppointmentStatusEnum.Canceled };
+        var dto = new UpdateAppointmentStatusDTO { Status = AppointmentStatusEnum.Canceled };
 
-        var updated = await _service.UpdateAsync(1, appointmentStatus);
+        var updated = await _service.UpdateAsync(1, dto);
 
         updated.Should().BeTrue();
         var dbStatus = await _context.AppointmentStatus.FindAsync(1);
@@ -80,11 +80,11 @@ public class AppointmentStatusServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task UpdateAsync_IdMismatch_ReturnsFalse()
+    public async Task UpdateAsync_NonExistingId_ReturnsFalse()
     {
-        var appointmentStatus = new AppointmentStatus { Id = 2, Status = AppointmentStatusEnum.Active };
+        var dto = new UpdateAppointmentStatusDTO { Status = AppointmentStatusEnum.Active };
 
-        var updated = await _service.UpdateAsync(1, appointmentStatus);
+        var updated = await _service.UpdateAsync(999, dto);
 
         updated.Should().BeFalse();
     }

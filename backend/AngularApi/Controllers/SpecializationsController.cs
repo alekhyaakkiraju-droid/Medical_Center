@@ -27,16 +27,15 @@ namespace AngularApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutSpecialization(int id, Specialization specialization)
+        public async Task<IActionResult> PutSpecialization(int id, [FromBody] UpdateSpecializationDTO dto)
         {
-            if (id != specialization.Id) return BadRequest();
-            return await _specializationService.UpdateSpecializationAsync(id, specialization) ? NoContent() : NotFound();
+            return await _specializationService.UpdateSpecializationAsync(id, dto) ? NoContent() : NotFound();
         }
 
         [HttpPost]
-        public async Task<ActionResult<Specialization>> PostSpecialization(Specialization specialization)
+        public async Task<ActionResult<Specialization>> PostSpecialization([FromBody] CreateSpecializationDTO dto)
         {
-            var created = await _specializationService.CreateSpecializationAsync(specialization);
+            var created = await _specializationService.CreateSpecializationAsync(dto);
             return CreatedAtAction(nameof(GetSpecialization), new { id = created.Id }, created);
         }
 

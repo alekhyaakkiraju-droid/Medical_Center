@@ -23,22 +23,24 @@ public class SpecializationService : ISpecializationService
     public Task<Specialization?> GetSpecializationByIdAsync(int id, CancellationToken cancellationToken = default) =>
         _context.Specializations.Include(s => s.Services).FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
 
-    public async Task<Specialization> CreateSpecializationAsync(Specialization specialization, CancellationToken cancellationToken = default)
+    public async Task<Specialization> CreateSpecializationAsync(CreateSpecializationDTO dto, CancellationToken cancellationToken = default)
     {
+        var specialization = MapToEntity(dto);
         _context.Specializations.Add(specialization);
         await _context.SaveChangesAsync(cancellationToken);
         return specialization;
     }
 
-    public async Task<bool> UpdateSpecializationAsync(int id, Specialization specialization, CancellationToken cancellationToken = default)
+    public async Task<bool> UpdateSpecializationAsync(int id, UpdateSpecializationDTO dto, CancellationToken cancellationToken = default)
     {
-        if (id != specialization.Id) return false;
         var existing = await _context.Specializations.FindAsync([id], cancellationToken);
         if (existing == null) return false;
-        existing.SpecializationName = specialization.SpecializationName;
-        existing.SpecializationImage = specialization.SpecializationImage;
-        existing.Description = specialization.Description;
-        existing.IsActive = specialization.IsActive;
+
+        existing.SpecializationName = dto.SpecializationName;
+        existing.SpecializationImage = dto.SpecializationImage;
+        existing.Description = dto.Description;
+        existing.IsActive = dto.IsActive;
+
         try { await _context.SaveChangesAsync(cancellationToken); return true; }
         catch (DbUpdateConcurrencyException)
         {
@@ -55,4 +57,12 @@ public class SpecializationService : ISpecializationService
         await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
+
+    private static Specialization MapToEntity(CreateSpecializationDTO dto) => new()
+    {
+        SpecializationName = dto.SpecializationName,
+        SpecializationImage = dto.SpecializationImage,
+        Description = dto.Description,
+        IsActive = dto.IsActive
+    };
 }

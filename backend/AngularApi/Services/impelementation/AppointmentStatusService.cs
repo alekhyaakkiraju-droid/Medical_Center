@@ -26,27 +26,23 @@ public class AppointmentStatusService : IAppointmentStatusService
     public Task<AppointmentStatus?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
         _context.AppointmentStatus.FindAsync([id], cancellationToken).AsTask();
 
-    public async Task<AppointmentStatus> CreateAsync(AppointmentStatus appointmentStatus, CancellationToken cancellationToken = default)
+    public async Task<AppointmentStatus> CreateAsync(CreateAppointmentStatusDTO dto, CancellationToken cancellationToken = default)
     {
+        var appointmentStatus = new AppointmentStatus { Status = dto.Status };
         _context.AppointmentStatus.Add(appointmentStatus);
         await _context.SaveChangesAsync(cancellationToken);
         return appointmentStatus;
     }
 
-    public async Task<bool> UpdateAsync(int id, AppointmentStatus appointmentStatus, CancellationToken cancellationToken = default)
+    public async Task<bool> UpdateAsync(int id, UpdateAppointmentStatusDTO dto, CancellationToken cancellationToken = default)
     {
-        if (id != appointmentStatus.Id)
-        {
-            return false;
-        }
-
         var existing = await _context.AppointmentStatus.FindAsync([id], cancellationToken);
         if (existing == null)
         {
             return false;
         }
 
-        existing.Status = appointmentStatus.Status;
+        existing.Status = dto.Status;
 
         try
         {

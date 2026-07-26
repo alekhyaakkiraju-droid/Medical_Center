@@ -1,4 +1,4 @@
-﻿using AngularApi.DTO;
+using AngularApi.DTO;
 using AngularApi.Models;
 using AngularApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -38,21 +38,16 @@ namespace AngularApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAppointmentStatus(int id, AppointmentStatus appointmentStatus)
+        public async Task<IActionResult> PutAppointmentStatus(int id, [FromBody] UpdateAppointmentStatusDTO dto)
         {
-            if (id != appointmentStatus.Id)
-            {
-                return BadRequest();
-            }
-
-            var updated = await _appointmentStatusService.UpdateAsync(id, appointmentStatus);
+            var updated = await _appointmentStatusService.UpdateAsync(id, dto);
             return updated ? NoContent() : NotFound();
         }
 
         [HttpPost]
-        public async Task<ActionResult<AppointmentStatus>> PostAppointmentStatus(AppointmentStatus appointmentStatus)
+        public async Task<ActionResult<AppointmentStatus>> PostAppointmentStatus([FromBody] CreateAppointmentStatusDTO dto)
         {
-            var created = await _appointmentStatusService.CreateAsync(appointmentStatus);
+            var created = await _appointmentStatusService.CreateAsync(dto);
             return CreatedAtAction("GetAppointmentStatus", new { id = created.Id }, created);
         }
 
