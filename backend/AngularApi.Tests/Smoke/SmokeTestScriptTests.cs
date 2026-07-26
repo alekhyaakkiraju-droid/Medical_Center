@@ -8,17 +8,28 @@ public class SmokeTestScriptTests
         Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", ".."));
 
     [Fact]
-    public void SmokeTestScripts_ExistAndDefineThreeCriticalFlows()
+    public void SmokeTestScripts_ExistAndDefineExpandedCriticalFlows()
     {
         var pipelineSmoke = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "smoke-tests.sh"));
         var e2eSmoke = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "run-e2e-smoke.sh"));
+        var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
 
         pipelineSmoke.Should().Contain("/health");
         pipelineSmoke.Should().Contain("SMOKE_BASE_URL");
         pipelineSmoke.Should().Contain("SMOKE_API_URL");
+        pipelineSmoke.Should().Contain("Image-bearing page validation");
+        pipelineSmoke.Should().Contain("/pages/gallery");
+
         e2eSmoke.Should().Contain("Smoke Test 1");
         e2eSmoke.Should().Contain("Smoke Test 2");
         e2eSmoke.Should().Contain("Smoke Test 3");
+        e2eSmoke.Should().Contain("Smoke Test 4");
+        e2eSmoke.Should().Contain("Smoke Test 5");
+        e2eSmoke.Should().Contain("Smoke Test 6");
+        e2eSmoke.Should().Contain("401");
+
+        pipeline.Should().Contain("Staging E2E Tests");
+        pipeline.Should().Contain("run-e2e-smoke.sh");
     }
 
     [Fact]
