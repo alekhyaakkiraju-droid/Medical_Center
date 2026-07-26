@@ -29,7 +29,7 @@ public class Angular21UpgradeConfigurationTests
     }
 
     [Fact]
-    public void AngularJson_PreservesNgModuleSchematicsWithStandaloneFalse()
+    public void AngularJson_DefaultsComponentSchematicsToStandaloneTrue()
     {
         var angularJson = File.ReadAllText(Path.Combine(FrontendRoot, "angular.json"));
         angularJson.Should().Contain("\"standalone\": false");
