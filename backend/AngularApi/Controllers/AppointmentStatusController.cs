@@ -1,4 +1,4 @@
-using AngularApi.DTO;
+﻿using AngularApi.DTO;
 using AngularApi.Models;
 using AngularApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -25,7 +25,7 @@ namespace AngularApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<AppointmentStatus>> GetAppointmentStatus(int id)
+        public async Task<ActionResult<AppointmentStatusDetailDTO>> GetAppointmentStatus(int id)
         {
             var appointmentStatus = await _appointmentStatusService.GetByIdAsync(id);
 

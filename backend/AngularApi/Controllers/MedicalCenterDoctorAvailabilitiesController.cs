@@ -27,7 +27,7 @@ namespace AngularApi.Controllers
 
         // GET: api/MedicalCenterDoctorAvailabilities/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<MedicalCenterDoctorAvailability>> GetMedicalCenterDoctorAvailability(int id)
+        public async Task<ActionResult<MedicalCenterDoctorAvailabilityDetailDTO>> GetMedicalCenterDoctorAvailability(int id)
         {
             var medicalCenterDoctorAvailability = await _availabilityService.GetByIdAsync(id);
 

@@ -9,7 +9,7 @@ public interface IMedicalCenterService
         PaginationParameters pagination,
         CancellationToken cancellationToken = default);
 
-    Task<MedicalCenter?> GetMedicalCenterByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<MedicalCenterDetailDTO?> GetMedicalCenterByIdAsync(int id, CancellationToken cancellationToken = default);
 
     Task<MedicalCenter> CreateMedicalCenterAsync(
         CreateMedicalCenterDTO dto,

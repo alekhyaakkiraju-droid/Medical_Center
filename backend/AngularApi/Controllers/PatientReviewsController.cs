@@ -1,4 +1,4 @@
-using AngularApi.DTO;
+﻿using AngularApi.DTO;
 using AngularApi.Filters;
 using AngularApi.Models;
 using AngularApi.Services.Interfaces;
@@ -28,7 +28,7 @@ namespace AngularApi.Controllers
             await _patientReviewService.GetUniquePatientsAsync(pagination);
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<PatientReview>> GetPatientReview(int id)
+        public async Task<ActionResult<PatientReviewDetailDTO>> GetPatientReview(int id)
         {
             var patientReview = await _patientReviewService.GetByIdAsync(id);
             return patientReview == null ? NotFound() : patientReview;

@@ -34,7 +34,7 @@ public class MedicalCenterServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task GetMedicalCenterByIdAsync_ExistingId_ReturnsMedicalCenter()
+    public async Task GetMedicalCenterByIdAsync_ExistingId_ReturnsDetailDto()
     {
         _context.MedicalCenter.Add(new MedicalCenter { Id = 1, City = "Boston", State = "MA" });
         await _context.SaveChangesAsync();

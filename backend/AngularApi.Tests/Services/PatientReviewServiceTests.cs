@@ -20,7 +20,7 @@ public class PatientReviewServiceTests : IDisposable
 
     [Fact] public async Task GetAllAsync_ReturnsPagedReviews() { Seed(1, "p1", 5); Seed(2, "p2", 4); (await _service.GetAllAsync(new PaginationParameters())).Items.Should().HaveCount(2); }
     [Fact] public async Task GetUniquePatientsAsync_ReturnsDistinctPatients() { var p = new Patient { Id = "p1", UserName = "John", Email = "j@e.com", Name = "John" }; _context.PatientReviews.AddRange(new PatientReview { Id = 1, PatientId = "p1", Patient = p, DoctorId = "d1", OverallRating = 5 }, new PatientReview { Id = 2, PatientId = "p1", Patient = p, DoctorId = "d2", OverallRating = 4 }); await _context.SaveChangesAsync(); (await _service.GetUniquePatientsAsync(new PaginationParameters())).Items.Should().HaveCount(1); }
-    [Fact] public async Task GetByIdAsync_ExistingId_ReturnsReview() { Seed(1, "p1", 5); (await _service.GetByIdAsync(1))!.OverallRating.Should().Be(5); }
+    [Fact] public async Task GetByIdAsync_ExistingId_ReturnsDetailDto() { Seed(1, "p1", 5); (await _service.GetByIdAsync(1))!.OverallRating.Should().Be(5); }
     [Fact] public async Task GetByIdAsync_MissingId_ReturnsNull() => (await _service.GetByIdAsync(999)).Should().BeNull();
     [Fact] public async Task CreateAsync_OwnPatient_PersistsReview() { var c = await _service.CreateAsync(new CreatePatientReviewDTO { DoctorId = "d1", OverallRating = 5 }, User("p1", "user")); c!.PatientId.Should().Be("p1"); c.ReviewDate.Should().NotBeNull(); }
     [Fact] public async Task CreateAsync_AdminUser_CanCreateForAnyPatientContext() => (await _service.CreateAsync(new CreatePatientReviewDTO { DoctorId = "d1", OverallRating = 4 }, User("admin", "admin")))!.PatientId.Should().Be("admin");

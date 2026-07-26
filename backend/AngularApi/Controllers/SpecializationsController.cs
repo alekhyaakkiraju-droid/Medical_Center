@@ -1,4 +1,4 @@
-using AngularApi.DTO;
+﻿using AngularApi.DTO;
 using AngularApi.Models;
 using AngularApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -20,7 +20,7 @@ namespace AngularApi.Controllers
             await _specializationService.GetSpecializationsAsync(pagination);
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Specialization>> GetSpecialization(int id)
+        public async Task<ActionResult<SpecializationDetailDTO>> GetSpecialization(int id)
         {
             var specialization = await _specializationService.GetSpecializationByIdAsync(id);
             return specialization == null ? NotFound() : specialization;

@@ -1,4 +1,4 @@
-using AngularApi.DTO;
+﻿using AngularApi.DTO;
 using AngularApi.Filters;
 using AngularApi.Models;
 using AngularApi.Services.Interfaces;
@@ -27,7 +27,7 @@ namespace AngularApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<MedicalCenter>> GetMedicalCenter(int id)
+        public async Task<ActionResult<MedicalCenterDetailDTO>> GetMedicalCenter(int id)
         {
             var medicalCenter = await _medicalCenterService.GetMedicalCenterByIdAsync(id);
             return medicalCenter != null ? medicalCenter : NotFound();

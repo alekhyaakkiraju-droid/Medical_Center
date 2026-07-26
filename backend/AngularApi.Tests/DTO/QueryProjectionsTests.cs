@@ -59,6 +59,89 @@ public class QueryProjectionsTests : IDisposable
         bookings[0].AppointmentStatus.Should().Be("Active");
     }
 
+    [Fact]
+    public async Task SelectSpecializationDetailDto_ProjectsServicesWithoutNavigationGraph()
+    {
+        _context.Specializations.Add(new Specialization
+        {
+            Id = 1,
+            SpecializationName = "Cardiology",
+            Services = new List<Service> { new() { Id = 10, Name = "Heart Checkup", Description = "Full screening" } }
+        });
+        await _context.SaveChangesAsync();
+
+        var result = await _context.Specializations.SelectSpecializationDetailDto().SingleAsync();
+
+        result.SpecializationName.Should().Be("Cardiology");
+        result.Services.Should().ContainSingle(s => s.Name == "Heart Checkup" && s.Description == "Full screening");
+    }
+
+    [Fact]
+    public async Task SelectAppointmentStatusDetailDto_ProjectsStatusFieldsOnly()
+    {
+        _context.AppointmentStatus.Add(new AppointmentStatus { Id = 1, Status = AppointmentStatusEnum.Complete });
+        await _context.SaveChangesAsync();
+
+        var result = await _context.AppointmentStatus.SelectAppointmentStatusDetailDto().SingleAsync();
+
+        result.Id.Should().Be(1);
+        result.Status.Should().Be(AppointmentStatusEnum.Complete);
+    }
+
+    [Fact]
+    public async Task SelectMedicalCenterDetailDto_ProjectsScalarFieldsWithoutNavigationGraph()
+    {
+        _context.MedicalCenter.Add(new MedicalCenter
+        {
+            Id = 1,
+            City = "Boston",
+            State = "MA",
+            HospitalAffiliation = new HospitalAffiliation { HospitalName = "General Hospital" }
+        });
+        await _context.SaveChangesAsync();
+
+        var result = await _context.MedicalCenter.SelectMedicalCenterDetailDto().SingleAsync();
+
+        result.City.Should().Be("Boston");
+        result.State.Should().Be("MA");
+    }
+
+    [Fact]
+    public async Task SelectMedicalCenterDoctorAvailabilityDetailDto_ProjectsAvailabilityWithoutMedicalCenter()
+    {
+        var center = new MedicalCenter { Id = 1, City = "Boston" };
+        _context.MedicalCenterDoctorAvailability.Add(new MedicalCenterDoctorAvailability
+        {
+            Id = 1,
+            MedicalCenterId = center.Id,
+            MedicalCenter = center,
+            DayOfWeek = "Monday",
+            IsAvailable = true
+        });
+        await _context.SaveChangesAsync();
+
+        var result = await _context.MedicalCenterDoctorAvailability
+            .SelectMedicalCenterDoctorAvailabilityDetailDto()
+            .SingleAsync();
+
+        result.DayOfWeek.Should().Be("Monday");
+        result.MedicalCenterId.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task SelectPatientReviewDetailDto_HidesPatientIdWhenAnonymous()
+    {
+        _context.PatientReviews.AddRange(
+            new PatientReview { Id = 1, PatientId = "p1", DoctorId = "d1", IsReviewAnonymous = true, OverallRating = 5, CreatedBy = "p1" },
+            new PatientReview { Id = 2, PatientId = "p2", DoctorId = "d1", IsReviewAnonymous = false, OverallRating = 4, CreatedBy = "p2" });
+        await _context.SaveChangesAsync();
+
+        var reviews = await _context.PatientReviews.SelectPatientReviewDetailDto().OrderBy(r => r.Id).ToListAsync();
+
+        reviews[0].PatientId.Should().BeNull();
+        reviews[1].PatientId.Should().Be("p2");
+    }
+
     public void Dispose()
     {
         _context.Database.EnsureDeleted();

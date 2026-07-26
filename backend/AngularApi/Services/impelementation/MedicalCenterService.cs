@@ -32,8 +32,11 @@ public class MedicalCenterService : IMedicalCenterService
             })
             .ToPagedResultAsync(pagination, cancellationToken);
 
-    public Task<MedicalCenter?> GetMedicalCenterByIdAsync(int id, CancellationToken cancellationToken = default) =>
-        _context.MedicalCenter.FindAsync([id], cancellationToken).AsTask();
+    public Task<MedicalCenterDetailDTO?> GetMedicalCenterByIdAsync(int id, CancellationToken cancellationToken = default) =>
+        _context.MedicalCenter
+            .Where(m => m.Id == id)
+            .SelectMedicalCenterDetailDto()
+            .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<MedicalCenter> CreateMedicalCenterAsync(CreateMedicalCenterDTO dto, CancellationToken cancellationToken = default)
     { var medicalCenter = MapToEntity(dto); _context.MedicalCenter.Add(medicalCenter); await _context.SaveChangesAsync(cancellationToken); return medicalCenter; }
