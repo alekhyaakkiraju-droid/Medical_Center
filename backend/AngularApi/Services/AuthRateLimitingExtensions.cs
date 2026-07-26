@@ -8,6 +8,7 @@ public static class AuthRateLimitingExtensions
     public const string LoginPolicy = "auth-login";
     public const string RegisterPolicy = "auth-register";
     public const string ForgotPasswordPolicy = "auth-forgot-password";
+    public const string ContactSubmitPolicy = "contact-submit";
 
     public static IServiceCollection AddAuthRateLimiting(this IServiceCollection services)
     {
@@ -17,6 +18,7 @@ public static class AuthRateLimitingExtensions
             options.AddPolicy(LoginPolicy, context => CreateFixedWindowLimiter(context, 5));
             options.AddPolicy(RegisterPolicy, context => CreateFixedWindowLimiter(context, 3));
             options.AddPolicy(ForgotPasswordPolicy, context => CreateFixedWindowLimiter(context, 3));
+            options.AddPolicy(ContactSubmitPolicy, context => CreateFixedWindowLimiter(context, 3));
         });
 
         return services;

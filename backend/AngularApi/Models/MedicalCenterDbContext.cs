@@ -22,6 +22,7 @@ namespace AngularApi.Models
         public DbSet<PatientReview> PatientReviews { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<ContactInquiry> ContactInquiries { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
