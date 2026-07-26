@@ -37,23 +37,20 @@ namespace AngularApi.Controllers
         [ValidateOwnership(ResourceType.MedicalCenter)]
         public async Task<IActionResult> PutMedicalCenter(int id, UpdateMedicalCenterDTO dto)
         {
-            var updated = await _medicalCenterService.UpdateMedicalCenterAsync(id, dto);
-            return updated ? NoContent() : NotFound();
+            return (await _medicalCenterService.UpdateMedicalCenterAsync(id, dto, User)) switch { ResourceMutationResult.Success => NoContent(), ResourceMutationResult.Forbidden => Forbid(), _ => NotFound(), };
         }
 
         [HttpPost]
         public async Task<ActionResult<MedicalCenter>> PostMedicalCenter(CreateMedicalCenterDTO dto)
         {
-            var created = await _medicalCenterService.CreateMedicalCenterAsync(dto);
-            return CreatedAtAction("GetMedicalCenter", new { id = created.Id }, created);
+            var (created, result) = await _medicalCenterService.CreateMedicalCenterAsync(dto, User); return result switch { ResourceMutationResult.Forbidden => Forbid(), ResourceMutationResult.Success => CreatedAtAction("GetMedicalCenter", new { id = created!.Id }, created), _ => BadRequest(), };
         }
 
         [HttpDelete("{id}")]
         [ValidateOwnership(ResourceType.MedicalCenter)]
         public async Task<IActionResult> DeleteMedicalCenter(int id)
         {
-            var deleted = await _medicalCenterService.DeleteMedicalCenterAsync(id);
-            return deleted ? NoContent() : NotFound();
+            return (await _medicalCenterService.DeleteMedicalCenterAsync(id, User)) switch { ResourceMutationResult.Success => NoContent(), ResourceMutationResult.Forbidden => Forbid(), _ => NotFound(), };
         }
     }
 }
