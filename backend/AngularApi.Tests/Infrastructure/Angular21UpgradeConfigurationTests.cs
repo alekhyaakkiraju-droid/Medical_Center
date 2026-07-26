@@ -32,6 +32,6 @@ public class Angular21UpgradeConfigurationTests
     public void AngularJson_DefaultsComponentSchematicsToStandaloneTrue()
     {
         var angularJson = File.ReadAllText(Path.Combine(FrontendRoot, "angular.json"));
-        angularJson.Should().Contain("\"standalone\": false");
+        angularJson.Should().Contain("\"standalone\": true");
     }
 }
