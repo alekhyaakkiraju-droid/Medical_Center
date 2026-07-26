@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AngularApi.DTO;
 using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace AngularApi.Controllers
 {
@@ -17,49 +11,27 @@ namespace AngularApi.Controllers
     [Authorize(Policy = "AdminPolicy")]
     public class MedicalCentersController : ControllerBase
     {
-        private readonly MedicalCenterDbContext _context;
+        private readonly IMedicalCenterService _medicalCenterService;
 
-        public MedicalCentersController(MedicalCenterDbContext context)
+        public MedicalCentersController(IMedicalCenterService medicalCenterService)
         {
-            _context = context;
+            _medicalCenterService = medicalCenterService;
         }
 
-        // GET: api/MedicalCenters
         [HttpGet]
-        public async Task<ActionResult<PagedResult<MedicalCenterListItemDTO>>> GetMedicalCenter([FromQuery] PaginationParameters pagination)
+        public async Task<ActionResult<PagedResult<MedicalCenterListItemDTO>>> GetMedicalCenter(
+            [FromQuery] PaginationParameters pagination)
         {
-            return await _context.MedicalCenter
-                .Select(m => new MedicalCenterListItemDTO
-                {
-                    Id = m.Id,
-                    HospitalAffiliationId = m.HospitalAffiliationId,
-                    TimeSlotPerClientInMin = m.TimeSlotPerClientInMin,
-                    FirstConsultationFee = m.FirstConsultationFee,
-                    FollowupConsultationFee = m.FollowupConsultationFee,
-                    StreetAddress = m.StreetAddress,
-                    City = m.City,
-                    State = m.State,
-                    Zip = m.Zip
-                })
-                .ToPagedResultAsync(pagination);
+            return await _medicalCenterService.GetMedicalCentersAsync(pagination);
         }
 
-        // GET: api/MedicalCenters/5
         [HttpGet("{id}")]
         public async Task<ActionResult<MedicalCenter>> GetMedicalCenter(int id)
         {
-            var medicalCenter = await _context.MedicalCenter.FindAsync(id);
-
-            if (medicalCenter == null)
-            {
-                return NotFound();
-            }
-
-            return medicalCenter;
+            var medicalCenter = await _medicalCenterService.GetMedicalCenterByIdAsync(id);
+            return medicalCenter != null ? medicalCenter : NotFound();
         }
 
-        // PUT: api/MedicalCenters/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutMedicalCenter(int id, MedicalCenter medicalCenter)
         {
@@ -68,57 +40,22 @@ namespace AngularApi.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(medicalCenter).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MedicalCenterExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var updated = await _medicalCenterService.UpdateMedicalCenterAsync(id, medicalCenter);
+            return updated ? NoContent() : NotFound();
         }
 
-        // POST: api/MedicalCenters
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<MedicalCenter>> PostMedicalCenter(MedicalCenter medicalCenter)
         {
-            _context.MedicalCenter.Add(medicalCenter);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetMedicalCenter", new { id = medicalCenter.Id }, medicalCenter);
+            var created = await _medicalCenterService.CreateMedicalCenterAsync(medicalCenter);
+            return CreatedAtAction("GetMedicalCenter", new { id = created.Id }, created);
         }
 
-        // DELETE: api/MedicalCenters/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMedicalCenter(int id)
         {
-            var medicalCenter = await _context.MedicalCenter.FindAsync(id);
-            if (medicalCenter == null)
-            {
-                return NotFound();
-            }
-
-            _context.MedicalCenter.Remove(medicalCenter);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool MedicalCenterExists(int id)
-        {
-            return _context.MedicalCenter.Any(e => e.Id == id);
+            var deleted = await _medicalCenterService.DeleteMedicalCenterAsync(id);
+            return deleted ? NoContent() : NotFound();
         }
     }
 }
