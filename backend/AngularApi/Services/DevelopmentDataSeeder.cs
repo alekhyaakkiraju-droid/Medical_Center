@@ -1,10 +1,12 @@
 using AngularApi.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace AngularApi.Services;
 
 /// <summary>
-/// Seeds minimal demo data in Development when the database is empty.
+/// Seeds UAT reference data in Development when entities are missing.
+/// Each seed step is idempotent so partial or repeated runs do not duplicate records.
 /// </summary>
 public static class DevelopmentDataSeeder
 {
@@ -13,16 +15,36 @@ public static class DevelopmentDataSeeder
     /// </summary>
     public const int DefaultMedicalCenterId = 2;
 
+    public const string SeedPassword = "UatSeed123!";
+
+    public const string AdminEmail = "admin@uat.careshift.local";
+    public const string DoctorSmithEmail = "dr.smith@uat.careshift.local";
+    public const string DoctorJonesEmail = "dr.jones@uat.careshift.local";
+    public const string PatientAliceEmail = "patient.alice@uat.careshift.local";
+    public const string PatientBobEmail = "patient.bob@uat.careshift.local";
+
     private static readonly string[] AvailabilityDays = ["Monday", "Wednesday", "Friday"];
 
     public static async Task SeedAsync(IServiceProvider services)
     {
         using var scope = services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+        await roleManager.EnsureRolesCreatedAsync();
 
         await SeedSpecializationsAsync(context);
+        await SeedAppointmentStatusesAsync(context);
+
         var medicalCenterId = await SeedMedicalCentersAsync(context);
+
+        await SeedAdminUserAsync(userManager);
+        var doctors = await SeedDoctorsAsync(context, userManager, medicalCenterId);
+        var patients = await SeedPatientsAsync(context, userManager);
+
         await SeedDoctorAvailabilityAsync(context, medicalCenterId);
+        await SeedAppointmentsAsync(context, doctors, patients, medicalCenterId);
     }
 
     private static async Task SeedSpecializationsAsync(MedicalCenterDbContext context)
@@ -75,6 +97,28 @@ public static class DevelopmentDataSeeder
         await context.SaveChangesAsync();
     }
 
+    private static async Task SeedAppointmentStatusesAsync(MedicalCenterDbContext context)
+    {
+        var expectedStatuses = new[]
+        {
+            AppointmentStatusEnum.Active,
+            AppointmentStatusEnum.Complete,
+            AppointmentStatusEnum.Canceled
+        };
+
+        foreach (var status in expectedStatuses)
+        {
+            if (await context.AppointmentStatus.AnyAsync(s => s.Status == status))
+            {
+                continue;
+            }
+
+            context.AppointmentStatus.Add(new AppointmentStatus { Status = status });
+        }
+
+        await context.SaveChangesAsync();
+    }
+
     internal static async Task<int> SeedMedicalCentersAsync(MedicalCenterDbContext context)
     {
         var existingDefaultCenter = await context.MedicalCenter.FindAsync(DefaultMedicalCenterId);
@@ -102,6 +146,195 @@ public static class DevelopmentDataSeeder
 
         await InsertMedicalCenterAsync(context, center);
         return center.Id;
+    }
+
+    private static async Task SeedAdminUserAsync(UserManager<AppUser> userManager)
+    {
+        if (await userManager.FindByEmailAsync(AdminEmail) != null)
+        {
+            return;
+        }
+
+        var admin = new AppUser
+        {
+            UserName = AdminEmail,
+            Email = AdminEmail,
+            EmailConfirmed = true,
+        };
+
+        var result = await userManager.CreateAsync(admin, SeedPassword);
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException(
+                $"Failed to seed admin user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+        }
+
+        await userManager.AddToRoleAsync(admin, "admin");
+    }
+
+    private static async Task<IReadOnlyList<Doctor>> SeedDoctorsAsync(
+        MedicalCenterDbContext context,
+        UserManager<AppUser> userManager,
+        int medicalCenterId)
+    {
+        var specializations = await context.Specializations
+            .OrderBy(s => s.Id)
+            .ToListAsync();
+
+        var doctorDefinitions = new[]
+        {
+            new
+            {
+                Email = DoctorSmithEmail,
+                Name = "Dr. Alice Smith",
+                Image = "images/doctors/smith.png",
+                ProfessionalStatement = "Board-certified cardiologist focused on preventive heart care.",
+                PracticingFrom = new DateTime(2010, 6, 1, 0, 0, 0, DateTimeKind.Utc),
+                SpecializationName = "Cardiology",
+                QualificationName = "MD Cardiology",
+                InstituteName = "Johns Hopkins School of Medicine",
+                ProcurementYear = new DateTime(2008, 5, 15, 0, 0, 0, DateTimeKind.Utc),
+                HospitalName = "City Heart Institute",
+                HospitalCity = "Boston",
+                HospitalCountry = "USA",
+                HospitalStartDate = new DateTime(2012, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+            },
+            new
+            {
+                Email = DoctorJonesEmail,
+                Name = "Dr. Robert Jones",
+                Image = "images/doctors/jones.png",
+                ProfessionalStatement = "Orthopedic surgeon specializing in sports medicine and joint repair.",
+                PracticingFrom = new DateTime(2008, 3, 15, 0, 0, 0, DateTimeKind.Utc),
+                SpecializationName = "Orthopedics",
+                QualificationName = "MD Orthopedics",
+                InstituteName = "Stanford University School of Medicine",
+                ProcurementYear = new DateTime(2006, 6, 1, 0, 0, 0, DateTimeKind.Utc),
+                HospitalName = "Regional Orthopedic Center",
+                HospitalCity = "Chicago",
+                HospitalCountry = "USA",
+                HospitalStartDate = new DateTime(2010, 9, 1, 0, 0, 0, DateTimeKind.Utc),
+            }
+        };
+
+        var doctors = new List<Doctor>();
+
+        foreach (var definition in doctorDefinitions)
+        {
+            var existingDoctor = await context.Doctors.FirstOrDefaultAsync(d => d.Email == definition.Email);
+            if (existingDoctor != null)
+            {
+                doctors.Add(existingDoctor);
+                continue;
+            }
+
+            var doctor = new Doctor
+            {
+                UserName = definition.Email,
+                Email = definition.Email,
+                EmailConfirmed = true,
+                Name = definition.Name,
+                Image = definition.Image,
+                ProfessionalStatement = definition.ProfessionalStatement,
+                PracticingFrom = definition.PracticingFrom,
+                MedicalCenterId = medicalCenterId,
+            };
+
+            var result = await userManager.CreateAsync(doctor, SeedPassword);
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException(
+                    $"Failed to seed doctor {definition.Email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
+
+            await userManager.AddToRoleAsync(doctor, "doctor");
+
+            var specialization = specializations.First(s => s.SpecializationName == definition.SpecializationName);
+            context.DoctorSpecialization.Add(new DoctorSpecialization
+            {
+                DoctorId = doctor.Id,
+                SpecializationId = specialization.Id,
+            });
+
+            context.DoctorQualifications.Add(new DoctorQualification
+            {
+                DoctorId = doctor.Id,
+                QualificationName = definition.QualificationName,
+                InstituteName = definition.InstituteName,
+                ProcurementYear = definition.ProcurementYear,
+            });
+
+            context.HospitalAffiliation.Add(new HospitalAffiliation
+            {
+                DoctorId = doctor.Id,
+                HospitalName = definition.HospitalName,
+                City = definition.HospitalCity,
+                Country = definition.HospitalCountry,
+                StartDate = definition.HospitalStartDate,
+            });
+
+            await context.SaveChangesAsync();
+            doctors.Add(doctor);
+        }
+
+        return doctors;
+    }
+
+    private static async Task<IReadOnlyList<Patient>> SeedPatientsAsync(
+        MedicalCenterDbContext context,
+        UserManager<AppUser> userManager)
+    {
+        var patientDefinitions = new[]
+        {
+            new
+            {
+                Email = PatientAliceEmail,
+                Name = "Alice Nguyen",
+                Address = "123 Maple Street, Springfield, IL 62701",
+                Image = "images/patients/alice.png",
+            },
+            new
+            {
+                Email = PatientBobEmail,
+                Name = "Bob Martinez",
+                Address = "456 Oak Avenue, Portland, OR 97201",
+                Image = "images/patients/bob.png",
+            }
+        };
+
+        var patients = new List<Patient>();
+
+        foreach (var definition in patientDefinitions)
+        {
+            var existingPatient = await context.Patients.FirstOrDefaultAsync(p => p.Email == definition.Email);
+            if (existingPatient != null)
+            {
+                patients.Add(existingPatient);
+                continue;
+            }
+
+            var patient = new Patient
+            {
+                UserName = definition.Email,
+                Email = definition.Email,
+                EmailConfirmed = true,
+                Name = definition.Name,
+                Image = definition.Image,
+            };
+            ((AppUser)patient).Address = definition.Address;
+
+            var result = await userManager.CreateAsync(patient, SeedPassword);
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException(
+                    $"Failed to seed patient {definition.Email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
+
+            await userManager.AddToRoleAsync(patient, "user");
+            patients.Add(patient);
+        }
+
+        return patients;
     }
 
     internal static async Task SeedDoctorAvailabilityAsync(MedicalCenterDbContext context, int defaultMedicalCenterId)
@@ -132,6 +365,116 @@ public static class DevelopmentDataSeeder
             context.MedicalCenterDoctorAvailability.AddRange(slots);
             await context.SaveChangesAsync();
         }
+    }
+
+    private static async Task SeedAppointmentsAsync(
+        MedicalCenterDbContext context,
+        IReadOnlyList<Doctor> doctors,
+        IReadOnlyList<Patient> patients,
+        int medicalCenterId)
+    {
+        if (doctors.Count < 2 || patients.Count < 2)
+        {
+            return;
+        }
+
+        if (await context.Appointments.AnyAsync(a => a.DoctorId == doctors[0].Id))
+        {
+            return;
+        }
+
+        var statuses = await context.AppointmentStatus.ToDictionaryAsync(s => s.Status!.Value, s => s.Id);
+        var today = DateTime.UtcNow.Date;
+        const decimal defaultFee = 30.00m;
+
+        var doctorOne = doctors[0];
+        var doctorTwo = doctors[1];
+        var patientOne = patients[0];
+        var patientTwo = patients[1];
+
+        var appointments = new[]
+        {
+            new Appointment
+            {
+                DoctorId = doctorOne.Id,
+                PatientId = patientOne.Id,
+                MedicalCenterId = medicalCenterId,
+                DoctorName = doctorOne.Name,
+                Name = patientOne.Name,
+                Email = patientOne.Email,
+                Phone = "555-0101",
+                AppointmentStatusId = statuses[AppointmentStatusEnum.Active],
+                AppointmentTakenDate = today,
+                ProbableStartTime = today.AddHours(10),
+                Amount = defaultFee,
+                PaymentStatus = "Pending",
+            },
+            new Appointment
+            {
+                DoctorId = doctorOne.Id,
+                PatientId = patientTwo.Id,
+                MedicalCenterId = medicalCenterId,
+                DoctorName = doctorOne.Name,
+                Name = patientTwo.Name,
+                Email = patientTwo.Email,
+                Phone = "555-0102",
+                AppointmentStatusId = statuses[AppointmentStatusEnum.Complete],
+                AppointmentTakenDate = today.AddDays(-1),
+                ProbableStartTime = today.AddDays(-1).AddHours(14),
+                ActualEndTime = today.AddDays(-1).AddHours(14).AddMinutes(30),
+                Amount = defaultFee,
+                PaymentStatus = "Paid",
+            },
+            new Appointment
+            {
+                DoctorId = doctorTwo.Id,
+                PatientId = patientOne.Id,
+                MedicalCenterId = medicalCenterId,
+                DoctorName = doctorTwo.Name,
+                Name = patientOne.Name,
+                Email = patientOne.Email,
+                Phone = "555-0103",
+                AppointmentStatusId = statuses[AppointmentStatusEnum.Canceled],
+                AppointmentTakenDate = today.AddDays(-2),
+                ProbableStartTime = today.AddDays(-2).AddHours(9),
+                Amount = defaultFee,
+                PaymentStatus = "Refunded",
+            },
+            new Appointment
+            {
+                DoctorId = doctorTwo.Id,
+                PatientId = patientTwo.Id,
+                MedicalCenterId = medicalCenterId,
+                DoctorName = doctorTwo.Name,
+                Name = patientTwo.Name,
+                Email = patientTwo.Email,
+                Phone = "555-0104",
+                AppointmentStatusId = statuses[AppointmentStatusEnum.Active],
+                AppointmentTakenDate = today.AddDays(-7),
+                ProbableStartTime = today.AddDays(-7).AddHours(11),
+                Amount = defaultFee,
+                PaymentStatus = "Pending",
+            },
+            new Appointment
+            {
+                DoctorId = doctorOne.Id,
+                PatientId = patientOne.Id,
+                MedicalCenterId = medicalCenterId,
+                DoctorName = doctorOne.Name,
+                Name = patientOne.Name,
+                Email = patientOne.Email,
+                Phone = "555-0105",
+                AppointmentStatusId = statuses[AppointmentStatusEnum.Complete],
+                AppointmentTakenDate = today.AddDays(-14),
+                ProbableStartTime = today.AddDays(-14).AddHours(16),
+                ActualEndTime = today.AddDays(-14).AddHours(16).AddMinutes(45),
+                Amount = defaultFee,
+                PaymentStatus = "Paid",
+            },
+        };
+
+        context.Appointments.AddRange(appointments);
+        await context.SaveChangesAsync();
     }
 
     private static MedicalCenterDoctorAvailability CreateAvailabilitySlot(int medicalCenterId, string dayOfWeek) =>
