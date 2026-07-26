@@ -19,6 +19,8 @@ public class DockerSecretConfigurationProviderTests
         {
             ["jwt_secret"] = "file-based-jwt-secret-value-32chars!",
             ["smtp_email_username"] = "smtp-user@example.com",
+            ["google_auth_client_id"] = "google-client-id.apps.googleusercontent.com",
+            ["google_auth_client_secret"] = "google-client-secret-value",
         });
 
         try
@@ -29,6 +31,10 @@ public class DockerSecretConfigurationProviderTests
             jwtSecret.Should().Be("file-based-jwt-secret-value-32chars!");
             data.TryGetValue("EmailSettings:EmailUsername", out var smtpUser).Should().BeTrue();
             smtpUser.Should().Be("smtp-user@example.com");
+            data.TryGetValue("GoogleAuth:ClientId", out var googleClientId).Should().BeTrue();
+            googleClientId.Should().Be("google-client-id.apps.googleusercontent.com");
+            data.TryGetValue("GoogleAuth:ClientSecret", out var googleClientSecret).Should().BeTrue();
+            googleClientSecret.Should().Be("google-client-secret-value");
         }
         finally
         {
