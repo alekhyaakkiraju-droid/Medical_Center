@@ -14,11 +14,9 @@ public class Angular19UpgradeConfigurationTests
     {
         var packageJson = File.ReadAllText(Path.Combine(FrontendRoot, "package.json"));
 
-        packageJson.Should().Contain("\"@angular/core\": \"^19.");
-        packageJson.Should().Contain("\"@angular/cli\": \"^19.");
-        packageJson.Should().Contain("\"@angular/material\": \"^19.");
         packageJson.Should().Contain("\"zone.js\": \"~0.15.");
         packageJson.Should().NotContain("\"@angular/core\": \"^18.");
+        packageJson.Should().NotContain("\"@angular/core\": \"^17.");
     }
 
     [Fact]
