@@ -18,21 +18,28 @@ public class SmokeTestScriptTests
         pipelineSmoke.Should().Contain("/health");
         pipelineSmoke.Should().Contain("SMOKE_BASE_URL");
         pipelineSmoke.Should().Contain("SMOKE_API_URL");
-        pipelineSmoke.Should().Contain("Image-bearing page validation");
+        pipelineSmoke.Should().Contain("FRONTEND_URL");
+        pipelineSmoke.Should().Contain("Smoke Test 4: Image-bearing Team page");
+        pipelineSmoke.Should().Contain("Smoke Test 5: Image-bearing Gallery page");
+        pipelineSmoke.Should().Contain("Smoke Test 6: Unauthorized API rejection");
+        pipelineSmoke.Should().Contain("Smoke Test 7: SPA navigation uses routerLink");
         pipelineSmoke.Should().Contain("/pages/team");
+        pipelineSmoke.Should().Contain("/pages/gallery");
+        pipelineSmoke.Should().Contain("routerlink");
         pipelineSmoke.Should().Contain("app-root");
-        pipelineSmoke.Should().Contain("antiforgery-token");
         pipelineSmoke.Should().Contain("120");
 
         e2eSmoke.Should().Contain("Smoke Test 1");
         e2eSmoke.Should().Contain("Smoke Test 2");
         e2eSmoke.Should().Contain("Smoke Test 3");
-        e2eSmoke.Should().Contain("Smoke Test 4");
-        e2eSmoke.Should().Contain("Smoke Test 5");
-        e2eSmoke.Should().Contain("Smoke Test 6");
+        e2eSmoke.Should().Contain("Smoke Test 4: Image-bearing Team page");
+        e2eSmoke.Should().Contain("Smoke Test 5: Image-bearing Gallery page");
+        e2eSmoke.Should().Contain("Smoke Test 6: Unauthorized API returns structured JSON");
+        e2eSmoke.Should().Contain("Smoke Test 7: SPA navigation uses routerLink");
         e2eSmoke.Should().Contain("401");
         e2eSmoke.Should().Contain("application/json");
-        e2eSmoke.Should().Contain("antiforgery-token");
+        e2eSmoke.Should().Contain("/pages/gallery");
+        e2eSmoke.Should().Contain("routerlink");
 
         patientJourney.Should().Contain("Patient Journey Step 1");
         patientJourney.Should().Contain("Patient Journey Step 2");
