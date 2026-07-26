@@ -15,6 +15,7 @@ public class DocumentationArtifactsTests
             new object[] { "docs/adr/003-yarp-retention.md", new[] { "## Status", "## Context", "## Decision", "## Consequences" } },
             new object[] { "docs/adr/004-angular-ngmodules.md", new[] { "## Status", "## Context", "## Decision", "## Consequences" } },
             new object[] { "docs/adr/005-forge-shipping-cicd.md", new[] { "## Status", "## Context", "## Decision", "## Consequences" } },
+            new object[] { "docs/adr/006-service-layer-refactor.md", new[] { "## Status", "## Context", "## Decision", "## Consequences" } },
             new object[] { "docs/compliance/data-classification.md", new[] { "T1", "T4", "Entity Mapping" } },
             new object[] { "docs/compliance/hipaa-checklist.md", new[] { "Compliant", "In Progress", "Pending", "secrets-management.md" } },
             new object[] { "docs/secrets-management.md", new[] { "90-day", "Rotation Policy", "Emergency Rotation", "Audit Trail Requirements", "JWT Signing Key Rotation", "MSSQL SA Password Rotation", "SMTP Credentials Rotation", "Google OAuth Credentials Rotation" } },
@@ -51,13 +52,13 @@ public class DocumentationArtifactsTests
     }
 
     [Fact]
-    public void AdrDirectory_ContainsFiveArchitectureDecisionRecords()
+    public void AdrDirectory_ContainsSixArchitectureDecisionRecords()
     {
         var adrDirectory = Path.Combine(RepoRoot, "docs", "adr");
         Directory.Exists(adrDirectory).Should().BeTrue();
 
         var adrFiles = Directory.GetFiles(adrDirectory, "*.md");
-        adrFiles.Should().HaveCount(5, because: "WO-030 requires five ADRs");
+        adrFiles.Should().HaveCount(6, because: "WO-023 adds ADR-006 for service layer refactor verification");
     }
 
     [Fact]
