@@ -40,6 +40,19 @@ public class OwnershipValidatorTests
         _validator.CanAccessDoctorResource(user, "doctor-2").Should().BeFalse();
     }
 
+    [Fact]
+    public void CanAccessPatientReviewResource_OwnReview_ReturnsTrue() => _validator.CanAccessPatientReviewResource(CreateUser("patient-1","user"),"patient-1").Should().BeTrue();
+    [Fact]
+    public void CanAccessPatientReviewResource_OtherReview_ReturnsFalse() => _validator.CanAccessPatientReviewResource(CreateUser("patient-1","user"),"patient-2").Should().BeFalse();
+    [Fact]
+    public void CanAccessPatientReviewResource_AdminUser_ReturnsTrue() => _validator.CanAccessPatientReviewResource(CreateUser("admin-user","admin"),"patient-2").Should().BeTrue();
+    [Fact]
+    public void CanAccessPatientReviewResource_EmptyPatientId_ReturnsFalse() => _validator.CanAccessPatientReviewResource(CreateUser("patient-1","user"),string.Empty).Should().BeFalse();
+    [Fact]
+    public void CanAccessMedicalCenterResource_AdminUser_ReturnsTrue() => _validator.CanAccessMedicalCenterResource(CreateUser("admin-user","admin")).Should().BeTrue();
+    [Fact]
+    public void CanAccessMedicalCenterResource_NonAdminUser_ReturnsFalse() => _validator.CanAccessMedicalCenterResource(CreateUser("doctor-1","doctor")).Should().BeFalse();
+
     private static ClaimsPrincipal CreateUser(string userId, string role)
     {
         var claims = new[]

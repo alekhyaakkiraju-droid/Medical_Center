@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using AngularApi.DTO;
 using AngularApi.Models;
 using AngularApi.Tests.Infrastructure;
 using FluentAssertions;
@@ -73,6 +75,26 @@ public class OwnershipValidationIntegrationTests : IClassFixture<MedicalCenterWe
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
+    [Fact]
+    public async Task PutPatientReview_AsAdminForAnyReview_ReturnsNoContent()
+    {
+        var reviewId = await SeedPatientReviewAsync("patient-b", "doctor-1");
+        var client = CreateAuthenticatedClient("admin-user", "admin");
+        await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
+        var response = await client.PutAsJsonAsync($"/api/PatientReviews/{reviewId}", new UpdatePatientReviewDTO { DoctorId = "doctor-1", OverallRating = 5 });
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [Fact]
+    public async Task PutMedicalCenter_AsAdmin_ReturnsNoContent()
+    {
+        var medicalCenterId = await SeedMedicalCenterAsync();
+        var client = CreateAuthenticatedClient("admin-user", "admin");
+        await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
+        var response = await client.PutAsJsonAsync($"/api/MedicalCenters/{medicalCenterId}", new UpdateMedicalCenterDTO { HospitalAffiliationId = 1, TimeSlotPerClientInMin = 30, FirstConsultationFee = 100, FollowupConsultationFee = 75, StreetAddress = "123 Main St", City = "Austin", State = "TX", Zip = "78701" });
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
     private HttpClient CreateAuthenticatedClient(string userId, params string[] roles)
     {
         var client = AntiforgeryTestHelper.CreateClient(_factory);
@@ -109,5 +131,27 @@ public class OwnershipValidationIntegrationTests : IClassFixture<MedicalCenterWe
         });
 
         await context.SaveChangesAsync();
+    }
+
+    private async Task<int> SeedPatientReviewAsync(string patientId, string doctorId)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+        if (!context.Patients.Any(p => p.Id == patientId)) context.Patients.Add(new Patient { Id = patientId, Name = "Review Patient", Email = "review@example.com" });
+        if (!context.Doctors.Any(d => d.Id == doctorId)) context.Doctors.Add(new Doctor { Id = doctorId, Name = "Review Doctor" });
+        var review = new PatientReview { PatientId = patientId, DoctorId = doctorId, OverallRating = 4, ReviewDate = DateTime.UtcNow };
+        context.PatientReviews.Add(review);
+        await context.SaveChangesAsync();
+        return review.Id;
+    }
+
+    private async Task<int> SeedMedicalCenterAsync()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+        var medicalCenter = new MedicalCenter { HospitalAffiliationId = 1, TimeSlotPerClientInMin = 30, FirstConsultationFee = 100, FollowupConsultationFee = 75, StreetAddress = "123 Main St", City = "Austin", State = "TX", Zip = "78701" };
+        context.MedicalCenter.Add(medicalCenter);
+        await context.SaveChangesAsync();
+        return medicalCenter.Id;
     }
 }
