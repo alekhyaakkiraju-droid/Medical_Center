@@ -1,14 +1,27 @@
+secrets:
+  jwt_secret:
+    file: ./secrets/jwt_secret
+  mssql_sa_password:
+    file: ./secrets/mssql_sa_password
+  smtp_email_username:
+    file: ./secrets/smtp_email_username
+  smtp_email_password:
+    file: ./secrets/smtp_email_password
+
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: medical-center-sqlserver
+    entrypoint: ["/bin/bash", "/docker/sqlserver-entrypoint.sh"]
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+    secrets:
+      - mssql_sa_password
     ports:
       - "1433:1433"
     volumes:
       - sqlserver-data:/var/opt/mssql
+      - ./docker/sqlserver-entrypoint.sh:/docker/sqlserver-entrypoint.sh:ro
     healthcheck:
       test:
         [
@@ -27,14 +40,16 @@ services:
     container_name: medical-center-api
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__connection: Server=sqlserver,1433;Database=MedicalCenter;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=False
-      Jwt__Secret: ${JWT_SECRET}
+      ConnectionStrings__connection: Server=sqlserver,1433;Database=MedicalCenter;User Id=sa;TrustServerCertificate=True;Encrypt=False
       Jwt__ValidIssuer: ${JWT_VALID_ISSUER}
       Jwt__ValidAudience: ${JWT_VALID_AUDIENCE}
       GoogleAuth__ClientId: ${GOOGLE_AUTH_CLIENT_ID}
       GoogleAuth__ClientSecret: ${GOOGLE_AUTH_CLIENT_SECRET}
-      EmailSettings__EmailUsername: ${SMTP_EMAIL_USERNAME}
-      EmailSettings__EmailPassword: ${SMTP_EMAIL_PASSWORD}
+    secrets:
+      - jwt_secret
+      - mssql_sa_password
+      - smtp_email_username
+      - smtp_email_password
     depends_on:
       sqlserver:
         condition: service_healthy

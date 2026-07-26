@@ -18,6 +18,7 @@ namespace WebApiDemo
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Configuration.AddDockerSecrets();
             builder.ConfigureSerilog();
 
             builder.Services.AddAntiforgery(options =>
