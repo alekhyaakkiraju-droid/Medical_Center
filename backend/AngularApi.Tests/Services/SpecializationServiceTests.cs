@@ -44,9 +44,10 @@ public class SpecializationServiceTests : IDisposable
     [Fact]
     public async Task CreateSpecializationAsync_ValidInput_PersistsSpecialization()
     {
-        var created = await _service.CreateSpecializationAsync(new Specialization { Id = 1, SpecializationName = "Cardiology" });
+        var created = await _service.CreateSpecializationAsync(new CreateSpecializationDTO { SpecializationName = "Cardiology" });
         created.SpecializationName.Should().Be("Cardiology");
-        (await _context.Specializations.FindAsync(1)).Should().NotBeNull();
+        created.Id.Should().BeGreaterThan(0);
+        (await _context.Specializations.FindAsync(created.Id)).Should().NotBeNull();
     }
 
     [Fact]
@@ -54,17 +55,17 @@ public class SpecializationServiceTests : IDisposable
     {
         _context.Specializations.Add(new Specialization { Id = 1, SpecializationName = "Cardiology" });
         await _context.SaveChangesAsync();
-        (await _service.UpdateSpecializationAsync(1, new Specialization { Id = 1, SpecializationName = "Pediatric Cardiology" })).Should().BeTrue();
+        (await _service.UpdateSpecializationAsync(1, new UpdateSpecializationDTO { SpecializationName = "Pediatric Cardiology" })).Should().BeTrue();
         (await _context.Specializations.FindAsync(1))!.SpecializationName.Should().Be("Pediatric Cardiology");
     }
 
     [Fact]
-    public async Task UpdateSpecializationAsync_IdMismatch_ReturnsFalse() =>
-        (await _service.UpdateSpecializationAsync(1, new Specialization { Id = 2, SpecializationName = "Neurology" })).Should().BeFalse();
+    public async Task UpdateSpecializationAsync_NonExistingId_ReturnsFalse() =>
+        (await _service.UpdateSpecializationAsync(999, new UpdateSpecializationDTO { SpecializationName = "Neurology" })).Should().BeFalse();
 
     [Fact]
-    public async Task UpdateSpecializationAsync_NonExistingId_ReturnsFalse() =>
-        (await _service.UpdateSpecializationAsync(1, new Specialization { Id = 1, SpecializationName = "Cardiology" })).Should().BeFalse();
+    public async Task UpdateSpecializationAsync_MissingRecord_ReturnsFalse() =>
+        (await _service.UpdateSpecializationAsync(1, new UpdateSpecializationDTO { SpecializationName = "Cardiology" })).Should().BeFalse();
 
     [Fact]
     public async Task DeleteSpecializationAsync_ExistingId_RemovesSpecialization()

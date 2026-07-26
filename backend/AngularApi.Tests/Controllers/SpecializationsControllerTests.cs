@@ -68,26 +68,13 @@ namespace AngularApi.Tests.Controllers
 
 
         [Fact]
-        public async Task PutSpecialization_IdMismatch_ReturnsBadRequest()
-        {
-            // Arrange
-            var specialization = new Specialization { Id = 2, SpecializationName = "Neurology" };
-
-            // Act
-            var result = await _controller.PutSpecialization(1, specialization);
-
-            // Assert
-            result.Should().BeOfType<BadRequestResult>();
-        }
-
-        [Fact]
         public async Task PutSpecialization_NonExistingId_ReturnsNotFound()
         {
             // Arrange
-            var specialization = new Specialization { Id = 1, SpecializationName = "Cardiology" };
+            var dto = new UpdateSpecializationDTO { SpecializationName = "Cardiology" };
 
             // Act
-            var result = await _controller.PutSpecialization(1, specialization);
+            var result = await _controller.PutSpecialization(1, dto);
 
             // Assert
             result.Should().BeOfType<NotFoundResult>();
@@ -97,17 +84,17 @@ namespace AngularApi.Tests.Controllers
         public async Task PostSpecialization_ValidInput_CreatesSpecialization()
         {
             // Arrange
-            var specialization = new Specialization { Id = 1, SpecializationName = "Cardiology" };
+            var dto = new CreateSpecializationDTO { SpecializationName = "Cardiology" };
 
             // Act
-            var result = await _controller.PostSpecialization(specialization);
+            var result = await _controller.PostSpecialization(dto);
 
             // Assert
             var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
             var createdSpecialization = createdResult.Value.Should().BeAssignableTo<Specialization>().Subject;
-            createdSpecialization.Id.Should().Be(1);
+            createdSpecialization.Id.Should().BeGreaterThan(0);
             createdSpecialization.SpecializationName.Should().Be("Cardiology");
-            var dbSpecialization = await _context.Specializations.FindAsync(1);
+            var dbSpecialization = await _context.Specializations.FindAsync(createdSpecialization.Id);
             dbSpecialization.Should().NotBeNull();
         }
 
