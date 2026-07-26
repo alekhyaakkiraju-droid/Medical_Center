@@ -41,7 +41,7 @@ public class Express5UpgradeConfigurationTests
     {
         var serverSource = File.ReadAllText(Path.Combine(FrontendRoot, "server.ts"));
 
-        serverSource.Should().Contain("server.get('/{*path}'");
+        serverSource.Should().Contain("app.all('/api/{*path}'");
         serverSource.Should().NotContain("server.get('**'");
     }
 

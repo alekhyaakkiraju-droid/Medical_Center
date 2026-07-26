@@ -13,6 +13,7 @@ public class SmokeTestScriptTests
         var pipelineSmoke = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "smoke-tests.sh"));
         var e2eSmoke = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "run-e2e-smoke.sh"));
         var patientJourney = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "e2e-patient-journey.sh"));
+        var ssrSmoke = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "ssr-smoke-tests.sh"));
         var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
 
         pipelineSmoke.Should().Contain("/health");
@@ -59,6 +60,10 @@ public class SmokeTestScriptTests
         pipeline.Should().Contain("Patient Journey E2E");
         pipeline.Should().Contain("e2e-patient-journey.sh");
         pipeline.Should().Contain("./scripts/smoke-tests.sh");
+
+        ssrSmoke.Should().Contain("WO-059");
+        ssrSmoke.Should().Contain("/api/nonexistent");
+        ssrSmoke.Should().Contain("/pages/about-us");
     }
 
     [Fact]
