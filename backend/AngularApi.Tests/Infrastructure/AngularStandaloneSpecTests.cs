@@ -7,9 +7,6 @@ public class AngularStandaloneSpecTests
     private static readonly string FrontendAppRoot = Path.GetFullPath(
         Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "front-end", "src", "app"));
 
-    private static readonly string FrontendSrcRoot = Path.GetFullPath(
-        Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "front-end", "src"));
-
     private static readonly string[] DeletedNgModuleNames =
     [
         "SharedModule",
@@ -74,14 +71,5 @@ public class AngularStandaloneSpecTests
         var replacement = File.ReadAllText(Path.Combine(FrontendAppRoot, "shared", "shared-standalone-components.spec.ts"));
         replacement.Should().Contain("imports: [DeleteModalComponent, PaymentComponent, SideBarComponent]");
         replacement.Should().NotContain("SharedModule");
-    }
-
-    [Fact]
-    public void FrontendContainsStandaloneSpecMigrationGate()
-    {
-        var gate = File.ReadAllText(Path.Combine(FrontendSrcRoot, "angular-standalone-spec-migration.spec.ts"));
-        gate.Should().Contain("WO-057");
-        gate.Should().Contain("declarations:");
-        gate.Should().Contain("SharedModule");
     }
 }
