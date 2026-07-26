@@ -16,7 +16,8 @@ public class DocumentationArtifactsTests
             new object[] { "docs/adr/004-angular-ngmodules.md", new[] { "## Status", "## Context", "## Decision", "## Consequences" } },
             new object[] { "docs/adr/005-forge-shipping-cicd.md", new[] { "## Status", "## Context", "## Decision", "## Consequences" } },
             new object[] { "docs/compliance/data-classification.md", new[] { "T1", "T4", "Entity Mapping" } },
-            new object[] { "docs/compliance/hipaa-checklist.md", new[] { "Compliant", "In Progress", "Pending" } },
+            new object[] { "docs/compliance/hipaa-checklist.md", new[] { "Compliant", "In Progress", "Pending", "secrets-management.md" } },
+            new object[] { "docs/secrets-management.md", new[] { "90-day", "Rotation Policy", "Emergency Rotation", "Audit Trail Requirements", "JWT Signing Key Rotation", "MSSQL SA Password Rotation", "SMTP Credentials Rotation", "Google OAuth Credentials Rotation" } },
             new object[] { "docs/compliance/data-subject-rights.md", new[] { "30-day", "Breach Notification", "Pending" } },
             new object[] { "CONTRIBUTING.md", new[] { "Local Setup", "Coding Standards", "Pull Request Process" } },
         };

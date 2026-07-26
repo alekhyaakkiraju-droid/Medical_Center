@@ -2,13 +2,13 @@
 
 Status legend: **Compliant** | **In Progress** | **Pending**
 
-Last reviewed: 2026-07-23
+Last reviewed: 2026-07-25
 
 ## Administrative Safeguards
 
 | Control | Status | Evidence / Notes |
 |---------|--------|------------------|
-| Security management process | In Progress | Risk assessment documented in compliance docs; formal RA tool pending |
+| Security management process | Compliant | Documented 90-day secret rotation policy and procedures in [`docs/secrets-management.md`](../secrets-management.md); risk assessment in compliance docs |
 | Assigned security responsibility | Pending | Designated HIPAA Security Officer role not yet formalized |
 | Workforce security | In Progress | Role-based access via ASP.NET Identity (`admin`, `doctor`, `user` policies) |
 | Information access management | In Progress | `OwnershipValidator`, role policies; minimum-necessary review ongoing |
