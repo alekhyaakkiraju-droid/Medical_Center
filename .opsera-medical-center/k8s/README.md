@@ -1,9 +1,31 @@
 # Medical Center dev Kubernetes manifests
 
-Dev manifests for Forge Shipping deploy to `opsera-usw2-np`.
+Dev manifests for Forge Shipping deploy to `opsera-usw2-np` / `opsera-medical-center-dev`.
 
 Target URL: `https://medical-center-yarp-dev.agent.opsera.dev`
 
-Image placeholders (`PLACEHOLDER_*_ECR_URI`) are substituted at deploy time from ECR push outputs.
+## Before first deploy
 
-Before first successful deploy, provision namespace secrets (SQL connection string, JWT, SMTP, OAuth).
+1. **ECR repos** (one-time, account `792373136340`):
+   ```bash
+   bash .opsera-medical-center/scripts/bootstrap-ecr.sh
+   ```
+2. **Namespace secrets** (one-time):
+   ```bash
+   cp .opsera-medical-center/k8s/secrets.example.yaml /tmp/secrets.yaml
+   # edit values, then:
+   kubectl apply -f /tmp/secrets.yaml -n opsera-medical-center-dev
+   ```
+3. **Render image tags** at deploy time:
+   ```bash
+   IMAGE_TAG=<git-sha-short> bash .opsera-medical-center/scripts/render-k8s-manifests.sh
+   kubectl apply -f .opsera-medical-center/k8s/namespace.yaml
+   kubectl apply -f .opsera-medical-center/k8s/yarp-configmap.yaml
+   kubectl apply -f .opsera-medical-center/k8s/*-service.yaml
+   kubectl apply -f .opsera-medical-center/k8s/*-deployment.rendered.yaml
+   kubectl apply -f .opsera-medical-center/k8s/ingress.yaml
+   ```
+
+Image placeholders (`PLACEHOLDER_*_ECR_URI`) are substituted by `render-k8s-manifests.sh`.
+
+YARP uses `yarp-configmap.yaml` so upstream API is `http://medical-center-api:8080` (K8s service DNS, not Docker Compose `api`).

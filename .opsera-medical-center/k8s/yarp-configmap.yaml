@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: medical-center-yarp-config
+  labels:
+    app: medical-center-yarp
+    tenant: opsera
+data:
+  appsettings.json: |
+    {
+      "Logging": {
+        "LogLevel": {
+          "Default": "Information",
+          "Microsoft.AspNetCore": "Warning"
+        }
+      },
+      "ReverseProxy": {
+        "Routes": {
+          "api-route": {
+            "ClusterId": "api-cluster",
+            "Match": {
+              "Path": "/api/{**catch-all}"
+            }
+          }
+        },
+        "Clusters": {
+          "api-cluster": {
+            "Destinations": {
+              "api": {
+                "Address": "http://medical-center-api:8080"
+              }
+            }
+          }
+        }
+      }
+    }

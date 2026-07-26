@@ -26,6 +26,44 @@ spec:
               value: http://+:8080
             - name: ASPNETCORE_ENVIRONMENT
               value: Development
+            - name: ConnectionStrings__connection
+              valueFrom:
+                secretKeyRef:
+                  name: medical-center-app-secrets
+                  key: connection-string
+            - name: Jwt__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: medical-center-app-secrets
+                  key: jwt-secret
+            - name: Jwt__ValidIssuer
+              value: medical-center-dev
+            - name: Jwt__ValidAudience
+              value: medical-center-dev
+            - name: Jwt__FrontendBaseUrl
+              value: https://medical-center-yarp-dev.agent.opsera.dev
+            - name: CorsSettings__AllowedOrigins__0
+              value: https://medical-center-yarp-dev.agent.opsera.dev
+            - name: EmailSettings__EmailUsername
+              valueFrom:
+                secretKeyRef:
+                  name: medical-center-app-secrets
+                  key: smtp-email-username
+            - name: EmailSettings__EmailPassword
+              valueFrom:
+                secretKeyRef:
+                  name: medical-center-app-secrets
+                  key: smtp-email-password
+            - name: GoogleAuth__ClientId
+              valueFrom:
+                secretKeyRef:
+                  name: medical-center-app-secrets
+                  key: google-auth-client-id
+            - name: GoogleAuth__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: medical-center-app-secrets
+                  key: google-auth-client-secret
           readinessProbe:
             httpGet:
               path: /health
