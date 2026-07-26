@@ -60,7 +60,7 @@
           </li>
         </ul>
         <div class="link-btn">
-          <a href="#" class="btn-style-one">Appoinment</a>
+          <a routerLink="/pages/appointment" class="btn-style-one">Appoinment</a>
         </div>
       </div>
     </div>
@@ -96,6 +96,7 @@
         <ul class="flex flex-col my-3 font-medium lg:flex-row lg:space-x-8 lg:mt-0">
           <li *ngFor="let item of menuItems">
             <a [routerLink]="item.href"
+              routerLinkActive="active"
               style="font-family: 'Source Sans Pro sans-serif'; font-size: 17px; text-transform: uppercase; padding: 25px 20px;"
               class="block py-2 pl-3 pr-4 text-white border-b border-gray-100 lg:border-0">
               {{ item.label }}

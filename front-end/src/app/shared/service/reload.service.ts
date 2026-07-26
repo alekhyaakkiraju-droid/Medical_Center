@@ -1,57 +1,53 @@
-import { AfterViewInit, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ReloadService implements AfterViewInit {
-
-  constructor() { }
-  ngAfterViewInit(): void {
-    console.log('Angular view fully initialized');
-    this.initializeLoader();
-  }
+export class ReloadService {
 
   initializeLoader(): void {
-    console.log('initializeLoader is running');
-    // Check for loader and preloader elements
     const loader = document.querySelector('.loader');
     const preloader = document.getElementById('preloader');
 
-    if (!loader || !preloader) {
-      console.warn('Loader or preloader elements are missing from the DOM');
-      return; 
+    if (!loader && !preloader) {
+      return;
     }
 
-    // Reset the loader visibility if needed
-    preloader.style.display = 'block';
-    loader.classList.remove('fade-out');
-    loader.classList.add('fade-in'); 
+    if (loader) {
+      loader.classList.remove('fade-in');
+      setTimeout(() => {
+        loader.classList.add('fade-out');
+      }, 300);
+      setTimeout(() => {
+        this.hidePreloader(preloader);
+      }, 600);
+      return;
+    }
 
-    // Fade out the loader after a short timeout
-    setTimeout(() => {
-      loader.classList.add('fade-out');
-    }, 300); 
-
-   
-    setTimeout(() => {
-      preloader.style.display = 'none';
-    }, 600); 
+    this.hidePreloader(preloader);
   }
 
   resetLoader(): void {
-    console.log('Resetting loader');
-    // Reset loader and preloader to initial state
     const loader = document.querySelector('.loader');
     const preloader = document.getElementById('preloader');
-    
-    if (!loader || !preloader) {
-      console.warn('Loader or preloader elements are missing from the DOM');
-      return; 
+
+    if (!loader && !preloader) {
+      return;
     }
 
-    // Show the preloader again
-    preloader.style.display = 'block';
-    loader.classList.remove('fade-out');
-    loader.classList.add('fade-in');
+    if (preloader) {
+      preloader.style.display = 'block';
+    }
+
+    if (loader) {
+      loader.classList.remove('fade-out');
+      loader.classList.add('fade-in');
+    }
+  }
+
+  private hidePreloader(preloader: HTMLElement | null): void {
+    if (preloader) {
+      preloader.style.display = 'none';
+    }
   }
 }
