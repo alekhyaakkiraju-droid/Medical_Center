@@ -198,4 +198,24 @@ public class ForgePipelineConfigurationTests
         runbook.Should().Contain("zap-dast-report.json");
         runbook.Should().Contain(".forge/zap-baseline.conf");
     }
+
+    [Fact]
+    public void ForgePipelineFile_IncludesAuthorizationRegressionGateInDevAndStaging()
+    {
+        var yaml = File.ReadAllText(PipelinePath);
+
+        yaml.Should().Contain("Authorization Regression Gate");
+        yaml.Should().Contain("FullyQualifiedName~Authorization");
+
+        var backendTestsIndex = yaml.IndexOf("- name: Backend Unit Tests", StringComparison.Ordinal);
+        var authGateIndex = yaml.IndexOf("- name: Authorization Regression Gate", StringComparison.Ordinal);
+        authGateIndex.Should().BeGreaterThan(backendTestsIndex);
+
+        var devBlockStart = yaml.IndexOf("environments:", StringComparison.Ordinal);
+        var stagingBlockStart = yaml.IndexOf("  staging:", StringComparison.Ordinal);
+        var productionBlockStart = yaml.IndexOf("  production:", StringComparison.Ordinal);
+
+        yaml[devBlockStart..stagingBlockStart].Should().Contain("- Authorization Regression Gate");
+        yaml[stagingBlockStart..productionBlockStart].Should().Contain("- Authorization Regression Gate");
+    }
 }

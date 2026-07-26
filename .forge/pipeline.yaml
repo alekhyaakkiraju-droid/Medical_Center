@@ -104,6 +104,11 @@ steps:
     config:
       testCommand: dotnet test backend/AngularApi.Tests/AngularApi.Tests.csproj -c Release
 
+  - name: Authorization Regression Gate
+    variantId: test:generic
+    config:
+      testCommand: dotnet test backend/AngularApi.Tests/AngularApi.Tests.csproj --filter FullyQualifiedName~Authorization -c Release
+
   - name: Frontend Unit Tests
     variantId: test:generic
     config:
@@ -334,6 +339,7 @@ environments:
       - Backend Build
       - Frontend Build
       - Backend Unit Tests
+      - Authorization Regression Gate
       - Frontend Unit Tests
   staging:
     description: Staging — full build, scan, registry push, staging deploy, smoke and E2E
@@ -344,6 +350,7 @@ environments:
       - Backend Build
       - Frontend Build
       - Backend Unit Tests
+      - Authorization Regression Gate
       - Frontend Unit Tests
       - Docker API Image
       - Docker YARP Image
