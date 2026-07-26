@@ -12,6 +12,7 @@ public class SmokeTestScriptTests
     {
         var pipelineSmoke = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "smoke-tests.sh"));
         var e2eSmoke = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "run-e2e-smoke.sh"));
+        var patientJourney = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "e2e-patient-journey.sh"));
         var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
 
         pipelineSmoke.Should().Contain("/health");
@@ -33,9 +34,23 @@ public class SmokeTestScriptTests
         e2eSmoke.Should().Contain("application/json");
         e2eSmoke.Should().Contain("antiforgery-token");
 
+        patientJourney.Should().Contain("Patient Journey Step 1");
+        patientJourney.Should().Contain("Patient Journey Step 2");
+        patientJourney.Should().Contain("Patient Journey Step 3");
+        patientJourney.Should().Contain("Patient Journey Step 4");
+        patientJourney.Should().Contain("Patient Journey Step 5");
+        patientJourney.Should().Contain("antiforgery-token");
+        patientJourney.Should().Contain("X-XSRF-TOKEN");
+        patientJourney.Should().Contain("/api/Account/me");
+        patientJourney.Should().Contain("/Appointments/patient/");
+        patientJourney.Should().Contain("patient.alice@uat.careshift.local");
+        patientJourney.Should().Contain("UatSeed123!");
+
         pipeline.Should().Contain("Staging E2E Tests");
         pipeline.Should().Contain("run-e2e-smoke.sh");
         pipeline.Should().Contain("Staging Smoke Tests");
+        pipeline.Should().Contain("Patient Journey E2E");
+        pipeline.Should().Contain("e2e-patient-journey.sh");
     }
 
     [Fact]
@@ -43,8 +58,10 @@ public class SmokeTestScriptTests
     {
         var pipelineSmoke = new FileInfo(Path.Combine(RepoRoot, "scripts", "smoke-tests.sh"));
         var e2eSmoke = new FileInfo(Path.Combine(RepoRoot, "scripts", "run-e2e-smoke.sh"));
+        var patientJourney = new FileInfo(Path.Combine(RepoRoot, "scripts", "e2e-patient-journey.sh"));
 
         pipelineSmoke.Exists.Should().BeTrue();
         e2eSmoke.Exists.Should().BeTrue();
+        patientJourney.Exists.Should().BeTrue();
     }
 }
