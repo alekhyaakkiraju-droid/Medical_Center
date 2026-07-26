@@ -224,13 +224,26 @@ steps:
     config:
       testCommand: SMOKE_BASE_URL="${STAGING_BASE_URL}" SMOKE_API_URL="${STAGING_API_URL}" ./scripts/run-e2e-smoke.sh
 
+  # --- DAST (OWASP ZAP) — runs against live staging; high+ findings block production promotion ---
+  - name: DAST Scan
+    variantId: scan:zap
+    config:
+      zapConfig: .forge/zap-baseline.conf
+      scanCommand: docker run --rm -v "$(pwd):/zap/wrk/:rw" ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t "${STAGING_BASE_URL}" -O "${STAGING_API_URL}/swagger/v1/swagger.json" -c /zap/wrk/.forge/zap-baseline.conf -J zap-dast-report.json -x zap-dast-report.xml -I
+      failOnBreach: fail
+      severityThreshold: high
+      timeoutMinutes: 10
+      archiveArtifacts:
+        - zap-dast-report.json
+        - zap-dast-report.xml
+
   # --- Production promotion (dual gate: automated tests + IDP manual sign-off) ---
   - name: Production Promotion Gate
     variantId: gate:idp-approval
     config:
       gateType: manual
       requiredApprovers: 1
-      description: IDP sign-off required after staging smoke and E2E pass
+      description: IDP sign-off required after staging smoke, E2E, and DAST pass
 
   - name: Production Deploy API
     variantId: deploy:aws_ecs
@@ -322,6 +335,7 @@ environments:
       - Staging Deploy Frontend
       - Staging Smoke Tests
       - Staging E2E Tests
+      - DAST Scan
   production:
     description: Production — IDP-governed promotion, deploy, post-deploy verification, rollback
     steps:

@@ -24,7 +24,7 @@ Developer → merge main → Forge Shipping (.forge/pipeline.yaml)
 | Environment | Purpose | Gate |
 |-------------|---------|------|
 | `dev` | Build and unit tests on PR/push | Automated CI only |
-| `staging` | Full container build, ECR push, ECS deploy, smoke + E2E | Automated tests |
+| `staging` | Full container build, ECR push, ECS deploy, smoke + E2E + DAST | Automated tests |
 | `production` | Promoted release serving patient traffic | Staging pass **and** IDP manual approval |
 
 ---
@@ -73,6 +73,7 @@ Complete this checklist before approving production promotion:
 - [ ] **Staging deploy:** ECS staging services updated with `$GIT_SHA` (API, YARP, frontend)
 - [ ] **Staging smoke:** `Staging Smoke Tests` step passed (`./scripts/smoke-tests.sh` against `STAGING_BASE_URL` / `STAGING_API_URL`)
 - [ ] **Staging E2E:** `Staging E2E Tests` step passed (`./scripts/run-e2e-smoke.sh`)
+- [ ] **DAST Scan:** OWASP ZAP baseline passed against `${STAGING_BASE_URL}` / `${STAGING_API_URL}` (config: `.forge/zap-baseline.conf`); review archived `zap-dast-report.json` / `zap-dast-report.xml`; high+ findings block promotion
 - [ ] **Database migrations:** API startup applied pending EF migrations without error (see [Database Migration Verification](#database-migration-verification))
 - [ ] **Secrets current:** JWT, SMTP, and database credentials valid in target environment (see [Secrets Management](#secrets-management-docker-secrets-from-wo-003))
 - [ ] **Rollback SHA recorded:** Note `$PREVIOUS_GIT_SHA` from last known-good production deployment
@@ -103,6 +104,7 @@ Production promotion is governed by `.forge/pipeline.yaml`. Staging must pass be
    - **Staging Deploy API / YARP / Frontend** (`variantId: deploy:aws_ecs`, `IMAGE_TAG: "$GIT_SHA"`)
    - **Staging Smoke Tests:** `SMOKE_BASE_URL="${STAGING_BASE_URL}" SMOKE_API_URL="${STAGING_API_URL}" ./scripts/smoke-tests.sh`
    - **Staging E2E Tests:** `SMOKE_BASE_URL="${STAGING_BASE_URL}" SMOKE_API_URL="${STAGING_API_URL}" ./scripts/run-e2e-smoke.sh`
+   - **DAST Scan** (`variantId: scan:zap`, 10 min timeout, JSON/XML artifacts; config `.forge/zap-baseline.conf`)
 
 ### Production promotion (manual IDP gate)
 
@@ -110,7 +112,7 @@ After staging passes, the **production** block executes:
 
 1. **Production Promotion Gate** (`variantId: gate:idp-approval`) — **manual IDP sign-off required**
    - Open the Forge Shipping run in IDP
-   - Verify staging smoke and E2E steps are green
+   - Verify staging smoke, E2E, and DAST steps are green
    - Approve the gate (1 approver required per pipeline config)
 2. **Production Deploy API** — deploys `medical-center-api` with `IMAGE_TAG: "$GIT_SHA"` to `${ECS_PRODUCTION_CLUSTER}` / `${ECS_PRODUCTION_API_SERVICE}`
 3. **Production Deploy YARP** — deploys `medical-center-yarp`
