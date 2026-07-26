@@ -10,6 +10,7 @@ import { ProfileService } from '../services/Profile.service';
 import { Profile, ProfileDetails } from '../../models';
 
 @Component({
+  standalone: false,
   selector: 'app-user-profile',
   templateUrl: './user-profile.component.html'
 })

@@ -5,6 +5,7 @@ import { RelatedPatientsReviewsService } from '../../services/related-patients-r
 import { Subscription } from 'rxjs';
 
 @Component({
+  standalone: false,
   selector: 'app-patient-reviews',
   templateUrl: './patient-reviews.component.html'
 })

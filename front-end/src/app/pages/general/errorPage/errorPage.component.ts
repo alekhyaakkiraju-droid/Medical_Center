@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
+  standalone: false,
   selector: 'app-errorPage',
   templateUrl: './errorPage.component.html'
 })

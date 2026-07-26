@@ -10,6 +10,7 @@ import { Booking } from '../../../pages/models';
 
 
 @Component({
+  standalone: false,
   selector: 'app-related-appointments',
   templateUrl: './related-appointments.component.html'
 })

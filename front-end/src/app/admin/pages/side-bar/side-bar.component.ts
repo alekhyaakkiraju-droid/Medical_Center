@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { DoctorMENU, MENU } from '../../menu';
 
 @Component({
+  standalone: false,
   selector: 'app-side-bar',
   templateUrl: './side-bar.component.html'
 })

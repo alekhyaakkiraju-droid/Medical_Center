@@ -2,6 +2,7 @@ import { AfterViewInit, Component, ElementRef, Inject, PLATFORM_ID, QueryList, V
 import { isPlatformBrowser } from '@angular/common';
 
 @Component({
+  standalone: false,
   selector: 'app-chart',
   templateUrl: './chart.component.html'
 })

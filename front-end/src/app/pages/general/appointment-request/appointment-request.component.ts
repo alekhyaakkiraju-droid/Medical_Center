@@ -9,6 +9,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
 
 @Component({
+  standalone: false,
   selector: 'app-appointment-request',
   templateUrl: './appointment-request.component.html',
   styleUrls: ['./appointment-request.component.css']

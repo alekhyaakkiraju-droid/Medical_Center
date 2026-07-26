@@ -7,6 +7,7 @@ import { MENU } from '../../menu';
 import { AppointmentService } from '../../../pages/general/services/appointment.service';
 
 @Component({
+  standalone: false,
   selector: 'app-doctors',
   templateUrl: './doctors.component.html'
 })

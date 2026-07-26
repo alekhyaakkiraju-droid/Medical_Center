@@ -4,6 +4,7 @@ import { Doctor } from '../../models';
 import { Subscription } from 'rxjs';
 
 @Component({
+  standalone: false,
   selector: 'app-doctorcs',
   templateUrl: './doctorcs.component.html',
   styleUrls: ['./doctorcs.component.css']

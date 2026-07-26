@@ -4,6 +4,7 @@ import { filter, take } from 'rxjs/operators';
 import { ReloadService } from './shared/service/reload.service';
 
 @Component({
+  standalone: false,
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'

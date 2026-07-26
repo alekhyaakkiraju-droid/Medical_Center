@@ -4,6 +4,7 @@ import { ReloadService } from '../../../shared/service/reload.service';
 import { MENU } from '../../menu';
 
 @Component({
+  standalone: false,
   selector: 'app-temp-appointment',
   templateUrl: './temp-appointment.component.html'
 })

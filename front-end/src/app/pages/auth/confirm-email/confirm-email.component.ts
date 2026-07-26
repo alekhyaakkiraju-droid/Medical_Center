@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
 
 @Component({
+  standalone: false,
   selector: 'app-confirm-email',
   templateUrl: './confirm-email.component.html'
 })

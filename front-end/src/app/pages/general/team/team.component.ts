@@ -6,6 +6,7 @@ import { TEAM_TABS } from '../../models/teamTabs ';
 import { Subscription } from 'rxjs';
 
 @Component({
+  standalone: false,
   selector: 'app-team',
   templateUrl: './team.component.html',
   styleUrls: ['./team.component.css']

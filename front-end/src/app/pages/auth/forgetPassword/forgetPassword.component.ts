@@ -6,6 +6,7 @@ import { ModelService } from '../auth-services/model.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
+  standalone: false,
   selector: 'app-forgetPassword',
   templateUrl: './forgetPassword.component.html'
 })

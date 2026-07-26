@@ -4,6 +4,7 @@ import { SpecializationService } from '../services/specialization.service';
 import { Subscription } from 'rxjs';
 
 @Component({
+  standalone: false,
   selector: 'app-Home',
   templateUrl: './Home.component.html',
   styleUrls: ['./Home.component.css']

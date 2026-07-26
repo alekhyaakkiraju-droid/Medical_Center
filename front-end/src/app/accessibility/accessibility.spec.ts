@@ -22,16 +22,16 @@ import { PatientService } from '../admin/services/patient.service';
 import { TotalEarningsService } from '../admin/services/total-earnings.service';
 import { expectNoA11yViolations } from './axe-test.helper';
 
-@Component({ selector: 'app-forgetPassword', template: '' })
+@Component({ selector: 'app-forgetPassword', template: '', standalone: false })
 class ForgetPasswordStubComponent {}
 
-@Component({ selector: 'app-side-bar', template: '' })
+@Component({ selector: 'app-side-bar', template: '', standalone: false })
 class SideBarStubComponent {}
 
-@Component({ selector: 'app-chart', template: '' })
+@Component({ selector: 'app-chart', template: '', standalone: false })
 class ChartStubComponent {}
 
-@Component({ selector: 'app-delete-modal', template: '' })
+@Component({ selector: 'app-delete-modal', template: '', standalone: false })
 class DeleteModalStubComponent {}
 
 describe('WCAG 2.1 AA accessibility', () => {

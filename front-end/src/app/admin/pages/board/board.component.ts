@@ -15,6 +15,7 @@ import * as XLSX from 'xlsx';
 
 
 @Component({
+  standalone: false,
   selector: 'app-board',
   templateUrl: './board.component.html',
   styleUrls: ['./board.component.css']
