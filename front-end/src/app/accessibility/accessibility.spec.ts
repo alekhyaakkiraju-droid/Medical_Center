@@ -24,25 +24,25 @@ import { expectNoA11yViolations } from './axe-test.helper';
 import { standaloneComponentTestProviders } from '../testing/standalone-component-test-providers';
 
 @Component({
-    selector: 'app-forgetPassword', template: '', changeDetection: ChangeDetectionStrategy.Eager,
+    selector: 'app-forgetPassword', template: '', standalone: true, changeDetection: ChangeDetectionStrategy.Eager,
     imports: [ReactiveFormsModule, FormsModule, CommonModule]
 })
 class ForgetPasswordStubComponent {}
 
 @Component({
-    selector: 'app-side-bar', template: '', changeDetection: ChangeDetectionStrategy.Eager,
+    selector: 'app-side-bar', template: '', standalone: true, changeDetection: ChangeDetectionStrategy.Eager,
     imports: [ReactiveFormsModule, FormsModule, CommonModule]
 })
 class SideBarStubComponent {}
 
 @Component({
-    selector: 'app-chart', template: '', changeDetection: ChangeDetectionStrategy.Eager,
+    selector: 'app-chart', template: '', standalone: true, changeDetection: ChangeDetectionStrategy.Eager,
     imports: [ReactiveFormsModule, FormsModule, CommonModule]
 })
 class ChartStubComponent {}
 
 @Component({
-    selector: 'app-delete-modal', template: '', changeDetection: ChangeDetectionStrategy.Eager,
+    selector: 'app-delete-modal', template: '', standalone: true, changeDetection: ChangeDetectionStrategy.Eager,
     imports: [ReactiveFormsModule, FormsModule, CommonModule]
 })
 class DeleteModalStubComponent {}
