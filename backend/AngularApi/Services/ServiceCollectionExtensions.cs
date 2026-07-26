@@ -97,6 +97,18 @@ namespace AngularApi.Services
 
                         return Task.CompletedTask;
                     },
+                    OnChallenge = context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.ContentType = "application/json";
+                        var payload = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            error = "Unauthorized",
+                            message = "Authentication is required to access this resource.",
+                        });
+                        return context.Response.WriteAsync(payload);
+                    },
                 };
             })
             .AddCookie()
