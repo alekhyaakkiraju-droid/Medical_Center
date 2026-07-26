@@ -1,8 +1,10 @@
+using AngularApi.Infrastructure;
 using AngularApi.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
@@ -22,6 +24,7 @@ public class MedicalCenterWebApplicationFactory : WebApplicationFactory<Program>
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["ConnectionStrings:connection"] = "Server=(localdb)\\mssqllocaldb;Database=MedicalCenterTests;Trusted_Connection=True;",
+                ["ConnectionStrings:SaPassword"] = "TestPassword123!",
                 ["Jwt:ValidIssuer"] = "test-issuer",
                 ["Jwt:ValidAudience"] = "test-audience",
                 ["Jwt:Secret"] = "ThisIsAVeryLongSecretKeyForTestingPurposes123!",
@@ -38,20 +41,51 @@ public class MedicalCenterWebApplicationFactory : WebApplicationFactory<Program>
 
         builder.ConfigureServices(services =>
         {
-            var dbContextDescriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(DbContextOptions<MedicalCenterDbContext>));
-            if (dbContextDescriptor != null)
-            {
-                services.Remove(dbContextDescriptor);
-            }
+            RemoveDbContextRegistrations(services);
 
             services.AddDbContext<MedicalCenterDbContext>(options =>
             {
                 options.UseInMemoryDatabase(_databaseName);
             });
 
+            ReplaceDatabaseMigrationRunner(services);
             services.AddSingleton<IStartupFilter, TestClientIpStartupFilter>();
         });
+    }
+
+    private static void RemoveDbContextRegistrations(IServiceCollection services)
+    {
+        var descriptors = services
+            .Where(d =>
+                d.ServiceType == typeof(MedicalCenterDbContext)
+                || d.ServiceType == typeof(DbContextOptions<MedicalCenterDbContext>)
+                || d.ServiceType == typeof(IDbContextOptionsConfiguration<MedicalCenterDbContext>))
+            .ToList();
+
+        foreach (var descriptor in descriptors)
+        {
+            services.Remove(descriptor);
+        }
+    }
+
+    private static void ReplaceDatabaseMigrationRunner(IServiceCollection services)
+    {
+        var migrationRunnerDescriptors = services
+            .Where(d => d.ServiceType == typeof(IDatabaseMigrationRunner))
+            .ToList();
+
+        foreach (var descriptor in migrationRunnerDescriptors)
+        {
+            services.Remove(descriptor);
+        }
+
+        services.AddScoped<IDatabaseMigrationRunner, NoOpDatabaseMigrationRunner>();
+    }
+
+    private sealed class NoOpDatabaseMigrationRunner : IDatabaseMigrationRunner
+    {
+        public Task ApplyPendingMigrationsAsync(CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
     }
 
     private sealed class TestClientIpStartupFilter : IStartupFilter
