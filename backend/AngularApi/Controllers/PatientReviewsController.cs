@@ -1,8 +1,8 @@
-﻿using AngularApi.DTO;
+using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace AngularApi.Controllers
 {
@@ -11,122 +11,41 @@ namespace AngularApi.Controllers
     [Authorize(Policy = "AdminPolicy")]
     public class PatientReviewsController : ControllerBase
     {
-        private readonly MedicalCenterDbContext _context;
+        private readonly IPatientReviewService _patientReviewService;
 
-        public PatientReviewsController(MedicalCenterDbContext context)
+        public PatientReviewsController(IPatientReviewService patientReviewService)
         {
-            _context = context;
+            _patientReviewService = patientReviewService;
         }
-
 
         [HttpGet]
-        public async Task<ActionResult<PagedResult<ReviewDTO>>> GetPatientReviews([FromQuery] PaginationParameters pagination)
-        {
-            return await _context.PatientReviews
-                .Select(r => new ReviewDTO
-                {
-                    Id = r.Id,
-                    PatientId = r.PatientId,
-                    DoctorId = r.DoctorId,
-                    IsReviewAnonymous = r.IsReviewAnonymous,
-                    WaitTimeRating = r.WaitTimeRating,
-                    BedsideMannerRating = r.BedsideMannerRating,
-                    OverallRating = r.OverallRating,
-                    Review = r.Review,
-                    IsDoctorRecommended = r.IsDoctorRecommended,
-                    ReviewDate = r.ReviewDate
-                })
-                .ToPagedResultAsync(pagination);
-        }
+        public async Task<ActionResult<PagedResult<ReviewDTO>>> GetPatientReviews([FromQuery] PaginationParameters pagination) =>
+            await _patientReviewService.GetAllAsync(pagination);
 
         [HttpGet("unique-patients")]
-        public async Task<ActionResult<PagedResult<PatientDTO>>> GetUniquePatients([FromQuery] PaginationParameters pagination)
-        {
-            return await _context.PatientReviews
-                .Where(pr => pr.Patient != null)
-                .Select(pr => new PatientDTO
-                {
-                    PatientId = pr.Patient!.Id,
-                    Name = pr.Patient.UserName,
-                    Email = pr.Patient.Email,
-                    Image = pr.Patient.Image
-                })
-                .Distinct()
-                .ToPagedResultAsync(pagination);
-        }
+        public async Task<ActionResult<PagedResult<PatientDTO>>> GetUniquePatients([FromQuery] PaginationParameters pagination) =>
+            await _patientReviewService.GetUniquePatientsAsync(pagination);
 
         [HttpGet("{id}")]
         public async Task<ActionResult<PatientReview>> GetPatientReview(int id)
         {
-            var patientReview = await _context.PatientReviews.FindAsync(id);
-
-            if (patientReview == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(patientReview);
+            var patientReview = await _patientReviewService.GetByIdAsync(id);
+            return patientReview == null ? NotFound() : patientReview;
         }
-
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPatientReview(int id, PatientReview patientReview)
-        {
-            if (id != patientReview.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(patientReview).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PatientReviewExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
+        public async Task<IActionResult> PutPatientReview(int id, [FromBody] UpdatePatientReviewDTO dto) =>
+            await _patientReviewService.UpdateAsync(id, dto, User) ? NoContent() : NotFound();
 
         [HttpPost]
-        public async Task<ActionResult<PatientReview>> PostPatientReview(PatientReview patientReview)
+        public async Task<ActionResult<PatientReview>> PostPatientReview([FromBody] CreatePatientReviewDTO dto)
         {
-            _context.PatientReviews.Add(patientReview);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetPatientReview", new { id = patientReview.Id }, patientReview);
+            var created = await _patientReviewService.CreateAsync(dto, User);
+            return created == null ? BadRequest() : CreatedAtAction(nameof(GetPatientReview), new { id = created.Id }, created);
         }
 
-        // DELETE: api/PatientReviews/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePatientReview(int id)
-        {
-            var patientReview = await _context.PatientReviews.FindAsync(id);
-            if (patientReview == null)
-            {
-                return NotFound();
-            }
-
-            _context.PatientReviews.Remove(patientReview);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool PatientReviewExists(int id)
-        {
-            return _context.PatientReviews.Any(e => e.Id == id);
-        }
+        public async Task<IActionResult> DeletePatientReview(int id) =>
+            await _patientReviewService.DeleteAsync(id) ? NoContent() : NotFound();
     }
 }
