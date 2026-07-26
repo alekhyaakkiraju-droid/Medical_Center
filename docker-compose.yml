@@ -37,6 +37,13 @@ services:
       retries: 10
       start_period: 30s
 
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: medical-center-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
   api:
     build:
       context: ./backend/AngularApi
@@ -49,6 +56,9 @@ services:
       Jwt__ValidAudience: ${JWT_VALID_AUDIENCE}
       CorsSettings__AllowedOrigins__0: ${CORS_ALLOWED_ORIGINS_0:-http://localhost:8081}
       CorsSettings__AllowedOrigins__1: ${CORS_ALLOWED_ORIGINS_1:-http://localhost:4200}
+      SmtpSettings__Host: mailhog
+      SmtpSettings__Port: 1025
+      SmtpSettings__UseTls: "false"
     secrets:
       - jwt_secret
       - mssql_sa_password
