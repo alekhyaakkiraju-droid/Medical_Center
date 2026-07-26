@@ -42,23 +42,18 @@ namespace AngularApi.Controllers
         // PUT: api/MedicalCenterDoctorAvailabilities/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMedicalCenterDoctorAvailability(int id, MedicalCenterDoctorAvailability medicalCenterDoctorAvailability)
+        public async Task<IActionResult> PutMedicalCenterDoctorAvailability(int id, UpdateMedicalCenterDoctorAvailabilityDTO dto)
         {
-            if (id != medicalCenterDoctorAvailability.Id)
-            {
-                return BadRequest();
-            }
-
-            var updated = await _availabilityService.UpdateAsync(id, medicalCenterDoctorAvailability);
+            var updated = await _availabilityService.UpdateAsync(id, dto);
             return updated ? NoContent() : NotFound();
         }
 
         // POST: api/MedicalCenterDoctorAvailabilities
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<MedicalCenterDoctorAvailability>> PostMedicalCenterDoctorAvailability(MedicalCenterDoctorAvailability medicalCenterDoctorAvailability)
+        public async Task<ActionResult<MedicalCenterDoctorAvailability>> PostMedicalCenterDoctorAvailability(CreateMedicalCenterDoctorAvailabilityDTO dto)
         {
-            var created = await _availabilityService.CreateAsync(medicalCenterDoctorAvailability);
+            var created = await _availabilityService.CreateAsync(dto);
             if (created == null)
             {
                 return BadRequest();

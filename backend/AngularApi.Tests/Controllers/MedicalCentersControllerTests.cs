@@ -39,24 +39,10 @@ public class MedicalCentersControllerTests : IDisposable
     }
 
     [Fact]
-    public async Task PutMedicalCenter_IdMismatch_ReturnsBadRequest()
-    {
-        (await _controller.PutMedicalCenter(1, new MedicalCenter { Id = 2 })).Should().BeOfType<BadRequestResult>();
-    }
+    public async Task PutMedicalCenter_NonExistingId_ReturnsNotFound(){var dto=new UpdateMedicalCenterDTO{StreetAddress="1 Main St",City="Boston",State="MA",Zip="02101"};(await _controller.PutMedicalCenter(1,dto)).Should().BeOfType<NotFoundResult>();}
 
     [Fact]
-    public async Task PutMedicalCenter_NonExistingId_ReturnsNotFound()
-    {
-        (await _controller.PutMedicalCenter(1, new MedicalCenter { Id = 1 })).Should().BeOfType<NotFoundResult>();
-    }
-
-    [Fact]
-    public async Task PostMedicalCenter_ValidInput_CreatesMedicalCenter()
-    {
-        var result = await _controller.PostMedicalCenter(new MedicalCenter { Id = 1, City = "Boston" });
-        result.Result.Should().BeOfType<CreatedAtActionResult>();
-        (await _context.MedicalCenter.FindAsync(1)).Should().NotBeNull();
-    }
+    public async Task PostMedicalCenter_ValidInput_CreatesMedicalCenter(){var dto=new CreateMedicalCenterDTO{StreetAddress="1 Main St",City="Boston",State="MA",Zip="02101"};var result=await _controller.PostMedicalCenter(dto);result.Result.Should().BeOfType<CreatedAtActionResult>();(await _context.MedicalCenter.CountAsync()).Should().Be(1);}
 
     [Fact]
     public async Task DeleteMedicalCenter_ExistingId_DeletesMedicalCenter()

@@ -63,9 +63,7 @@ public class MedicalCenterDoctorAvailabilityServiceTests : IDisposable
     public async Task CreateAsync_ValidMedicalCenter_PersistsAvailability()
     {
         var medicalCenter = SeedMedicalCenter();
-        var availability = CreateAvailability(medicalCenter.Id, "Thursday");
-
-        var created = await _service.CreateAsync(availability);
+        var created = await _service.CreateAsync(CreateDto(medicalCenter.Id, "Thursday"));
 
         created.Should().NotBeNull();
         created!.Id.Should().BeGreaterThan(0);
@@ -75,9 +73,7 @@ public class MedicalCenterDoctorAvailabilityServiceTests : IDisposable
     [Fact]
     public async Task CreateAsync_InvalidMedicalCenterId_ReturnsNull()
     {
-        var availability = CreateAvailability(999, "Friday");
-
-        var created = await _service.CreateAsync(availability);
+        var created = await _service.CreateAsync(CreateDto(999, "Friday"));
 
         created.Should().BeNull();
         (await _context.MedicalCenterDoctorAvailability.CountAsync()).Should().Be(0);
@@ -91,10 +87,8 @@ public class MedicalCenterDoctorAvailabilityServiceTests : IDisposable
         _context.MedicalCenterDoctorAvailability.Add(availability);
         await _context.SaveChangesAsync();
 
-        availability.IsAvailable = false;
-        availability.ReasonOfUnavailability = "Holiday";
-
-        var updated = await _service.UpdateAsync(availability.Id, availability);
+        var dto = new UpdateMedicalCenterDoctorAvailabilityDTO { MedicalCenterId = medicalCenter.Id, DayOfWeek = availability.DayOfWeek!, StartTime = availability.StartTime!.Value, EndTime = availability.EndTime!.Value, IsAvailable = false, ReasonOfUnavailability = "Holiday" };
+        var updated = await _service.UpdateAsync(availability.Id, dto);
 
         updated.Should().BeTrue();
         var dbAvailability = await _context.MedicalCenterDoctorAvailability.FindAsync(availability.Id);
@@ -110,7 +104,7 @@ public class MedicalCenterDoctorAvailabilityServiceTests : IDisposable
         _context.MedicalCenterDoctorAvailability.Add(availability);
         await _context.SaveChangesAsync();
 
-        var updated = await _service.UpdateAsync(availability.Id + 1, availability);
+        var updated = await _service.UpdateAsync(availability.Id + 1, CreateUpdateDto(medicalCenter.Id, "Sunday"));
 
         updated.Should().BeFalse();
     }
@@ -160,6 +154,24 @@ public class MedicalCenterDoctorAvailabilityServiceTests : IDisposable
             EndTime = DateTime.Today.AddHours(17),
             IsAvailable = true
         };
+
+    private static CreateMedicalCenterDoctorAvailabilityDTO CreateDto(int medicalCenterId, string dayOfWeek) => new()
+    {
+        MedicalCenterId = medicalCenterId,
+        DayOfWeek = dayOfWeek,
+        StartTime = DateTime.Today.AddHours(9),
+        EndTime = DateTime.Today.AddHours(17),
+        IsAvailable = true
+    };
+
+    private static UpdateMedicalCenterDoctorAvailabilityDTO CreateUpdateDto(int medicalCenterId, string dayOfWeek) => new()
+    {
+        MedicalCenterId = medicalCenterId,
+        DayOfWeek = dayOfWeek,
+        StartTime = DateTime.Today.AddHours(9),
+        EndTime = DateTime.Today.AddHours(17),
+        IsAvailable = true
+    };
 
     public void Dispose()
     {
