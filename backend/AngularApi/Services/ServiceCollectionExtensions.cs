@@ -40,6 +40,7 @@ namespace AngularApi.Services
             services.AddScoped<ISpecializationService, SpecializationService>();
             services.AddScoped<IMedicalCenterDoctorAvailabilityService, MedicalCenterDoctorAvailabilityService>();
             services.AddScoped<IPatientReviewService, PatientReviewService>();
+            services.AddScoped<IContactService, ContactService>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
