@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AngularApi.DTO;
+﻿using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace AngularApi.Controllers
 {
@@ -16,31 +11,23 @@ namespace AngularApi.Controllers
     [Authorize(Policy = "AdminPolicy")]
     public class AppointmentStatusController : ControllerBase
     {
-        private readonly MedicalCenterDbContext _context;
+        private readonly IAppointmentStatusService _appointmentStatusService;
 
-        public AppointmentStatusController(MedicalCenterDbContext context)
+        public AppointmentStatusController(IAppointmentStatusService appointmentStatusService)
         {
-            _context = context;
+            _appointmentStatusService = appointmentStatusService;
         }
 
-        // GET: api/AppointmentStatus
         [HttpGet]
         public async Task<ActionResult<PagedResult<AppointmentStatusListItemDTO>>> GetAppointmentStatus([FromQuery] PaginationParameters pagination)
         {
-            return await _context.AppointmentStatus
-                .Select(s => new AppointmentStatusListItemDTO
-                {
-                    Id = s.Id,
-                    Status = s.Status
-                })
-                .ToPagedResultAsync(pagination);
+            return await _appointmentStatusService.GetAllAsync(pagination);
         }
 
-        // GET: api/AppointmentStatus/5
         [HttpGet("{id}")]
         public async Task<ActionResult<AppointmentStatus>> GetAppointmentStatus(int id)
         {
-            var appointmentStatus = await _context.AppointmentStatus.FindAsync(id);
+            var appointmentStatus = await _appointmentStatusService.GetByIdAsync(id);
 
             if (appointmentStatus == null)
             {
@@ -50,8 +37,6 @@ namespace AngularApi.Controllers
             return appointmentStatus;
         }
 
-        // PUT: api/AppointmentStatus/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAppointmentStatus(int id, AppointmentStatus appointmentStatus)
         {
@@ -60,57 +45,22 @@ namespace AngularApi.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(appointmentStatus).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AppointmentStatusExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var updated = await _appointmentStatusService.UpdateAsync(id, appointmentStatus);
+            return updated ? NoContent() : NotFound();
         }
 
-        // POST: api/AppointmentStatus
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<AppointmentStatus>> PostAppointmentStatus(AppointmentStatus appointmentStatus)
         {
-            _context.AppointmentStatus.Add(appointmentStatus);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetAppointmentStatus", new { id = appointmentStatus.Id }, appointmentStatus);
+            var created = await _appointmentStatusService.CreateAsync(appointmentStatus);
+            return CreatedAtAction("GetAppointmentStatus", new { id = created.Id }, created);
         }
 
-        // DELETE: api/AppointmentStatus/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAppointmentStatus(int id)
         {
-            var appointmentStatus = await _context.AppointmentStatus.FindAsync(id);
-            if (appointmentStatus == null)
-            {
-                return NotFound();
-            }
-
-            _context.AppointmentStatus.Remove(appointmentStatus);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool AppointmentStatusExists(int id)
-        {
-            return _context.AppointmentStatus.Any(e => e.Id == id);
+            var deleted = await _appointmentStatusService.DeleteAsync(id);
+            return deleted ? NoContent() : NotFound();
         }
     }
 }
