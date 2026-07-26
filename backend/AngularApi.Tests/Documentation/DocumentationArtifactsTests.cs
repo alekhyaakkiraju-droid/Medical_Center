@@ -20,6 +20,7 @@ public class DocumentationArtifactsTests
             new object[] { "docs/compliance/hipaa-checklist.md", new[] { "Compliant", "In Progress", "Pending", "secrets-management.md" } },
             new object[] { "docs/secrets-management.md", new[] { "90-day", "Rotation Policy", "Emergency Rotation", "Audit Trail Requirements", "JWT Signing Key Rotation", "MSSQL SA Password Rotation", "SMTP Credentials Rotation", "Google OAuth Credentials Rotation" } },
             new object[] { "docs/compliance/data-subject-rights.md", new[] { "30-day", "Breach Notification", "Pending" } },
+            new object[] { "docs/test-data-manifest.md", new[] { "Update this document whenever", "## User Accounts", "## Doctors", "## Patients", "## Appointments", "## Reference Data", "## Idempotency Notes", "UatSeed123!" } },
             new object[] { "CONTRIBUTING.md", new[] { "Local Setup", "Coding Standards", "Pull Request Process" } },
         };
 
