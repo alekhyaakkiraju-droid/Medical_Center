@@ -1,12 +1,11 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: medical-center-yarp
+  name: medical-center-ingress
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/rewrite-target: /
   labels:
-    app: medical-center-yarp
+    app: medical-center
     tenant: opsera
 spec:
   ingressClassName: nginx
@@ -14,10 +13,17 @@ spec:
     - host: medical-center-yarp-dev.agent.opsera.dev
       http:
         paths:
-          - path: /
+          - path: /api
             pathType: Prefix
             backend:
               service:
                 name: medical-center-yarp
                 port:
                   number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: medical-center-frontend
+                port:
+                  number: 80
