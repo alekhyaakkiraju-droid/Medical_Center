@@ -70,4 +70,48 @@ public class ForgePipelineConfigurationTests
         yaml.Should().Contain("./scripts/smoke-tests.sh");
         yaml.Should().Contain("engine: opsera");
     }
+
+    [Fact]
+    public void ForgePipelineFile_IncludesRegistryPushAndProductionPromotion()
+    {
+        var yaml = File.ReadAllText(PipelinePath);
+
+        yaml.Should().Contain("CONTAINER_REGISTRY_URL");
+        yaml.Should().Contain("PRODUCTION_BASE_URL");
+        yaml.Should().Contain("variantId: push:ecr");
+        yaml.Should().Contain("Push API Image to Registry");
+        yaml.Should().Contain("Push YARP Image to Registry");
+        yaml.Should().Contain("Push Frontend Image to Registry");
+        yaml.Should().Contain("tag: \"$GIT_SHA\"");
+        yaml.Should().Contain("tag: latest");
+        yaml.Should().Contain("Staging E2E Tests");
+        yaml.Should().Contain("./scripts/run-e2e-smoke.sh");
+        yaml.Should().Contain("Production Promotion Gate");
+        yaml.Should().Contain("variantId: gate:idp-approval");
+        yaml.Should().Contain("Production Deploy API");
+        yaml.Should().Contain("variantId: deploy:aws_ecs");
+        yaml.Should().Contain("Production Post-Deploy Smoke Tests");
+        yaml.Should().Contain("Production Rollback");
+    }
+
+    [Fact]
+    public void ForgePipelineFile_DefinesProductionEnvironmentBlock()
+    {
+        var yaml = File.ReadAllText(PipelinePath);
+
+        yaml.Should().Contain("production:");
+        yaml.Should().Contain("Production Promotion Gate");
+        yaml.Should().Contain("Production Post-Deploy Smoke Tests");
+        yaml.Should().Contain("Production Rollback");
+    }
+
+    [Fact]
+    public void DeploymentRunbook_DocumentsRollbackWithinFiveMinutes()
+    {
+        var runbook = File.ReadAllText(Path.Combine(RepoRoot, "docs", "deployment-runbook.md"));
+
+        runbook.Should().Contain("Rollback");
+        runbook.Should().Contain("5 minutes");
+        runbook.Should().Contain("$PREVIOUS_GIT_SHA");
+    }
 }
