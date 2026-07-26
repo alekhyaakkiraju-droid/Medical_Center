@@ -1,5 +1,6 @@
-# Forge Shipping pipeline for Medical Center (WO-024)
-# Engine: opsera (Forge custom). Triggers on main pushes and pull requests.
+# Forge Shipping pipeline for Medical Center
+# Phase 1 (WO-024): CI, security scans, Docker build, staging smoke tests
+# Phase 2 (WO-001): ECR push, staging deploy/E2E, IDP production promotion, rollback
 name: Medical Center CI/CD
 engine: opsera
 webhook_enabled: true
@@ -18,6 +19,34 @@ variables:
     value: "8.0"
   NODE_VERSION:
     value: "22"
+  CONTAINER_REGISTRY_URL:
+    value: "${CONTAINER_REGISTRY_URL}"
+  AWS_REGION:
+    value: "${AWS_REGION:-us-east-1}"
+  STAGING_BASE_URL:
+    value: "${STAGING_BASE_URL}"
+  STAGING_API_URL:
+    value: "${STAGING_API_URL}"
+  PRODUCTION_BASE_URL:
+    value: "${PRODUCTION_BASE_URL}"
+  PRODUCTION_API_URL:
+    value: "${PRODUCTION_API_URL}"
+  ECS_STAGING_CLUSTER:
+    value: "${ECS_STAGING_CLUSTER}"
+  ECS_PRODUCTION_CLUSTER:
+    value: "${ECS_PRODUCTION_CLUSTER}"
+  ECS_STAGING_API_SERVICE:
+    value: "${ECS_STAGING_API_SERVICE:-medical-center-api-staging}"
+  ECS_STAGING_YARP_SERVICE:
+    value: "${ECS_STAGING_YARP_SERVICE:-medical-center-yarp-staging}"
+  ECS_STAGING_FRONTEND_SERVICE:
+    value: "${ECS_STAGING_FRONTEND_SERVICE:-medical-center-frontend-staging}"
+  ECS_PRODUCTION_API_SERVICE:
+    value: "${ECS_PRODUCTION_API_SERVICE:-medical-center-api-production}"
+  ECS_PRODUCTION_YARP_SERVICE:
+    value: "${ECS_PRODUCTION_YARP_SERVICE:-medical-center-yarp-production}"
+  ECS_PRODUCTION_FRONTEND_SERVICE:
+    value: "${ECS_PRODUCTION_FRONTEND_SERVICE:-medical-center-frontend-production}"
 
 steps:
   # --- Security scans (parallel source-level) ---
@@ -99,16 +128,206 @@ steps:
       failOnBreach: fail
       severityThreshold: critical
 
-  # --- Staging deploy verification (post-deploy smoke tests) ---
+  # --- Registry push (Git SHA + latest) ---
+  - name: Push API Image to Registry
+    variantId: push:ecr
+    config:
+      registry: "${CONTAINER_REGISTRY_URL}"
+      region: "${AWS_REGION:-us-east-1}"
+      imageName: medical-center-api
+      tag: "$GIT_SHA"
+
+  - name: Push API Image Latest Tag
+    variantId: push:ecr
+    config:
+      registry: "${CONTAINER_REGISTRY_URL}"
+      region: "${AWS_REGION:-us-east-1}"
+      imageName: medical-center-api
+      tag: latest
+
+  - name: Push YARP Image to Registry
+    variantId: push:ecr
+    config:
+      registry: "${CONTAINER_REGISTRY_URL}"
+      region: "${AWS_REGION:-us-east-1}"
+      imageName: medical-center-yarp
+      tag: "$GIT_SHA"
+
+  - name: Push YARP Image Latest Tag
+    variantId: push:ecr
+    config:
+      registry: "${CONTAINER_REGISTRY_URL}"
+      region: "${AWS_REGION:-us-east-1}"
+      imageName: medical-center-yarp
+      tag: latest
+
+  - name: Push Frontend Image to Registry
+    variantId: push:ecr
+    config:
+      registry: "${CONTAINER_REGISTRY_URL}"
+      region: "${AWS_REGION:-us-east-1}"
+      imageName: medical-center-frontend
+      tag: "$GIT_SHA"
+
+  - name: Push Frontend Image Latest Tag
+    variantId: push:ecr
+    config:
+      registry: "${CONTAINER_REGISTRY_URL}"
+      region: "${AWS_REGION:-us-east-1}"
+      imageName: medical-center-frontend
+      tag: latest
+
+  # --- Staging deploy and verification ---
+  - name: Staging Deploy API
+    variantId: deploy:aws_ecs
+    config:
+      repoFullName: alekhyaakkiraju-droid/Medical_Center
+      branch: main
+      region: "${AWS_REGION:-us-east-1}"
+      clusterName: "${ECS_STAGING_CLUSTER}"
+      serviceName: "${ECS_STAGING_API_SERVICE}"
+      envVars:
+        IMAGE_TAG: "$GIT_SHA"
+        IMAGE_NAME: medical-center-api
+
+  - name: Staging Deploy YARP
+    variantId: deploy:aws_ecs
+    config:
+      repoFullName: alekhyaakkiraju-droid/Medical_Center
+      branch: main
+      region: "${AWS_REGION:-us-east-1}"
+      clusterName: "${ECS_STAGING_CLUSTER}"
+      serviceName: "${ECS_STAGING_YARP_SERVICE}"
+      envVars:
+        IMAGE_TAG: "$GIT_SHA"
+        IMAGE_NAME: medical-center-yarp
+
+  - name: Staging Deploy Frontend
+    variantId: deploy:aws_ecs
+    config:
+      repoFullName: alekhyaakkiraju-droid/Medical_Center
+      branch: main
+      region: "${AWS_REGION:-us-east-1}"
+      clusterName: "${ECS_STAGING_CLUSTER}"
+      serviceName: "${ECS_STAGING_FRONTEND_SERVICE}"
+      envVars:
+        IMAGE_TAG: "$GIT_SHA"
+        IMAGE_NAME: medical-center-frontend
+
   - name: Staging Smoke Tests
     variantId: test:generic
     config:
-      testCommand: ./scripts/smoke-tests.sh
+      testCommand: SMOKE_BASE_URL="${STAGING_BASE_URL}" SMOKE_API_URL="${STAGING_API_URL}" ./scripts/smoke-tests.sh
+
+  - name: Staging E2E Tests
+    variantId: test:generic
+    config:
+      testCommand: SMOKE_BASE_URL="${STAGING_BASE_URL}" SMOKE_API_URL="${STAGING_API_URL}" ./scripts/run-e2e-smoke.sh
+
+  # --- Production promotion (dual gate: automated tests + IDP manual sign-off) ---
+  - name: Production Promotion Gate
+    variantId: gate:idp-approval
+    config:
+      gateType: manual
+      requiredApprovers: 1
+      description: IDP sign-off required after staging smoke and E2E pass
+
+  - name: Production Deploy API
+    variantId: deploy:aws_ecs
+    config:
+      repoFullName: alekhyaakkiraju-droid/Medical_Center
+      branch: main
+      region: "${AWS_REGION:-us-east-1}"
+      clusterName: "${ECS_PRODUCTION_CLUSTER}"
+      serviceName: "${ECS_PRODUCTION_API_SERVICE}"
+      envVars:
+        IMAGE_TAG: "$GIT_SHA"
+        IMAGE_NAME: medical-center-api
+
+  - name: Production Deploy YARP
+    variantId: deploy:aws_ecs
+    config:
+      repoFullName: alekhyaakkiraju-droid/Medical_Center
+      branch: main
+      region: "${AWS_REGION:-us-east-1}"
+      clusterName: "${ECS_PRODUCTION_CLUSTER}"
+      serviceName: "${ECS_PRODUCTION_YARP_SERVICE}"
+      envVars:
+        IMAGE_TAG: "$GIT_SHA"
+        IMAGE_NAME: medical-center-yarp
+
+  - name: Production Deploy Frontend
+    variantId: deploy:aws_ecs
+    config:
+      repoFullName: alekhyaakkiraju-droid/Medical_Center
+      branch: main
+      region: "${AWS_REGION:-us-east-1}"
+      clusterName: "${ECS_PRODUCTION_CLUSTER}"
+      serviceName: "${ECS_PRODUCTION_FRONTEND_SERVICE}"
+      envVars:
+        IMAGE_TAG: "$GIT_SHA"
+        IMAGE_NAME: medical-center-frontend
+
+  - name: Production Post-Deploy Smoke Tests
+    variantId: test:generic
+    config:
+      testCommand: SMOKE_BASE_URL="${PRODUCTION_BASE_URL}" SMOKE_API_URL="${PRODUCTION_API_URL}" ./scripts/smoke-tests.sh
+
+  - name: Production Rollback
+    variantId: deploy:aws_ecs
+    config:
+      repoFullName: alekhyaakkiraju-droid/Medical_Center
+      branch: main
+      region: "${AWS_REGION:-us-east-1}"
+      clusterName: "${ECS_PRODUCTION_CLUSTER}"
+      serviceName: "${ECS_PRODUCTION_API_SERVICE}"
+      envVars:
+        IMAGE_TAG: "$PREVIOUS_GIT_SHA"
+        IMAGE_NAME: medical-center-api
+        ROLLBACK: "true"
 
 environments:
   dev:
     description: Development — build and test only
-    steps: [Secret Detection, SAST Scan, NPM Dependency Audit, Backend Build, Frontend Build, Backend Unit Tests, Frontend Unit Tests]
+    steps:
+      - Secret Detection
+      - SAST Scan
+      - NPM Dependency Audit
+      - Backend Build
+      - Frontend Build
+      - Backend Unit Tests
+      - Frontend Unit Tests
   staging:
-    description: Staging — full build, scan, docker, smoke tests
-    steps: all
+    description: Staging — full build, scan, registry push, staging deploy, smoke and E2E
+    steps:
+      - Secret Detection
+      - SAST Scan
+      - NPM Dependency Audit
+      - Backend Build
+      - Frontend Build
+      - Backend Unit Tests
+      - Frontend Unit Tests
+      - Docker API Image
+      - Docker YARP Image
+      - Docker Frontend Image
+      - Container Vulnerability Scan
+      - Push API Image to Registry
+      - Push API Image Latest Tag
+      - Push YARP Image to Registry
+      - Push YARP Image Latest Tag
+      - Push Frontend Image to Registry
+      - Push Frontend Image Latest Tag
+      - Staging Deploy API
+      - Staging Deploy YARP
+      - Staging Deploy Frontend
+      - Staging Smoke Tests
+      - Staging E2E Tests
+  production:
+    description: Production — IDP-governed promotion, deploy, post-deploy verification, rollback
+    steps:
+      - Production Promotion Gate
+      - Production Deploy API
+      - Production Deploy YARP
+      - Production Deploy Frontend
+      - Production Post-Deploy Smoke Tests
+      - Production Rollback

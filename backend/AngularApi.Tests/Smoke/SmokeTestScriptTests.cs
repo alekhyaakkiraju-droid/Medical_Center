@@ -14,6 +14,8 @@ public class SmokeTestScriptTests
         var e2eSmoke = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "run-e2e-smoke.sh"));
 
         pipelineSmoke.Should().Contain("/health");
+        pipelineSmoke.Should().Contain("SMOKE_BASE_URL");
+        pipelineSmoke.Should().Contain("SMOKE_API_URL");
         e2eSmoke.Should().Contain("Smoke Test 1");
         e2eSmoke.Should().Contain("Smoke Test 2");
         e2eSmoke.Should().Contain("Smoke Test 3");
