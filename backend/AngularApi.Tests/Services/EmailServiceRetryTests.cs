@@ -101,6 +101,7 @@ public class EmailServiceRetryTests
             configuration,
             smtpSettings,
             transport,
+            Microsoft.Extensions.Options.Options.Create(new BaaFeatureFlags { SmtpBaaExecuted = true }),
             NullLogger<EmailService>.Instance);
     }
 }

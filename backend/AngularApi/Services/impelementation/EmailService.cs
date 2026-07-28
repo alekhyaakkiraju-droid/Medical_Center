@@ -14,6 +14,7 @@ namespace AngularApi.Services.impelementation
         private readonly IConfiguration _configuration;
         private readonly SmtpSettings _smtpSettings;
         private readonly IEmailTransport _emailTransport;
+        private readonly BaaFeatureFlags _baaFeatureFlags;
         private readonly ILogger<EmailService> _logger;
         private readonly ResiliencePipeline _retryPipeline;
 
@@ -21,11 +22,13 @@ namespace AngularApi.Services.impelementation
             IConfiguration configuration,
             IOptions<SmtpSettings> smtpSettings,
             IEmailTransport emailTransport,
+            IOptions<BaaFeatureFlags> baaFeatureFlags,
             ILogger<EmailService> logger)
         {
             _configuration = configuration;
             _smtpSettings = smtpSettings.Value;
             _emailTransport = emailTransport;
+            _baaFeatureFlags = baaFeatureFlags.Value;
             _logger = logger;
             _retryPipeline = new ResiliencePipelineBuilder()
                 .AddRetry(new RetryStrategyOptions
@@ -48,6 +51,14 @@ namespace AngularApi.Services.impelementation
 
         public async Task SendEmailAsync(Message message)
         {
+            if (IsPhiContainingMessage(message) && !_baaFeatureFlags.SmtpBaaExecuted)
+            {
+                _logger.LogWarning(
+                    "PHI email suppressed: BAA not executed for SMTP provider. Subject: {Subject}",
+                    message.Subject);
+                return;
+            }
+
             var emailUsername = _configuration["EmailSettings:EmailUsername"]
                 ?? throw new InvalidOperationException("EmailSettings:EmailUsername is not configured.");
             var emailPassword = _configuration["EmailSettings:EmailPassword"]
@@ -70,6 +81,12 @@ namespace AngularApi.Services.impelementation
                     emailUsername,
                     emailPassword,
                     token));
+        }
+
+        private static bool IsPhiContainingMessage(Message message)
+        {
+            return message.Subject.Contains("Appointment Confirmation", StringComparison.OrdinalIgnoreCase)
+                || message.Subject.Contains("Breach", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

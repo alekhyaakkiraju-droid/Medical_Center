@@ -13,6 +13,16 @@ export class BlogComponent implements OnInit {
 
   constructor() { }
 
+  currentPage = 1;
+  totalPages = 3;
+  pages = [1, 2, 3];
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
+  }
+
   ngOnInit() {
   }
   blogPosts = [

@@ -148,6 +148,31 @@ public class SmokeTestScriptTests
     }
 
     [Fact]
+    public void JourneyPublicSmokeScript_ExistsAndValidatesPublicRoutesAndBranding()
+    {
+        var scriptPath = Path.Combine(RepoRoot, "scripts", "journey-smoke-public.sh");
+        File.Exists(scriptPath).Should().BeTrue(because: "WO-051 requires a public page journey smoke script");
+
+        var script = File.ReadAllText(scriptPath);
+        script.Should().Contain("SMOKE_BASE_URL");
+        script.Should().Contain("/pages/about-us");
+        script.Should().Contain("/pages/contact");
+        script.Should().Contain("/pages/service");
+        script.Should().Contain("/pages/blog");
+        script.Should().Contain("/pages/gallery");
+        script.Should().Contain("/pages/team");
+        script.Should().Contain("Lorem ipsum");
+        script.Should().Contain("PrimeCare");
+        script.Should().Contain("Modamba");
+        script.Should().Contain("CareShift");
+        script.Should().Contain("exit 1");
+
+        var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
+        pipeline.Should().Contain("Public Page Journey Smoke Tests");
+        pipeline.Should().Contain("journey-smoke-public.sh");
+    }
+
+    [Fact]
     public void OpenApiGenerationScripts_ContainOutputValidation()
     {
         var generateOpenApi = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "generate-openapi.sh"));

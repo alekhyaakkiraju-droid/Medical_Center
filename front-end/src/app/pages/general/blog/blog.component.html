@@ -6,12 +6,12 @@
   <div class="container">
     <div class="title-text">
       <h1>Blog</h1>
-      <ul class="title-menu clearfix">
+      <nav aria-label="Breadcrumb"><ul class="title-menu clearfix">
         <li>
           <a routerLink="/pages/home">home &nbsp;/</a>
         </li>
         <li>Blog</li>
-      </ul>
+      </ul></nav>
     </div>
   </div>
 </section>
@@ -29,7 +29,7 @@
               <div class="image-box">
                 <figure>
                   <a [href]="post.link">
-                    <img [src]="post.image" alt="Blog Image" />
+                    <img [src]="post.image" [alt]="post.title" />
                   </a>
                 </figure>
               </div>
@@ -82,11 +82,11 @@
     </div>
     <div class="styled-pagination">
       <ul>
-        <li><a class="prev" href="#"><span class="fa fa-angle-left" aria-hidden="true"></span></a></li>
-        <li><a href="#" class="active">1</a></li>
-        <li><a href="#">2</a></li>
-        <li><a href="#">3</a></li>
-        <li><a class="next" href="#"><span class="fa fa-angle-right" aria-hidden="true"></span></a></li>
+        <li><button type="button" class="prev" (click)="goToPage(currentPage - 1)" [disabled]="currentPage <= 1" aria-label="Previous page"><span class="fa fa-angle-left" aria-hidden="true"></span></button></li>
+        @for (page of pages; track page) {
+          <li><button type="button" (click)="goToPage(page)" [class.active]="page === currentPage" [attr.aria-current]="page === currentPage ? 'page' : null" [attr.aria-label]="'Page ' + page">{{ page }}</button></li>
+        }
+        <li><button type="button" class="next" (click)="goToPage(currentPage + 1)" [disabled]="currentPage >= totalPages" aria-label="Next page"><span class="fa fa-angle-right" aria-hidden="true"></span></button></li>
       </ul>
     </div>
   </div>

@@ -1,9 +1,10 @@
-using AngularApi.DTO;
-using AngularApi.Contracts.Enums;
-using AngularApi.Models;
+using System.Net;
 using AngularApi.Contracts.DTO;
+using AngularApi.Contracts.Enums;
 using AngularApi.Contracts.Models;
 using AngularApi.Contracts.Services;
+using AngularApi.DTO;
+using AngularApi.Models;
 using AngularApi.Options;
 using AngularApi.Services;
 using AngularApi.Contracts.Services.Interfaces;
@@ -47,23 +48,11 @@ public class AppointmentService : IAppointmentService
     public async Task<bool> UpdateAppointmentAsync(int id, UpdateAppointmentDTO appointmentDto, CancellationToken cancellationToken = default)
     {
         var appointment = await _context.Appointments.FindAsync([id], cancellationToken);
-        if (appointment == null)
-        {
-            return false;
-        }
-
+        if (appointment == null) return false;
         appointment.AppointmentTakenDate = appointmentDto.AppointmentTakenDate;
         _context.Entry(appointment).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync(cancellationToken);
-            return true;
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            return false;
-        }
+        try { await _context.SaveChangesAsync(cancellationToken); return true; }
+        catch (DbUpdateConcurrencyException) { return false; }
     }
 
     public async Task<decimal> GetTotalEarningsAsync(CancellationToken cancellationToken = default) =>
@@ -138,8 +127,8 @@ public class AppointmentService : IAppointmentService
 
         try
         {
-            var encodedPatientName = System.Net.WebUtility.HtmlEncode(patientName);
-            var encodedDoctorName = System.Net.WebUtility.HtmlEncode(doctorName);
+            var encodedPatientName = WebUtility.HtmlEncode(patientName);
+            var encodedDoctorName = WebUtility.HtmlEncode(doctorName);
             var formattedDate = appointmentDate.ToString("f");
             var emailBody = _emailTemplateService.GetAppointmentConfirmationEmail(
                 encodedPatientName,
@@ -161,67 +150,36 @@ public class AppointmentService : IAppointmentService
     public async Task<bool> DeleteAppointmentAsync(int id, CancellationToken cancellationToken = default)
     {
         var appointment = await _context.Appointments.FindAsync([id], cancellationToken);
-        if (appointment == null)
-        {
-            return false;
-        }
-
+        if (appointment == null) return false;
         _context.Appointments.Remove(appointment);
         await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 
     public Task<PagedResult<AppointmentDTO>> GetAppointmentsByPatientAsync(string patientId, PaginationParameters pagination, CancellationToken cancellationToken = default) =>
-        _context.Appointments
-            .Where(a => a.PatientId == patientId)
-            .SelectAppointmentDto()
-            .ToPagedResultAsync(pagination, cancellationToken);
+        _context.Appointments.Where(a => a.PatientId == patientId).SelectAppointmentDto().ToPagedResultAsync(pagination, cancellationToken);
 
     public Task<PagedResult<AppointmentDTO>> GetAppointmentsByDateAsync(DateTime date, PaginationParameters pagination, CancellationToken cancellationToken = default) =>
-        _context.Appointments
-            .Where(a => a.ProbableStartTime!.Value.Date == date.Date)
-            .SelectAppointmentDto()
-            .ToPagedResultAsync(pagination, cancellationToken);
+        _context.Appointments.Where(a => a.ProbableStartTime!.Value.Date == date.Date).SelectAppointmentDto().ToPagedResultAsync(pagination, cancellationToken);
 
     public Task<PagedResult<AppointmentDTO>> GetAppointmentsByStatusAsync(AppointmentStatusEnum status, PaginationParameters pagination, CancellationToken cancellationToken = default) =>
-        _context.Appointments
-            .Where(a => a.AppointmentStatus!.Status == status)
-            .SelectAppointmentDto()
-            .ToPagedResultAsync(pagination, cancellationToken);
+        _context.Appointments.Where(a => a.AppointmentStatus!.Status == status).SelectAppointmentDto().ToPagedResultAsync(pagination, cancellationToken);
 
     public Task<PagedResult<AppointmentDTO>> GetTodaysAppointmentsAsync(PaginationParameters pagination, CancellationToken cancellationToken = default)
     {
         var today = DateTime.Today;
-        return _context.Appointments
-            .Where(a => a.ProbableStartTime!.Value.Date == today)
-            .SelectAppointmentDto()
-            .ToPagedResultAsync(pagination, cancellationToken);
+        return _context.Appointments.Where(a => a.ProbableStartTime!.Value.Date == today).SelectAppointmentDto().ToPagedResultAsync(pagination, cancellationToken);
     }
 
     public Task<PagedResult<AppointmentDTO>> GetUpcomingAppointmentsAsync(PaginationParameters pagination, CancellationToken cancellationToken = default)
     {
         var now = DateTime.Now;
-        return _context.Appointments
-            .Where(a => a.ProbableStartTime > now)
-            .OrderBy(a => a.ProbableStartTime)
-            .SelectAppointmentDto()
-            .ToPagedResultAsync(pagination, cancellationToken);
+        return _context.Appointments.Where(a => a.ProbableStartTime > now).OrderBy(a => a.ProbableStartTime).SelectAppointmentDto().ToPagedResultAsync(pagination, cancellationToken);
     }
 
-    public Task<PagedResult<AppointmentDTO>> GetAppointmentsByPatientAndStatusAsync(
-        string patientId,
-        AppointmentStatusEnum status,
-        PaginationParameters pagination,
-        CancellationToken cancellationToken = default) =>
-        _context.Appointments
-            .Where(a => a.PatientId == patientId && a.AppointmentStatus!.Status == status)
-            .SelectAppointmentDto()
-            .ToPagedResultAsync(pagination, cancellationToken);
+    public Task<PagedResult<AppointmentDTO>> GetAppointmentsByPatientAndStatusAsync(string patientId, AppointmentStatusEnum status, PaginationParameters pagination, CancellationToken cancellationToken = default) =>
+        _context.Appointments.Where(a => a.PatientId == patientId && a.AppointmentStatus!.Status == status).SelectAppointmentDto().ToPagedResultAsync(pagination, cancellationToken);
 
     public Task<PagedResult<AppointmentDTO>> GetAppointmentHistoryByPatientAsync(string patientId, PaginationParameters pagination, CancellationToken cancellationToken = default) =>
-        _context.Appointments
-            .Where(a => a.PatientId == patientId)
-            .OrderByDescending(a => a.ProbableStartTime)
-            .SelectAppointmentDto()
-            .ToPagedResultAsync(pagination, cancellationToken);
+        _context.Appointments.Where(a => a.PatientId == patientId).OrderByDescending(a => a.ProbableStartTime).SelectAppointmentDto().ToPagedResultAsync(pagination, cancellationToken);
 }

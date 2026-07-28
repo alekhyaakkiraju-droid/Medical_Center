@@ -22,7 +22,7 @@
   }
   
   .cta .cta-block .emmergency {
-    background: #48bdc5;
+    background: var(--color-primary);
   }
   
   .cta .cta-block .emmergency a {
@@ -48,7 +48,7 @@
   
   .cta .cta-block .top-doctor .btn-main:hover {
     background: #fff;
-    color: #48bdc5;
+    color: var(--color-primary);
   }
   
   .cta .cta-block .working-time {
@@ -137,21 +137,21 @@
     font-weight: 600;
     color: #4d4d4d;
     font-family: "Source Sans Pro", sans-serif;
-    border: 2px solid #48bdc5;
+    border: 2px solid var(--color-primary);
     border-radius: 0;
     transition: all .3s ease;
   }
   
   .tabs .nav-tabs li a:hover {
-    background: #48bdc5;
+    background: var(--color-primary);
     color: #fff;
-    border: 2px solid #48bdc5;
+    border: 2px solid var(--color-primary);
   }
   
   .tabs .nav-tabs li.active a {
     color: #fff;
-    background: #48bdc5;
-    border: 2px solid #48bdc5;
+    background: var(--color-primary);
+    border: 2px solid var(--color-primary);
   }
   
   .tab-content {
@@ -368,14 +368,14 @@
     margin-bottom:20px;
     background: #fff;
     text-transform: uppercase;
-    color: #48bdc5;
+    color: var(--color-primary);
     padding: 10px 25px;
-    border: 1px solid #48bdc5;
+    border: 1px solid var(--color-primary);
     transition: all .2s ease-in;
   }
   
    .btn-main:hover {
-    background: #48bdc5;
+    background: var(--color-primary);
     color: #fff;
   }
 
@@ -391,7 +391,7 @@
   .service-section .section-title p {
     font-size: 15px;
     line-height: 26px;
-    color: #777777;
+    color: var(--color-text-body);
     font-weight: 400;
   }
   
@@ -401,12 +401,11 @@
   
   .service-section .items-container .slick-prev:before, .service-section .items-container .slick-next:before {
     font-size: 25px;
-    color: #48bdc5;
+    color: var(--color-primary);
   }
   
   .service-section .items-container .item {
     margin: 10px 20px;
-    outline: 0;
   }
   
   .service-section .inner-box {
@@ -430,7 +429,7 @@
     font-size: 15px;
     line-height: 26px;
     font-weight: 400;
-    color: #777777;
+    color: var(--color-text-body);
     letter-spacing: .5px;
   }
   
@@ -448,7 +447,7 @@
     font-size: 15px;
     line-height: 26px;
     font-weight: 400;
-    color: #777777;
+    color: var(--color-text-body);
     padding-bottom: 15px;
   }
   
@@ -475,7 +474,7 @@
   .service-two .left-side .section-title h3:after {
     position: absolute;
     content: '';
-    background: #48bdc5;
+    background: var(--color-primary);
     bottom: 0px;
     left: 0px;
     height: 1px;
@@ -485,7 +484,7 @@
   .service-two .left-side .section-title p {
     font-size: 15px;
     line-height: 26px;
-    color: #777777;
+    color: var(--color-text-body);
     font-weight: 400;
     padding-bottom: 40px;
   }
@@ -537,7 +536,7 @@
   
   .service-two .link-buttons li {
     display: inline-block;
-    color: #777777;
+    color: var(--color-text-body);
     font-size: 18px;
     font-weight: 400;
   }
@@ -554,7 +553,7 @@
   }
   
   .service-two .link-buttons li.link-btn.style-one {
-    background: #48bdc5;
+    background: var(--color-primary);
     transition: all 500ms ease;
   }
   
@@ -573,7 +572,7 @@
   }
   
   .service-two .link-buttons li.link-btn.style-two:hover {
-    background: #48bdc5;
+    background: var(--color-primary);
     transition: all 500ms ease;
   }
   
@@ -629,7 +628,7 @@
     font-size: 15px;
     line-height: 30px;
     font-weight: 400;
-    color: #777777;
+    color: var(--color-text-body);
     padding-top: 30px;
     letter-spacing: 0.3px;
   }
@@ -663,7 +662,7 @@
     font-size: 15px;
     line-height: 30px;
     font-weight: 400;
-    color: #777777;
+    color: var(--color-text-body);
     margin-bottom: 0px;
   }
   
