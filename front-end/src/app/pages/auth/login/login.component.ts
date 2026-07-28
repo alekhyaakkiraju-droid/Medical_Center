@@ -115,7 +115,9 @@ export class LoginComponent implements OnInit, AfterViewInit{
           if (this.authService.isRole('admin')) {
             this.router.navigate(['admin/dashboard']);
           } else if (this.authService.isRole('doctor')) {
-            this.router.navigate(['doctor/doctor-appointments']);
+            this.router.navigate(['doctor/dashboard']);
+          } else if (this.authService.isRole('user')) {
+            this.router.navigate(['/patient/home']);
           } else {
             this.router.navigate(['/pages/home']);
           }
