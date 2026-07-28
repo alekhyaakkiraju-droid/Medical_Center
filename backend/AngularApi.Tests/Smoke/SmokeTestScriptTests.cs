@@ -88,14 +88,14 @@ public class SmokeTestScriptTests
         var devSteps = pipeline[devBlockStart..stagingBlockStart];
         var stagingSteps = pipeline[stagingBlockStart..productionBlockStart];
 
-        var smokeIndex = stagingSteps.IndexOf("- Staging Smoke Tests", StringComparison.Ordinal);
+        var gateIndex = stagingSteps.IndexOf("- Post-Deploy Verification Gate", StringComparison.Ordinal);
         var expandedIndex = stagingSteps.IndexOf("- Expanded Smoke Tests", StringComparison.Ordinal);
         var staticAssetIndex = stagingSteps.IndexOf("- Static Asset Verification", StringComparison.Ordinal);
         var patientIndex = stagingSteps.IndexOf("- Patient Journey E2E", StringComparison.Ordinal);
         var dastIndex = stagingSteps.IndexOf("- DAST Scan", StringComparison.Ordinal);
 
-        smokeIndex.Should().BeGreaterThan(-1);
-        expandedIndex.Should().BeGreaterThan(smokeIndex);
+        gateIndex.Should().BeGreaterThan(-1);
+        expandedIndex.Should().BeGreaterThan(gateIndex);
         staticAssetIndex.Should().BeGreaterThan(expandedIndex);
         patientIndex.Should().BeGreaterThan(staticAssetIndex);
         dastIndex.Should().BeGreaterThan(patientIndex);
@@ -134,6 +134,27 @@ public class SmokeTestScriptTests
         var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
         pipeline.Should().Contain("Static Asset Verification");
         pipeline.Should().Contain("check-static-assets.sh");
+    }
+
+    [Fact]
+    public void PostDeployGateScript_ExistsAndOrchestratesJourneySuites()
+    {
+        var scriptPath = Path.Combine(RepoRoot, "scripts", "post-deploy-gate.sh");
+        File.Exists(scriptPath).Should().BeTrue(because: "WO-054 requires a post-deploy gate orchestrator");
+
+        var script = File.ReadAllText(scriptPath);
+        script.Should().Contain("scripts/smoke-tests.sh");
+        script.Should().Contain("scripts/journey-smoke-public.sh");
+        script.Should().Contain("scripts/journey-smoke-auth.sh");
+        script.Should().Contain("scripts/journey-smoke-assets.sh");
+        script.Should().Contain("deployment-verification-report.json");
+        script.Should().Contain("overall_result");
+        script.Should().Contain("exit 1");
+
+        var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
+        pipeline.Should().Contain("Post-Deploy Verification Gate");
+        pipeline.Should().Contain("post-deploy-gate.sh");
+        pipeline.Should().Contain("deployment-verification-report.json");
     }
 
     [Fact]

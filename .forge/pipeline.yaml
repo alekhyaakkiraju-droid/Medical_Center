@@ -246,11 +246,13 @@ steps:
         IMAGE_TAG: "$GIT_SHA"
         IMAGE_NAME: medical-center-frontend
 
-  - name: Staging Smoke Tests
+  - name: Post-Deploy Verification Gate
     variantId: test:generic
     config:
-      # WO-031: passing /health confirms API started with IDP SMTP env vars from Staging Deploy API
-      testCommand: SMOKE_BASE_URL="${STAGING_BASE_URL}" SMOKE_API_URL="${STAGING_API_URL}" ./scripts/smoke-tests.sh
+      # WO-054: orchestrates smoke-tests + journey scripts into single staging gate
+      testCommand: DEPLOY_ENV=staging GIT_SHA="$GIT_SHA" SMOKE_BASE_URL="${STAGING_BASE_URL}" SMOKE_API_URL="${STAGING_API_URL}" ./scripts/post-deploy-gate.sh
+      archiveArtifacts:
+        - deployment-verification-report.json
 
   - name: Expanded Smoke Tests
     variantId: test:generic
@@ -384,7 +386,7 @@ environments:
       - Staging Deploy API
       - Staging Deploy YARP
       - Staging Deploy Frontend
-      - Staging Smoke Tests
+      - Post-Deploy Verification Gate
       - Expanded Smoke Tests
       - Static Asset Verification
       - Patient Journey E2E
