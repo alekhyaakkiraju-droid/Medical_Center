@@ -21,6 +21,61 @@ public class OwnershipValidationIntegrationTests : IClassFixture<MedicalCenterWe
     }
 
     [Fact]
+    public async Task GetAppointment_WhenPatientOwnsAppointment_ReturnsSuccess()
+    {
+        var appointmentId = await SeedAppointmentAsync("patient-a", "doctor-1");
+
+        var client = CreateAuthenticatedClient("patient-a", "user");
+        var response = await client.GetAsync($"/api/Appointments/{appointmentId}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task GetAppointment_WhenPatientDoesNotOwnAppointment_ReturnsForbidden()
+    {
+        var appointmentId = await SeedAppointmentAsync("patient-a", "doctor-1");
+
+        var client = CreateAuthenticatedClient("patient-b", "user");
+        var response = await client.GetAsync($"/api/Appointments/{appointmentId}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task GetAppointment_WhenAssignedDoctor_ReturnsSuccess()
+    {
+        var appointmentId = await SeedAppointmentAsync("patient-a", "doctor-1");
+
+        var client = CreateAuthenticatedClient("doctor-1", "doctor");
+        var response = await client.GetAsync($"/api/Appointments/{appointmentId}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task GetAppointment_WhenAdmin_ReturnsSuccess()
+    {
+        var appointmentId = await SeedAppointmentAsync("patient-a", "doctor-1");
+
+        var client = CreateAuthenticatedClient("admin-user", "admin");
+        var response = await client.GetAsync($"/api/Appointments/{appointmentId}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task GetAppointment_WhenNonAssignedDoctor_ReturnsForbidden()
+    {
+        var appointmentId = await SeedAppointmentAsync("patient-a", "doctor-1");
+
+        var client = CreateAuthenticatedClient("doctor-2", "doctor");
+        var response = await client.GetAsync($"/api/Appointments/{appointmentId}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
     public async Task GetAppointmentsByPatient_WhenPatientIdDoesNotMatchUser_ReturnsForbidden()
     {
         var client = CreateAuthenticatedClient("patient-a", "user");
@@ -107,7 +162,7 @@ public class OwnershipValidationIntegrationTests : IClassFixture<MedicalCenterWe
         return client;
     }
 
-    private async Task SeedAppointmentAsync(string patientId, string doctorId)
+    private async Task<int> SeedAppointmentAsync(string patientId, string doctorId)
     {
         using var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
@@ -122,15 +177,35 @@ public class OwnershipValidationIntegrationTests : IClassFixture<MedicalCenterWe
             context.Doctors.Add(new Doctor { Id = doctorId, Name = "Test Doctor" });
         }
 
-        context.Appointments.Add(new Appointment
+        var medicalCenterId = 1;
+        if (!context.MedicalCenter.Any(m => m.Id == medicalCenterId))
+        {
+            context.MedicalCenter.Add(new MedicalCenter
+            {
+                Id = medicalCenterId,
+                HospitalAffiliationId = 1,
+                TimeSlotPerClientInMin = 30,
+                FirstConsultationFee = 100,
+                FollowupConsultationFee = 75,
+                StreetAddress = "123 Main St",
+                City = "Austin",
+                State = "TX",
+                Zip = "78701",
+            });
+        }
+
+        var appointment = new Appointment
         {
             PatientId = patientId,
             DoctorId = doctorId,
             DoctorName = "Test Doctor",
+            MedicalCenterId = medicalCenterId,
             AppointmentTakenDate = DateTime.UtcNow,
-        });
+        };
 
+        context.Appointments.Add(appointment);
         await context.SaveChangesAsync();
+        return appointment.Id;
     }
 
     private async Task<int> SeedPatientReviewAsync(string patientId, string doctorId)

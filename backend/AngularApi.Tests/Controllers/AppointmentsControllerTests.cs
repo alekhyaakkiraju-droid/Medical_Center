@@ -1,5 +1,7 @@
+using System.Reflection;
 using AngularApi.Controllers;
 using AngularApi.DTO;
+using AngularApi.Filters;
 using AngularApi.Models;
 using AngularApi.Options;
 using AngularApi.Services;
@@ -73,6 +75,22 @@ namespace AngularApi.Tests.Controllers
                 _emailServiceMock.Object,
                 _emailTemplateService,
                 _ownershipValidator);
+
+        [Fact]
+        public void AppointmentMutatingActions_HaveValidateOwnershipAttributeForAppointment()
+        {
+            AssertValidateOwnership(typeof(AppointmentsController).GetMethod(nameof(AppointmentsController.GetAppointment))!);
+            AssertValidateOwnership(typeof(AppointmentsController).GetMethod(nameof(AppointmentsController.UpdateAppointment))!);
+            AssertValidateOwnership(typeof(AppointmentsController).GetMethod(nameof(AppointmentsController.DeleteAppointment))!);
+        }
+
+        private static void AssertValidateOwnership(MethodInfo method)
+        {
+            var attribute = method.GetCustomAttribute<ValidateOwnershipAttribute>();
+            attribute.Should().NotBeNull();
+            attribute!.ResourceType.Should().Be(ResourceType.Appointment);
+            attribute.IdParameterName.Should().Be("id");
+        }
 
         [Fact]
         public async Task GetAllAppointments_ReturnsAppointmentDtos()
