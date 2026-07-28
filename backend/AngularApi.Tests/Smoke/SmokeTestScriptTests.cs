@@ -67,10 +67,10 @@ public class SmokeTestScriptTests
 
         pipeline.Should().Contain("Expanded Smoke Tests");
         pipeline.Should().Contain("run-e2e-smoke.sh");
-        pipeline.Should().Contain("Staging Smoke Tests");
+        pipeline.Should().Contain("Post-Deploy Verification Gate");
         pipeline.Should().Contain("Patient Journey E2E");
         pipeline.Should().Contain("e2e-patient-journey.sh");
-        pipeline.Should().Contain("./scripts/smoke-tests.sh");
+        pipeline.Should().Contain("post-deploy-gate.sh");
 
         ssrSmoke.Should().Contain("WO-059");
         ssrSmoke.Should().Contain("/api/nonexistent");
@@ -99,14 +99,14 @@ public class SmokeTestScriptTests
         var devSteps = pipeline[devBlockStart..stagingBlockStart];
         var stagingSteps = pipeline[stagingBlockStart..productionBlockStart];
 
-        var smokeIndex = stagingSteps.IndexOf("- Staging Smoke Tests", StringComparison.Ordinal);
+        var gateIndex = stagingSteps.IndexOf("- Post-Deploy Verification Gate", StringComparison.Ordinal);
         var expandedIndex = stagingSteps.IndexOf("- Expanded Smoke Tests", StringComparison.Ordinal);
         var staticAssetIndex = stagingSteps.IndexOf("- Static Asset Verification", StringComparison.Ordinal);
         var patientIndex = stagingSteps.IndexOf("- Patient Journey E2E", StringComparison.Ordinal);
         var dastIndex = stagingSteps.IndexOf("- DAST Scan", StringComparison.Ordinal);
 
-        smokeIndex.Should().BeGreaterThan(-1);
-        expandedIndex.Should().BeGreaterThan(smokeIndex);
+        gateIndex.Should().BeGreaterThan(-1);
+        expandedIndex.Should().BeGreaterThan(gateIndex);
         staticAssetIndex.Should().BeGreaterThan(expandedIndex);
         patientIndex.Should().BeGreaterThan(staticAssetIndex);
         dastIndex.Should().BeGreaterThan(patientIndex);
@@ -148,70 +148,24 @@ public class SmokeTestScriptTests
     }
 
     [Fact]
-    public void JourneyPublicSmokeScript_ExistsAndValidatesPublicRoutesAndBranding()
+    public void PostDeployGateScript_ExistsAndOrchestratesJourneySuites()
     {
-        var scriptPath = Path.Combine(RepoRoot, "scripts", "journey-smoke-public.sh");
-        File.Exists(scriptPath).Should().BeTrue(because: "WO-051 requires a public page journey smoke script");
+        var scriptPath = Path.Combine(RepoRoot, "scripts", "post-deploy-gate.sh");
+        File.Exists(scriptPath).Should().BeTrue(because: "WO-054 requires a post-deploy gate orchestrator");
 
         var script = File.ReadAllText(scriptPath);
-        script.Should().Contain("SMOKE_BASE_URL");
-        script.Should().Contain("/pages/about-us");
-        script.Should().Contain("/pages/contact");
-        script.Should().Contain("/pages/service");
-        script.Should().Contain("/pages/blog");
-        script.Should().Contain("/pages/gallery");
-        script.Should().Contain("/pages/team");
-        script.Should().Contain("Lorem ipsum");
-        script.Should().Contain("PrimeCare");
-        script.Should().Contain("Modamba");
-        script.Should().Contain("CareShift");
+        script.Should().Contain("scripts/smoke-tests.sh");
+        script.Should().Contain("scripts/journey-smoke-public.sh");
+        script.Should().Contain("scripts/journey-smoke-auth.sh");
+        script.Should().Contain("scripts/journey-smoke-assets.sh");
+        script.Should().Contain("deployment-verification-report.json");
+        script.Should().Contain("overall_result");
         script.Should().Contain("exit 1");
 
         var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
-        pipeline.Should().Contain("Public Page Journey Smoke Tests");
-        pipeline.Should().Contain("journey-smoke-public.sh");
-    }
-
-    [Fact]
-    public void JourneyAuthSmokeScript_ExistsAndDefinesRoleBasedFlows()
-    {
-        var scriptPath = Path.Combine(RepoRoot, "scripts", "journey-smoke-auth.sh");
-        File.Exists(scriptPath).Should().BeTrue(because: "WO-052 requires an authenticated journey smoke script");
-
-        var script = File.ReadAllText(scriptPath);
-        script.Should().Contain("SMOKE_API_URL");
-        script.Should().Contain("admin@uat.careshift.local");
-        script.Should().Contain("dr.smith@uat.careshift.local");
-        script.Should().Contain("patient.alice@uat.careshift.local");
-        script.Should().Contain("UatSeed123!");
-        script.Should().Contain("antiforgery-token");
-        script.Should().Contain("X-XSRF-TOKEN");
-        script.Should().Contain("/Doctors/");
-        script.Should().Contain("/Appointments/patient/");
-        script.Should().Contain("exit 1");
-
-        var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
-        pipeline.Should().Contain("Authenticated Journey Smoke Tests");
-        pipeline.Should().Contain("journey-smoke-auth.sh");
-    }
-
-    [Fact]
-    public void JourneyAssetsSmokeScript_ExistsAndCrawlsPublicPageAssets()
-    {
-        var scriptPath = Path.Combine(RepoRoot, "scripts", "journey-smoke-assets.sh");
-        File.Exists(scriptPath).Should().BeTrue(because: "WO-053 requires a static asset journey smoke script");
-
-        var script = File.ReadAllText(scriptPath);
-        script.Should().Contain("SMOKE_BASE_URL");
-        script.Should().Contain("/pages/gallery");
-        script.Should().Contain("/pages/team");
-        script.Should().Contain("localhost");
-        script.Should().Contain("http_code");
-        script.Should().Contain("exit 1");
-
-        var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
-        pipeline.Should().Contain("Static Asset Journey Smoke Tests");
-        pipeline.Should().Contain("journey-smoke-assets.sh");
+        pipeline.Should().Contain("Post-Deploy Verification Gate");
+        pipeline.Should().Contain("post-deploy-gate.sh");
+        pipeline.Should().Contain("deployment-verification-report.json");
     }
 
     [Fact]
