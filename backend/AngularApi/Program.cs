@@ -15,10 +15,35 @@ namespace WebApiDemo
 {
     public class Program
     {
+        internal static void ApplyRecaptchaEnvironmentOverrides(IConfigurationBuilder configurationBuilder)
+        {
+            var recaptchaSiteKey = Environment.GetEnvironmentVariable("RECAPTCHA_SITE_KEY");
+            var recaptchaSecretKey = Environment.GetEnvironmentVariable("RECAPTCHA_SECRET_KEY");
+
+            if (string.IsNullOrWhiteSpace(recaptchaSiteKey) && string.IsNullOrWhiteSpace(recaptchaSecretKey))
+            {
+                return;
+            }
+
+            var overrides = new Dictionary<string, string?>();
+            if (!string.IsNullOrWhiteSpace(recaptchaSiteKey))
+            {
+                overrides["RecaptchaSettings:SiteKey"] = recaptchaSiteKey;
+            }
+
+            if (!string.IsNullOrWhiteSpace(recaptchaSecretKey))
+            {
+                overrides["RecaptchaSettings:SecretKey"] = recaptchaSecretKey;
+            }
+
+            configurationBuilder.AddInMemoryCollection(overrides);
+        }
+
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Configuration.AddDockerSecrets();
+            ApplyRecaptchaEnvironmentOverrides(builder.Configuration);
             builder.ConfigureSerilog();
 
             builder.Services.AddAntiforgery(options =>
