@@ -251,4 +251,37 @@ public class ForgePipelineConfigurationTests
         yaml.Should().Contain("npm run build -- --configuration production");
         yaml.Should().NotContain("./node_modules/.bin/ng build --configuration production");
     }
+
+    [Fact]
+    public void ForgePipelineFile_IncludesPlaceholderContentLintStep()
+    {
+        var yaml = File.ReadAllText(PipelinePath);
+
+        yaml.Should().Contain("Placeholder Content Lint");
+        yaml.Should().Contain("check-placeholder-content.sh");
+
+        var frontendTestsIndex = yaml.IndexOf("- name: Frontend Unit Tests", StringComparison.Ordinal);
+        var lintIndex = yaml.IndexOf("- name: Placeholder Content Lint", StringComparison.Ordinal);
+        lintIndex.Should().BeGreaterThan(frontendTestsIndex, because: "placeholder lint should run after frontend build/tests");
+
+        var devBlockStart = yaml.IndexOf("environments:", StringComparison.Ordinal);
+        var stagingBlockStart = yaml.IndexOf("  staging:", StringComparison.Ordinal);
+        var productionBlockStart = yaml.IndexOf("  production:", StringComparison.Ordinal);
+
+        yaml[devBlockStart..stagingBlockStart].Should().Contain("- Placeholder Content Lint");
+        yaml[stagingBlockStart..productionBlockStart].Should().Contain("- Placeholder Content Lint");
+    }
+
+    [Fact]
+    public void PlaceholderContentLintScript_ExistsAndIsExecutable()
+    {
+        var scriptPath = Path.Combine(RepoRoot, "scripts", "check-placeholder-content.sh");
+        File.Exists(scriptPath).Should().BeTrue(because: "WO-020 requires a placeholder content lint script");
+
+        var script = File.ReadAllText(scriptPath);
+        script.Should().Contain("Lorem ipsum");
+        script.Should().Contain("PrimeCare");
+        script.Should().Contain("front-end/src/app");
+        script.Should().Contain("exit 1");
+    }
 }

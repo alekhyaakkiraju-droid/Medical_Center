@@ -119,6 +119,11 @@ steps:
     config:
       testCommand: cd front-end && npm ci --ignore-scripts && npm run test -- --watch=false --browsers=ChromeHeadless
 
+  - name: Placeholder Content Lint
+    variantId: test:generic
+    config:
+      testCommand: ./scripts/check-placeholder-content.sh
+
   # --- Docker images (all 3 services) ---
   - name: Docker API Image
     variantId: build:docker
@@ -347,6 +352,7 @@ environments:
       - Backend Unit Tests
       - Authorization Regression Gate
       - Frontend Unit Tests
+      - Placeholder Content Lint
   staging:
     description: Staging — full build, scan, registry push, staging deploy, smoke and E2E
     steps:
@@ -359,6 +365,7 @@ environments:
       - Backend Unit Tests
       - Authorization Regression Gate
       - Frontend Unit Tests
+      - Placeholder Content Lint
       - Docker API Image
       - Docker YARP Image
       - Docker Frontend Image
