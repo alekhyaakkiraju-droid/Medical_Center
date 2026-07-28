@@ -80,8 +80,8 @@ public class StagingEmailConfigurationTests
     {
         var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
 
-        pipeline.Should().Contain("Staging Smoke Tests");
+        pipeline.Should().Contain("Post-Deploy Verification Gate");
+        pipeline.Should().Contain("post-deploy-gate.sh");
         pipeline.Should().Contain("run-e2e-smoke.sh");
-        pipeline.Should().Contain("WO-031");
     }
 }

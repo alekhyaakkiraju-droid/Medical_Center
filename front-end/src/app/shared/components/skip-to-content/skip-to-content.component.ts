@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 @Component({
   selector: 'app-skip-to-content',
   standalone: true,
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <a

@@ -29,7 +29,7 @@ Phase 3 (WO-037 through WO-041) addressed automatic logoff, NPP acknowledgment, 
 | Security awareness training | Deferred | Deferred — requires LMS vendor selection (prerequisite) |
 | Security incident procedures | In Progress | `BreachNotificationService`, `POST /api/admin/breach-assessment`, and `BreachNotification.html` template (see data-subject-rights.md) |
 | Contingency plan | Pending | Backup/DR runbooks not yet documented — Target: 2026-10-01, Responsible: Engineering Lead |
-| Evaluation | In Progress | Forge CI/CD provides change audit trail; authorization regression gate in `.forge/pipeline.yaml`; continuous security control verification via [`scripts/run-security-regression.sh`](../../scripts/run-security-regression.sh) |
+| Evaluation | In Progress | Forge CI/CD provides change audit trail; authorization regression gate in `.forge/pipeline.yaml`; mapped authorization tests in [`authorization-test-manifest.md`](authorization-test-manifest.md); continuous security control verification via [`scripts/run-security-regression.sh`](../../scripts/run-security-regression.sh) |
 
 ## Physical Safeguards
 

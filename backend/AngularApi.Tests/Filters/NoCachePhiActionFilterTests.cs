@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Json;
 using AngularApi.Contracts.DTO;
 using AngularApi.Contracts.Models;
 using AngularApi.Services;
@@ -45,10 +46,10 @@ public class NoCachePhiActionFilterTests : IClassFixture<MedicalCenterWebApplica
     public async Task AnonymousEndpoint_DoesNotIncludeNoCacheHeaders()
     {
         var client = _factory.CreateClient();
-        var response = await client.GetAsync("/health");
+        var response = await client.GetAsync("/api/Specializations?pageNumber=1&pageSize=1");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Headers.Contains("Cache-Control").Should().BeFalse();
+        response.Headers.CacheControl.Should().BeNull();
     }
 
     private async Task SeedUserAsync()

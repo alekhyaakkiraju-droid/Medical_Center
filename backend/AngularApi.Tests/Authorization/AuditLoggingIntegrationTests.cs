@@ -2,6 +2,7 @@ using AngularApi.Models;
 using AngularApi.Contracts.Models;
 using AngularApi.Services;
 using AngularApi.Tests.Infrastructure;
+using AngularApi.Tests.TestData;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -55,11 +56,7 @@ public class AuditLoggingIntegrationTests : IClassFixture<MedicalCenterWebApplic
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
 
-        var payload = new
-        {
-            doctorId = "doctor1",
-            appointmentTakenDate = DateTime.UtcNow
-        };
+        var payload = AppointmentTestPayloads.Valid("doctor1");
 
         var response = await client.PostAsJsonAsync("/api/Appointments", payload);
 

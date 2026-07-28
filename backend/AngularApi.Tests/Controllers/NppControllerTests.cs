@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Json;
 using AngularApi.Contracts.DTO;
 using AngularApi.Contracts.Models;
 using AngularApi.Services;
@@ -22,8 +23,9 @@ public class NppControllerTests : IClassFixture<MedicalCenterWebApplicationFacto
     [Fact]
     public async Task GetStatus_WhenUnacknowledged_ReturnsFalse()
     {
-        await SeedUserAsync();
-        var client = await CreateAuthenticatedClientAsync();
+        const string email = "npp-unacknowledged@example.com";
+        await SeedUserAsync(email);
+        var client = await CreateAuthenticatedClientAsync(email);
 
         var response = await client.GetAsync("/api/npp/status");
 
@@ -36,8 +38,9 @@ public class NppControllerTests : IClassFixture<MedicalCenterWebApplicationFacto
     [Fact]
     public async Task Acknowledge_ThenGetStatus_ReturnsTrue()
     {
-        await SeedUserAsync();
-        var client = await CreateAuthenticatedClientAsync();
+        const string email = "npp-acknowledged@example.com";
+        await SeedUserAsync(email);
+        var client = await CreateAuthenticatedClientAsync(email);
 
         var acknowledgeResponse = await client.PostAsync("/api/npp/acknowledge", null);
         acknowledgeResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -50,8 +53,9 @@ public class NppControllerTests : IClassFixture<MedicalCenterWebApplicationFacto
     [Fact]
     public async Task GetContent_ReturnsVersionAndContent()
     {
-        await SeedUserAsync();
-        var client = await CreateAuthenticatedClientAsync();
+        const string email = "npp-content@example.com";
+        await SeedUserAsync(email);
+        var client = await CreateAuthenticatedClientAsync(email);
 
         var response = await client.GetAsync("/api/npp/content");
 
@@ -61,37 +65,38 @@ public class NppControllerTests : IClassFixture<MedicalCenterWebApplicationFacto
         body.Content.Should().Contain("Notice of Privacy Practices");
     }
 
-    private async Task<HttpClient> CreateAuthenticatedClientAsync()
+    private async Task<HttpClient> CreateAuthenticatedClientAsync(string email)
     {
         var client = AntiforgeryTestHelper.CreateClient(_factory);
         await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
 
         var loginResponse = await client.PostAsJsonAsync("/api/Account/login", new LogInUserDTO
         {
-            Email = SeedData.TestUserEmail,
+            Email = email,
             Password = SeedData.TestUserPassword,
         });
         loginResponse.EnsureSuccessStatusCode();
         AntiforgeryTestHelper.ImportAuthCookies(loginResponse, client);
+        await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
         return client;
     }
 
-    private async Task SeedUserAsync()
+    private async Task SeedUserAsync(string email)
     {
         using var scope = _factory.Services.CreateScope();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         await roleManager.EnsureRolesCreatedAsync();
 
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
-        if (await userManager.FindByEmailAsync(SeedData.TestUserEmail) != null)
+        if (await userManager.FindByEmailAsync(email) != null)
         {
             return;
         }
 
         var user = new AppUser
         {
-            UserName = SeedData.TestUserEmail,
-            Email = SeedData.TestUserEmail,
+            UserName = email,
+            Email = email,
             EmailConfirmed = true,
         };
 

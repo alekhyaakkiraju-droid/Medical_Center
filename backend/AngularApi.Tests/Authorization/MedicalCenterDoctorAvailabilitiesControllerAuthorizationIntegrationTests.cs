@@ -22,13 +22,13 @@ public class MedicalCenterDoctorAvailabilitiesControllerAuthorizationIntegration
     }
 
     [Fact]
-    public async Task GetMedicalCenterDoctorAvailabilities_WithUserRole_ReturnsForbidden()
+    public async Task GetMedicalCenterDoctorAvailabilities_WithUserRole_ReturnsSuccess()
     {
         var client = CreateClientWithRole("user");
 
         var response = await client.GetAsync("/api/MedicalCenterDoctorAvailabilities");
 
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]

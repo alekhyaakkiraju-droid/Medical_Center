@@ -25,11 +25,7 @@ public class CsrfProtectionIntegrationTests : AuthorizationIntegrationTestBase
         await SeedAppointmentMutationFixtureAsync();
 
         var client = CreateClientForUser("csrf-patient", "user");
-        var payload = new
-        {
-            doctorId = "csrf-doctor",
-            appointmentTakenDate = DateTime.UtcNow,
-        };
+        var payload = AppointmentTestPayloads.Valid("csrf-doctor");
 
         var response = await client.PostAsJsonAsync("/api/Appointments", payload);
 
@@ -77,11 +73,7 @@ public class CsrfProtectionIntegrationTests : AuthorizationIntegrationTestBase
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
 
-        var payload = new
-        {
-            doctorId = "csrf-doctor",
-            appointmentTakenDate = DateTime.UtcNow,
-        };
+        var payload = AppointmentTestPayloads.Valid("csrf-doctor");
 
         var response = await client.PostAsJsonAsync("/api/Appointments", payload);
 

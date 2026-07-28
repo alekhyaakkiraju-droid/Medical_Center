@@ -2,7 +2,9 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-image-lightbox',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: true,
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (imageSrc) {
       <div

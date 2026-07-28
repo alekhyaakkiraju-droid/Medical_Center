@@ -31,7 +31,7 @@ public class EnvironmentConfigurationConsistencyTests
         var compose = File.ReadAllText(Path.Combine(RepoRoot, "docker-compose.yml"));
 
         var dockerfileMatch = Regex.Match(dockerfile, @"ARG\s+API_BASE_URL=(?<value>\S+)");
-        var composeMatch = Regex.Match(compose, @"API_PUBLIC_URL:\s*\$\{API_PUBLIC_URL:-(?<value>[^}]+)\}");
+        var composeMatch = Regex.Match(compose, @"API_BASE_URL:\s*\$\{API_PUBLIC_URL:-(?<value>[^}]+)\}");
 
         dockerfileMatch.Success.Should().BeTrue();
         composeMatch.Success.Should().BeTrue();

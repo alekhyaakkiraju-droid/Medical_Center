@@ -64,18 +64,22 @@ namespace AngularApi.Tests.Controllers
             };
         }
 
-        private AccountController CreateController(AuthCookieOptions authCookieOptions)
+        private AccountController CreateController(
+            AuthCookieOptions authCookieOptions,
+            GoogleAuthOptions? googleAuthOptions = null,
+            EmailTemplateService? emailTemplateService = null)
         {
             return new AccountController(
                 _userManagerMock.Object,
                 _configurationMock.Object,
                 _emailServiceMock.Object,
-                _emailTemplateService,
+                emailTemplateService ?? _emailTemplateService,
                 _jwtServiceMock.Object,
                 _googleServiceMock.Object,
                 _authCookieServiceMock.Object,
                 _antiforgeryMock.Object,
                 Microsoft.Extensions.Options.Options.Create(authCookieOptions),
+                Microsoft.Extensions.Options.Options.Create(googleAuthOptions ?? new GoogleAuthOptions()),
                 _auditServiceMock.Object,
                 _loggerMock.Object);
         }
@@ -370,18 +374,9 @@ namespace AngularApi.Tests.Controllers
             var registerWebHostMock = new Mock<IWebHostEnvironment>();
             registerWebHostMock.Setup(env => env.WebRootPath).Returns(apiWwwRoot);
             var registerEmailTemplateService = new EmailTemplateService(registerWebHostMock.Object);
-            var controller = new AccountController(
-                _userManagerMock.Object,
-                _configurationMock.Object,
-                _emailServiceMock.Object,
-                registerEmailTemplateService,
-                _jwtServiceMock.Object,
-                _googleServiceMock.Object,
-                _authCookieServiceMock.Object,
-                _antiforgeryMock.Object,
-                Microsoft.Extensions.Options.Options.Create(new AuthCookieOptions { FrontendBaseUrl = frontendBaseUrl }),
-                _auditServiceMock.Object,
-                _loggerMock.Object);
+            var controller = CreateController(
+                new AuthCookieOptions { FrontendBaseUrl = frontendBaseUrl },
+                emailTemplateService: registerEmailTemplateService);
             controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
 
             var registerDto = new RegisterUserDTO

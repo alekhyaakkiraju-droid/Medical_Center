@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using AngularApi.Contracts.DTO;
 using AngularApi.Tests.Infrastructure;
+using AngularApi.Tests.TestData;
 using FluentAssertions;
 
 namespace AngularApi.Tests.Contracts;
@@ -43,13 +44,15 @@ public class PatientJourneyContractTests : ContractTestBase
         var patientId = await SeedPatientUserAsync();
         await SeedDoctorForAppointmentsAsync();
         var client = await LoginAsync(ContractPatientEmail, ContractPassword);
-        var response = await client.PostAsJsonAsync("/api/Appointments", new { doctorId = ContractDoctorId, appointmentTakenDate = DateTime.UtcNow.AddDays(2) });
+        var response = await client.PostAsJsonAsync("/api/Appointments", AppointmentTestPayloads.Valid(ContractDoctorId));
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         using var document = ParseJson(await response.Content.ReadAsStringAsync());
-        document.RootElement.TryGetProperty("id", out _).Should().BeTrue();
-        document.RootElement.TryGetProperty("doctorId", out var doctorId).Should().BeTrue();
+        document.RootElement.TryGetProperty("appointmentId", out _).Should().BeTrue();
+        document.RootElement.TryGetProperty("doctor", out var doctor).Should().BeTrue();
+        doctor.TryGetProperty("id", out var doctorId).Should().BeTrue();
         doctorId.GetString().Should().Be(ContractDoctorId);
-        document.RootElement.TryGetProperty("patientId", out var returnedPatientId).Should().BeTrue();
+        document.RootElement.TryGetProperty("patient", out var patient).Should().BeTrue();
+        patient.TryGetProperty("patientId", out var returnedPatientId).Should().BeTrue();
         returnedPatientId.GetString().Should().Be(patientId);
     }
 
@@ -59,7 +62,7 @@ public class PatientJourneyContractTests : ContractTestBase
         var patientId = await SeedPatientUserAsync();
         await SeedDoctorForAppointmentsAsync();
         var client = await LoginAsync(ContractPatientEmail, ContractPassword);
-        await client.PostAsJsonAsync("/api/Appointments", new { doctorId = ContractDoctorId, appointmentTakenDate = DateTime.UtcNow.AddDays(3) });
+        await client.PostAsJsonAsync("/api/Appointments", AppointmentTestPayloads.Valid(ContractDoctorId, daysFromNow: 3));
         var response = await client.GetAsync($"/api/Appointments/patient/{patientId}?pageNumber=1&pageSize=10");
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         AssertPagedResultShape(ParseJson(await response.Content.ReadAsStringAsync()));
