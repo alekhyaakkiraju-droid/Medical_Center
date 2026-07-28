@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using System.Security.Claims;
 
@@ -26,8 +27,6 @@ namespace AngularApi.Tests.Controllers
         private readonly MedicalCenterDbContext _context;
         private readonly Mock<IAppointmentService> _appointmentServiceMock;
         private readonly Mock<UserManager<AppUser>> _userManagerMock;
-        private readonly Mock<IEmailService> _emailServiceMock;
-        private readonly EmailTemplateService _emailTemplateService;
         private readonly AppointmentsController _controller;
 
         public AppointmentsControllerTests()
@@ -39,14 +38,6 @@ namespace AngularApi.Tests.Controllers
 
             var store = new Mock<IUserStore<AppUser>>();
             _userManagerMock = new Mock<UserManager<AppUser>>(store.Object, null, null, null, null, null, null, null, null);
-
-            _emailServiceMock = new Mock<IEmailService>();
-
-            var webHostEnvironmentMock = new Mock<IWebHostEnvironment>();
-            webHostEnvironmentMock
-                .Setup(env => env.WebRootPath)
-                .Returns(Path.Combine(AppContext.BaseDirectory, "wwwroot"));
-            _emailTemplateService = new EmailTemplateService(webHostEnvironmentMock.Object);
             _appointmentServiceMock = new Mock<IAppointmentService>();
 
             _controller = CreateController(_appointmentServiceMock.Object);
@@ -63,18 +54,11 @@ namespace AngularApi.Tests.Controllers
                 HttpContext = new DefaultHttpContext { User = principal }
             };
 
-            var serviceProviderMock = new Mock<IServiceProvider>();
-            serviceProviderMock.Setup(sp => sp.GetService(typeof(EmailTemplateService)))
-                .Returns(_emailTemplateService);
-            _controller.ControllerContext.HttpContext.RequestServices = serviceProviderMock.Object;
+            _controller.ControllerContext.HttpContext.RequestServices = new Mock<IServiceProvider>().Object;
         }
 
         private AppointmentsController CreateController(IAppointmentService appointmentService) =>
-            new(
-                appointmentService,
-                _userManagerMock.Object,
-                _emailServiceMock.Object,
-                _emailTemplateService);
+            new(appointmentService, _userManagerMock.Object);
 
         [Fact]
         public void AppointmentMutatingActions_HaveValidateOwnershipAttributeForAppointment()
@@ -240,13 +224,10 @@ namespace AngularApi.Tests.Controllers
         }
 
         [Fact]
-        public async Task PostAppointment_EmailFailure_StillCreatesAppointment()
+        public async Task PostAppointment_DelegatesToServiceAndReturnsCreated()
         {
             var user = new AppUser { Id = "patient1", UserName = "Patient1", Email = "patient1@example.com" };
             _userManagerMock.Setup(x => x.FindByIdAsync("patient1")).ReturnsAsync(user);
-            _emailServiceMock
-                .Setup(x => x.SendEmailAsync(It.IsAny<Message>()))
-                .ThrowsAsync(new InvalidOperationException("SMTP unavailable"));
 
             var createdAppointment = new Appointment
             {
@@ -355,7 +336,11 @@ namespace AngularApi.Tests.Controllers
         {
             var appointmentService = new AppointmentService(
                 _context,
-                Microsoft.Extensions.Options.Options.Create(new AppointmentSettings { DefaultFee = 30, DefaultCenterId = 2 }));
+                Microsoft.Extensions.Options.Options.Create(new AppointmentSettings { DefaultFee = 30, DefaultCenterId = 2 }),
+                Mock.Of<IEmailService>(),
+                new EmailTemplateService(Mock.Of<IWebHostEnvironment>(env =>
+                    env.WebRootPath == Path.Combine(AppContext.BaseDirectory, "wwwroot"))),
+                NullLogger<AppointmentService>.Instance);
             var controller = CreateController(appointmentService);
             controller.ControllerContext = _controller.ControllerContext;
 

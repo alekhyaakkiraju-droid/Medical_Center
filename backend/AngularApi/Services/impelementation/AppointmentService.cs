@@ -3,9 +3,12 @@ using AngularApi.Contracts.Enums;
 using AngularApi.Models;
 using AngularApi.Contracts.DTO;
 using AngularApi.Contracts.Models;
+using AngularApi.Contracts.Services;
 using AngularApi.Options;
+using AngularApi.Services;
 using AngularApi.Contracts.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace AngularApi.Services.impelementation;
@@ -14,11 +17,22 @@ public class AppointmentService : IAppointmentService
 {
     private readonly MedicalCenterDbContext _context;
     private readonly AppointmentSettings _appointmentSettings;
+    private readonly IEmailService _emailService;
+    private readonly EmailTemplateService _emailTemplateService;
+    private readonly ILogger<AppointmentService> _logger;
 
-    public AppointmentService(MedicalCenterDbContext context, IOptions<AppointmentSettings> appointmentSettings)
+    public AppointmentService(
+        MedicalCenterDbContext context,
+        IOptions<AppointmentSettings> appointmentSettings,
+        IEmailService emailService,
+        EmailTemplateService emailTemplateService,
+        ILogger<AppointmentService> logger)
     {
         _context = context;
         _appointmentSettings = appointmentSettings.Value;
+        _emailService = emailService;
+        _emailTemplateService = emailTemplateService;
+        _logger = logger;
     }
 
     public Task<PagedResult<AppointmentDTO>> GetAppointmentsAsync(PaginationParameters pagination, CancellationToken cancellationToken = default) =>
@@ -81,7 +95,53 @@ public class AppointmentService : IAppointmentService
         _context.Appointments.Add(appointment);
         await _context.SaveChangesAsync(cancellationToken);
 
+        await TrySendConfirmationEmailAsync(
+            appointment.Email,
+            appointment.Name ?? appointment.DoctorName ?? "Patient",
+            appointment.DoctorName ?? "Doctor",
+            appointment.AppointmentTakenDate ?? appointment.ProbableStartTime ?? DateTime.UtcNow,
+            appointment.Id,
+            cancellationToken);
+
         return (appointment, null);
+    }
+
+    private async Task TrySendConfirmationEmailAsync(
+        string? patientEmail,
+        string patientName,
+        string doctorName,
+        DateTime appointmentDate,
+        int appointmentId,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(patientEmail))
+        {
+            _logger.LogWarning(
+                "Skipping appointment confirmation email because patient email is missing. AppointmentId={AppointmentId}",
+                appointmentId);
+            return;
+        }
+
+        try
+        {
+            var encodedPatientName = System.Net.WebUtility.HtmlEncode(patientName);
+            var encodedDoctorName = System.Net.WebUtility.HtmlEncode(doctorName);
+            var formattedDate = appointmentDate.ToString("f");
+            var emailBody = _emailTemplateService.GetAppointmentConfirmationEmail(
+                encodedPatientName,
+                encodedDoctorName,
+                formattedDate);
+            var message = new Message([patientEmail], "Appointment Confirmation - CareShift", emailBody);
+            await _emailService.SendEmailAsync(message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(
+                ex,
+                "Failed to send appointment confirmation email. AppointmentId={AppointmentId} PatientEmail={PatientEmail}",
+                appointmentId,
+                patientEmail);
+        }
     }
 
     public async Task<bool> DeleteAppointmentAsync(int id, CancellationToken cancellationToken = default)

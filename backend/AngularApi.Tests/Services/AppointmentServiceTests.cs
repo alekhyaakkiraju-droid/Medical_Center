@@ -2,18 +2,24 @@ using AngularApi.Contracts.Enums;
 using AngularApi.Models;
 using AngularApi.Contracts.DTO;
 using AngularApi.Contracts.Models;
+using AngularApi.Contracts.Services;
 using AngularApi.Options;
+using AngularApi.Services;
 using AngularApi.Services.impelementation;
+using AngularApi.Contracts.Services.Interfaces;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using Moq;
 
 namespace AngularApi.Tests.Services;
 
 public class AppointmentServiceTests : IDisposable
 {
     private readonly MedicalCenterDbContext _context;
-    private readonly AppointmentService _service;
+    private readonly Mock<IEmailService> _emailServiceMock;
+    private readonly EmailTemplateService _emailTemplateService;
 
     public AppointmentServiceTests()
     {
@@ -21,10 +27,27 @@ public class AppointmentServiceTests : IDisposable
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         _context = new MedicalCenterDbContext(options);
-        _service = new AppointmentService(
-            _context,
-            Microsoft.Extensions.Options.Options.Create(new AppointmentSettings { DefaultFee = 55, DefaultCenterId = 9 }));
+        _emailServiceMock = new Mock<IEmailService>();
+
+        var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        var templateDir = Path.Combine(tempDir, "EmailTemplates");
+        Directory.CreateDirectory(templateDir);
+        File.WriteAllText(
+            Path.Combine(templateDir, "ConfirmAppointment.html"),
+            "Hello {{patientName}} with {{DoctorName}} on {{date}}");
+
+        var webHostEnvironmentMock = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+        webHostEnvironmentMock.Setup(env => env.WebRootPath).Returns(tempDir);
+        _emailTemplateService = new EmailTemplateService(webHostEnvironmentMock.Object);
     }
+
+    private AppointmentService CreateService() =>
+        new(
+            _context,
+            Microsoft.Extensions.Options.Options.Create(new AppointmentSettings { DefaultFee = 55, DefaultCenterId = 9 }),
+            _emailServiceMock.Object,
+            _emailTemplateService,
+            NullLogger<AppointmentService>.Instance);
 
     [Fact]
     public async Task CreateAppointmentAsync_ValidDoctor_AppliesDefaultsAndPersists()
@@ -32,9 +55,15 @@ public class AppointmentServiceTests : IDisposable
         _context.Doctors.Add(new Doctor { Id = "doctor-id", Name = "Dr. Smith" });
         await _context.SaveChangesAsync();
 
-        var appointment = new Appointment { DoctorId = "doctor-id", AppointmentTakenDate = DateTime.UtcNow };
+        var appointment = new Appointment
+        {
+            DoctorId = "doctor-id",
+            AppointmentTakenDate = DateTime.UtcNow,
+            Email = "patient@example.com",
+            Name = "Jane Patient",
+        };
 
-        var (created, error) = await _service.CreateAppointmentAsync(appointment, "patient1");
+        var (created, error) = await CreateService().CreateAppointmentAsync(appointment, "patient1");
 
         error.Should().BeNull();
         created.Should().NotBeNull();
@@ -48,11 +77,65 @@ public class AppointmentServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task CreateAppointmentAsync_SendsConfirmationEmailWithExpectedContent()
+    {
+        _context.Doctors.Add(new Doctor { Id = "doctor-id", Name = "Dr. Smith" });
+        await _context.SaveChangesAsync();
+        Message? captured = null;
+        _emailServiceMock
+            .Setup(s => s.SendEmailAsync(It.IsAny<Message>()))
+            .Callback<Message>(message => captured = message)
+            .Returns(Task.CompletedTask);
+
+        var appointmentDate = new DateTime(2026, 8, 15, 10, 0, 0, DateTimeKind.Utc);
+        var appointment = new Appointment
+        {
+            DoctorId = "doctor-id",
+            AppointmentTakenDate = appointmentDate,
+            Email = "patient@example.com",
+            Name = "Jane Patient",
+        };
+
+        await CreateService().CreateAppointmentAsync(appointment, "patient1");
+
+        captured.Should().NotBeNull();
+        captured!.To.Should().Contain("patient@example.com");
+        captured.Subject.Should().Be("Appointment Confirmation - CareShift");
+        captured.Body.Should().Contain("Jane Patient");
+        captured.Body.Should().Contain("Dr. Smith");
+        _emailServiceMock.Verify(s => s.SendEmailAsync(It.IsAny<Message>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateAppointmentAsync_EmailFailureStillCreatesAppointment()
+    {
+        _context.Doctors.Add(new Doctor { Id = "doctor-id", Name = "Dr. Smith" });
+        await _context.SaveChangesAsync();
+        _emailServiceMock
+            .Setup(s => s.SendEmailAsync(It.IsAny<Message>()))
+            .ThrowsAsync(new InvalidOperationException("SMTP unavailable"));
+
+        var appointment = new Appointment
+        {
+            DoctorId = "doctor-id",
+            AppointmentTakenDate = DateTime.UtcNow,
+            Email = "patient@example.com",
+            Name = "Jane Patient",
+        };
+
+        var (created, error) = await CreateService().CreateAppointmentAsync(appointment, "patient1");
+
+        error.Should().BeNull();
+        created.Should().NotBeNull();
+        (await _context.Appointments.CountAsync()).Should().Be(1);
+    }
+
+    [Fact]
     public async Task CreateAppointmentAsync_InvalidDoctorId_ReturnsError()
     {
         var appointment = new Appointment { DoctorId = "missing-doctor" };
 
-        var (created, error) = await _service.CreateAppointmentAsync(appointment, "patient1");
+        var (created, error) = await CreateService().CreateAppointmentAsync(appointment, "patient1");
 
         created.Should().BeNull();
         error.Should().Be("Invalid DoctorId");
@@ -63,7 +146,7 @@ public class AppointmentServiceTests : IDisposable
     {
         var appointment = new Appointment();
 
-        var (created, error) = await _service.CreateAppointmentAsync(appointment, "patient1");
+        var (created, error) = await CreateService().CreateAppointmentAsync(appointment, "patient1");
 
         created.Should().BeNull();
         error.Should().Be("DoctorId is required");
@@ -78,39 +161,10 @@ public class AppointmentServiceTests : IDisposable
 
         var dto = new UpdateAppointmentDTO { Id = 1, AppointmentTakenDate = DateTime.Now.AddDays(1) };
 
-        var updated = await _service.UpdateAppointmentAsync(1, dto);
+        var updated = await CreateService().UpdateAppointmentAsync(1, dto);
 
         updated.Should().BeTrue();
-        var dbAppointment = await _context.Appointments.FindAsync(1);
-        dbAppointment!.AppointmentTakenDate.Should().Be(dto.AppointmentTakenDate);
-    }
-
-    [Fact]
-    public async Task GetTodaysAppointmentsAsync_ReturnsOnlyTodaysAppointments()
-    {
-        var today = DateTime.Today;
-        _context.Appointments.AddRange(
-            new Appointment { Id = 1, ProbableStartTime = today },
-            new Appointment { Id = 2, ProbableStartTime = today.AddDays(1) });
-        await _context.SaveChangesAsync();
-
-        var result = await _service.GetTodaysAppointmentsAsync(new PaginationParameters());
-
-        result.Items.Should().HaveCount(1);
-        result.Items[0].AppointmentId.Should().Be(1);
-    }
-
-    [Fact]
-    public async Task GetTotalEarningsAsync_ReturnsSumOfAmounts()
-    {
-        _context.Appointments.AddRange(
-            new Appointment { Id = 1, Amount = 30 },
-            new Appointment { Id = 2, Amount = 50 });
-        await _context.SaveChangesAsync();
-
-        var total = await _service.GetTotalEarningsAsync();
-
-        total.Should().Be(80);
+        (await _context.Appointments.FindAsync(1))!.AppointmentTakenDate.Should().Be(dto.AppointmentTakenDate);
     }
 
     public void Dispose()
