@@ -1,9 +1,7 @@
 using AngularApi.Filters;
-using AngularApi.Contracts.Services;
-﻿using AngularApi.Contracts.DTO;
+using AngularApi.Contracts.DTO;
 using AngularApi.Contracts.Enums;
 using AngularApi.Contracts.Models;
-using AngularApi.Services;
 using AngularApi.Contracts.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -19,19 +17,13 @@ namespace AngularApi.Controllers
     {
         private readonly IAppointmentService _appointmentService;
         private readonly UserManager<AppUser> _userManager;
-        private readonly EmailTemplateService _emailTemplateService;
-        private readonly IEmailService _emailService;
 
         public AppointmentsController(
             IAppointmentService appointmentService,
-            UserManager<AppUser> userManager,
-            IEmailService emailService,
-            EmailTemplateService emailTemplateService)
+            UserManager<AppUser> userManager)
         {
             _appointmentService = appointmentService;
             _userManager = userManager;
-            _emailService = emailService;
-            _emailTemplateService = emailTemplateService;
         }
 
         [Authorize(Policy = "AdminPolicy")]
@@ -98,7 +90,7 @@ namespace AngularApi.Controllers
 
         [Authorize(Policy = "UserPolicy")]
         [HttpPost]
-        public async Task<ActionResult<Appointment>> PostAppointment(Appointment appointment)
+        public async Task<ActionResult<AppointmentDTO>> PostAppointment([FromBody] CreateAppointmentDTO dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var user = await _userManager.FindByIdAsync(userId!);
@@ -107,27 +99,13 @@ namespace AngularApi.Controllers
                 return NotFound("User not found");
             }
 
-            var (createdAppointment, errorMessage) = await _appointmentService.CreateAppointmentAsync(appointment, userId!);
+            var (createdAppointment, errorMessage) = await _appointmentService.CreateAppointmentAsync(dto, userId!);
             if (errorMessage != null)
             {
                 return BadRequest(errorMessage);
             }
 
-            try
-            {
-                var emailBody = _emailTemplateService.GetAppointmentConfirmationEmail(
-                    user.UserName!,
-                    createdAppointment!.DoctorName!,
-                    createdAppointment.AppointmentTakenDate.ToString());
-                var messageObj = new Message(new[] { user.Email! }, "Appointment Confirmation", emailBody);
-                await _emailService.SendEmailAsync(messageObj);
-            }
-            catch (Exception)
-            {
-                // Email failure must not prevent appointment creation.
-            }
-
-            return CreatedAtAction("GetAppointment", new { id = createdAppointment!.Id }, createdAppointment);
+            return CreatedAtAction(nameof(GetAppointment), new { id = createdAppointment!.AppointmentId }, createdAppointment);
         }
 
         [Authorize(Roles = "admin,doctor")]

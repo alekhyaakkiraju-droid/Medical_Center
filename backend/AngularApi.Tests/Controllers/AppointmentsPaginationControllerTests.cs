@@ -3,13 +3,16 @@ using AngularApi.Controllers;
 using AngularApi.Contracts.DTO;
 using AngularApi.Contracts.Models;
 using AngularApi.Options;
+using AngularApi.Services;
 using AngularApi.Services.impelementation;
 using AngularApi.Contracts.Services.Interfaces;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using Moq;
 using System.Security.Claims;
 
 namespace AngularApi.Tests.Controllers;
@@ -27,11 +30,13 @@ public class AppointmentsPaginationControllerTests : IDisposable
         _context = new MedicalCenterDbContext(options);
         var appointmentService = new AppointmentService(
             _context,
-            Microsoft.Extensions.Options.Options.Create(new AppointmentSettings()));
+            Microsoft.Extensions.Options.Options.Create(new AppointmentSettings()),
+            Mock.Of<IEmailService>(),
+            new EmailTemplateService(Mock.Of<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>(env =>
+                env.WebRootPath == Path.Combine(AppContext.BaseDirectory, "wwwroot"))),
+            NullLogger<AppointmentService>.Instance);
         _controller = new AppointmentsController(
             appointmentService,
-            null!,
-            null!,
             null!);
 
         var claims = new[]

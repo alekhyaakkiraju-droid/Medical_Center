@@ -144,6 +144,7 @@
                   formControlName="doctor"
                   aria-label="Doctor"
                   class="form-control main"
+                  (change)="appointmentForm.patchValue({ date: '', timeSlot: '' })"
                   [ngClass]="{ 'is-invalid': doctor?.invalid && doctor?.touched }"
                   >
                   <option value="">Select Doctor</option>
@@ -158,6 +159,34 @@
                     @if (doctor?.hasError('required')) {
                       <small>Doctor is required</small>
                     }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Time Slot Selection -->
+            <div class="col-md-12 col-sm-12 col-xs-12">
+              <div class="form-group">
+                @if (availabilityMessage) {
+                  <p class="text-warning">{{ availabilityMessage }}</p>
+                }
+                @if (availableTimeSlots.length > 0) {
+                  <div class="d-flex flex-wrap gap-2">
+                    @for (slot of availableTimeSlots; track slot.startTime) {
+                      <button
+                        type="button"
+                        class="btn btn-outline-primary"
+                        [ngClass]="{ 'active': isSlotSelected(slot) }"
+                        [attr.aria-label]="'Select ' + slot.label + ' slot'"
+                        (click)="selectTimeSlot(slot)">
+                        {{ slot.label }}
+                      </button>
+                    }
+                  </div>
+                }
+                @if (timeSlot?.invalid && timeSlot?.touched) {
+                  <div class="text-danger">
+                    <small>Please select a time slot</small>
                   </div>
                 }
               </div>
@@ -194,7 +223,7 @@
                   <button
                     type="submit"
                     class="btn-style-one" [attr.data-content]="'Book now for ' + (appointmentFee | currency:'USD':'symbol':'1.2-2') + ' before prices change. Don\'t miss out!'" data-toggle="popover" title="Special Offer!"
-                    [disabled]="appointmentForm.invalid">
+                    [disabled]="appointmentForm.invalid || availableTimeSlots.length === 0">
                     Submit Now
                   </button>
                 </div>

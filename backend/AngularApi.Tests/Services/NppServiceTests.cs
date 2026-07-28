@@ -83,7 +83,7 @@ public class NppServiceTests
     private static NppService CreateService(string version, MedicalCenterDbContext? context = null)
     {
         context ??= CreateContext();
-        var settings = Options.Create(new NppSettings
+        var settings = Microsoft.Extensions.Options.Options.Create(new NppSettings
         {
             CurrentVersion = version,
             ContentFilePath = "wwwroot/legal/npp.md",

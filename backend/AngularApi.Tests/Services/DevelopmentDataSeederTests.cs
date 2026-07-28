@@ -269,7 +269,7 @@ public class DevelopmentDataSeederTests
         var context = scope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
 
         var patients = await context.Patients.ToListAsync();
-        patients.Should().HaveCount(2);
+        patients.Should().HaveCount(3);
         patients.Should().OnlyContain(p => !string.IsNullOrWhiteSpace(p.Name));
         patients.Should().OnlyContain(p => !string.IsNullOrWhiteSpace(((AppUser)p).Address));
     }
@@ -287,12 +287,16 @@ public class DevelopmentDataSeederTests
             .Include(a => a.AppointmentStatus)
             .ToListAsync();
 
-        appointments.Should().HaveCountGreaterThanOrEqualTo(5);
-        appointments.Select(a => a.AppointmentStatus!.Status).Distinct().Count().Should().BeGreaterThanOrEqualTo(2);
+        appointments.Should().HaveCountGreaterThanOrEqualTo(15);
+        appointments.Select(a => a.AppointmentStatus!.Status).Distinct().Count().Should().BeGreaterThanOrEqualTo(3);
         appointments.Should().OnlyContain(a => !string.IsNullOrWhiteSpace(a.DoctorId));
         appointments.Should().OnlyContain(a => !string.IsNullOrWhiteSpace(a.PatientId));
         appointments.Should().OnlyContain(a => a.MedicalCenterId == DevelopmentDataSeeder.DefaultMedicalCenterId);
-        appointments.Should().OnlyContain(a => a.Amount == 30.00m);
+        appointments.Select(a => a.PaymentStatus).Distinct().Count().Should().BeGreaterThanOrEqualTo(3);
+        appointments.Count(a => a.AppointmentTakenDate >= DateTime.UtcNow.Date).Should().BeGreaterThanOrEqualTo(3);
+        appointments.Count(a => a.AppointmentTakenDate == DateTime.UtcNow.Date).Should().BeGreaterThanOrEqualTo(2);
+        appointments.Should().Contain(a => a.Amount == 50.00m);
+        appointments.Should().Contain(a => a.Amount == 30.00m);
     }
 
     [Fact]

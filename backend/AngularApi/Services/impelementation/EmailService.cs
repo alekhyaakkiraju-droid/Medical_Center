@@ -1,8 +1,6 @@
 using AngularApi.Contracts.Services;
 using AngularApi.Options;
 using AngularApi.Contracts.Services.Interfaces;
-using MailKit.Net.Smtp;
-using MailKit.Security;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
@@ -15,6 +13,7 @@ namespace AngularApi.Services.impelementation
     {
         private readonly IConfiguration _configuration;
         private readonly SmtpSettings _smtpSettings;
+        private readonly IEmailTransport _emailTransport;
         private readonly BaaFeatureFlags _baaFeatureFlags;
         private readonly ILogger<EmailService> _logger;
         private readonly ResiliencePipeline _retryPipeline;
@@ -22,19 +21,30 @@ namespace AngularApi.Services.impelementation
         public EmailService(
             IConfiguration configuration,
             IOptions<SmtpSettings> smtpSettings,
+            IEmailTransport emailTransport,
             IOptions<BaaFeatureFlags> baaFeatureFlags,
             ILogger<EmailService> logger)
         {
             _configuration = configuration;
             _smtpSettings = smtpSettings.Value;
+            _emailTransport = emailTransport;
             _baaFeatureFlags = baaFeatureFlags.Value;
             _logger = logger;
             _retryPipeline = new ResiliencePipelineBuilder()
                 .AddRetry(new RetryStrategyOptions
                 {
                     MaxRetryAttempts = 3,
-                    DelayGenerator = static args => new ValueTask<TimeSpan?>(TimeSpan.FromMilliseconds(1000 * args.AttemptNumber)),
-                    ShouldHandle = new PredicateBuilder().Handle<Exception>()
+                    DelayGenerator = static args =>
+                        new ValueTask<TimeSpan?>(TimeSpan.FromMilliseconds(1000 * args.AttemptNumber)),
+                    ShouldHandle = new PredicateBuilder().Handle<Exception>(),
+                    OnRetry = args =>
+                    {
+                        logger.LogWarning(
+                            "Email SMTP send retry attempt {AttemptNumber} after {Delay}ms delay",
+                            args.AttemptNumber,
+                            1000 * args.AttemptNumber);
+                        return ValueTask.CompletedTask;
+                    }
                 })
                 .Build();
         }
@@ -58,18 +68,19 @@ namespace AngularApi.Services.impelementation
             emailMessage.From.Add(new MailboxAddress("Medical Center", emailUsername));
             emailMessage.Subject = message.Subject;
             emailMessage.Body = new TextPart("html") { Text = message.Body };
-            foreach (var recipient in message.To)
-                emailMessage.To.Add(MailboxAddress.Parse(recipient));
 
-            await _retryPipeline.ExecuteAsync(async _ =>
+            foreach (var recipient in message.To)
             {
-                using var smtpClient = new SmtpClient();
-                var secureSocketOptions = _smtpSettings.UseTls ? SecureSocketOptions.StartTls : SecureSocketOptions.None;
-                await smtpClient.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port, secureSocketOptions);
-                await smtpClient.AuthenticateAsync(emailUsername, emailPassword);
-                await smtpClient.SendAsync(emailMessage);
-                await smtpClient.DisconnectAsync(true);
-            });
+                emailMessage.To.Add(MailboxAddress.Parse(recipient));
+            }
+
+            await _retryPipeline.ExecuteAsync(
+                async token => await _emailTransport.SendAsync(
+                    emailMessage,
+                    _smtpSettings,
+                    emailUsername,
+                    emailPassword,
+                    token));
         }
 
         private static bool IsPhiContainingMessage(Message message)

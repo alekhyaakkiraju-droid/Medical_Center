@@ -8,7 +8,7 @@ namespace AngularApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Policy = "AdminPolicy")]
+    [Authorize]
     public class MedicalCenterDoctorAvailabilitiesController : ControllerBase
     {
         private readonly IMedicalCenterDoctorAvailabilityService _availabilityService;
@@ -19,6 +19,7 @@ namespace AngularApi.Controllers
         }
 
         // GET: api/MedicalCenterDoctorAvailabilities
+        [Authorize(Roles = "user,doctor,admin")]
         [HttpGet]
         public async Task<ActionResult<PagedResult<MedicalCenterDoctorAvailabilityDTO>>> GetMedicalCenterDoctorAvailability([FromQuery] PaginationParameters pagination)
         {
@@ -26,6 +27,7 @@ namespace AngularApi.Controllers
         }
 
         // GET: api/MedicalCenterDoctorAvailabilities/5
+        [Authorize(Roles = "user,doctor,admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<MedicalCenterDoctorAvailabilityDetailDTO>> GetMedicalCenterDoctorAvailability(int id)
         {
@@ -41,6 +43,7 @@ namespace AngularApi.Controllers
 
         // PUT: api/MedicalCenterDoctorAvailabilities/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutMedicalCenterDoctorAvailability(int id, UpdateMedicalCenterDoctorAvailabilityDTO dto)
         {
@@ -50,6 +53,7 @@ namespace AngularApi.Controllers
 
         // POST: api/MedicalCenterDoctorAvailabilities
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost]
         public async Task<ActionResult<MedicalCenterDoctorAvailability>> PostMedicalCenterDoctorAvailability(CreateMedicalCenterDoctorAvailabilityDTO dto)
         {
@@ -63,6 +67,7 @@ namespace AngularApi.Controllers
         }
 
         // DELETE: api/MedicalCenterDoctorAvailabilities/5
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMedicalCenterDoctorAvailability(int id)
         {

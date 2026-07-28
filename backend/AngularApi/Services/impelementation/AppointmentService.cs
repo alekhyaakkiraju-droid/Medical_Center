@@ -3,6 +3,7 @@ using AngularApi.Contracts.DTO;
 using AngularApi.Contracts.Enums;
 using AngularApi.Contracts.Models;
 using AngularApi.Contracts.Services;
+using AngularApi.DTO;
 using AngularApi.Models;
 using AngularApi.Options;
 using AngularApi.Services;
@@ -57,50 +58,92 @@ public class AppointmentService : IAppointmentService
     public async Task<decimal> GetTotalEarningsAsync(CancellationToken cancellationToken = default) =>
         await _context.Appointments.SumAsync(p => p.Amount, cancellationToken) ?? 0m;
 
-    public async Task<(Appointment? Appointment, string? ErrorMessage)> CreateAppointmentAsync(
-        CreateAppointmentDTO dto, string patientId, CancellationToken cancellationToken = default)
+    public async Task<(AppointmentDTO? Appointment, string? ErrorMessage)> CreateAppointmentAsync(
+        CreateAppointmentDTO dto,
+        string patientId,
+        CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(dto.DoctorId)) return (null, "DoctorId is required");
+        if (string.IsNullOrEmpty(dto.DoctorId))
+        {
+            return (null, "DoctorId is required");
+        }
+
         var doctor = await _context.Doctors.FindAsync([dto.DoctorId], cancellationToken);
-        if (doctor == null) return (null, "Invalid DoctorId");
-        var medicalCenter = await _context.MedicalCenter.FindAsync([dto.MedicalCenterId], cancellationToken);
-        if (medicalCenter == null) return (null, "Invalid MedicalCenterId");
+        if (doctor == null)
+        {
+            return (null, "Invalid DoctorId");
+        }
 
         var appointment = new Appointment
         {
             DoctorId = dto.DoctorId,
-            DoctorName = doctor.Name,
-            PatientId = patientId,
-            MedicalCenterId = dto.MedicalCenterId,
+            MedicalCenterId = dto.MedicalCenterId > 0 ? dto.MedicalCenterId : _appointmentSettings.DefaultCenterId,
+            AppointmentTakenDate = dto.AppointmentTakenDate,
+            ProbableStartTime = dto.ProbableStartTime,
             Name = dto.Name,
             Email = dto.Email,
             Phone = dto.Phone,
-            AppointmentTakenDate = dto.AppointmentTakenDate,
-            ProbableStartTime = dto.ProbableStartTime,
+            DoctorName = doctor.Name,
+            PatientId = patientId,
             AppointmentStatusId = (int)AppointmentStatusEnum.Active,
-            Amount = medicalCenter.FirstConsultationFee ?? _appointmentSettings.DefaultFee,
+            Amount = _appointmentSettings.DefaultFee,
             PaymentStatus = "Pending",
         };
+
         _context.Appointments.Add(appointment);
         await _context.SaveChangesAsync(cancellationToken);
-        await SendConfirmationEmailAsync(appointment);
-        return (appointment, null);
+
+        await TrySendConfirmationEmailAsync(
+            appointment.Email,
+            appointment.Name ?? appointment.DoctorName ?? "Patient",
+            appointment.DoctorName ?? "Doctor",
+            appointment.AppointmentTakenDate ?? appointment.ProbableStartTime ?? DateTime.UtcNow,
+            appointment.Id,
+            cancellationToken);
+
+        var createdDto = await _context.Appointments
+            .Where(a => a.Id == appointment.Id)
+            .SelectAppointmentDto()
+            .FirstAsync(cancellationToken);
+
+        return (createdDto, null);
     }
 
-    private async Task SendConfirmationEmailAsync(Appointment appointment)
+    private async Task TrySendConfirmationEmailAsync(
+        string? patientEmail,
+        string patientName,
+        string doctorName,
+        DateTime appointmentDate,
+        int appointmentId,
+        CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(appointment.Email)) return;
+        if (string.IsNullOrWhiteSpace(patientEmail))
+        {
+            _logger.LogWarning(
+                "Skipping appointment confirmation email because patient email is missing. AppointmentId={AppointmentId}",
+                appointmentId);
+            return;
+        }
+
         try
         {
-            var body = _emailTemplateService.GetAppointmentConfirmationEmail(
-                WebUtility.HtmlEncode(appointment.Name ?? "Patient"),
-                WebUtility.HtmlEncode(appointment.DoctorName ?? "Doctor"),
-                appointment.ProbableStartTime?.ToString("f") ?? appointment.AppointmentTakenDate?.ToString("f") ?? "");
-            await _emailService.SendEmailAsync(new Message([appointment.Email], "Appointment Confirmation - CareShift", body));
+            var encodedPatientName = WebUtility.HtmlEncode(patientName);
+            var encodedDoctorName = WebUtility.HtmlEncode(doctorName);
+            var formattedDate = appointmentDate.ToString("f");
+            var emailBody = _emailTemplateService.GetAppointmentConfirmationEmail(
+                encodedPatientName,
+                encodedDoctorName,
+                formattedDate);
+            var message = new Message([patientEmail], "Appointment Confirmation - CareShift", emailBody);
+            await _emailService.SendEmailAsync(message);
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to send appointment confirmation email for appointment {AppointmentId}", appointment.Id);
+            _logger.LogWarning(
+                ex,
+                "Failed to send appointment confirmation email. AppointmentId={AppointmentId} PatientEmail={PatientEmail}",
+                appointmentId,
+                patientEmail);
         }
     }
 
