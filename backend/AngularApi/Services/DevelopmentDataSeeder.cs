@@ -24,6 +24,7 @@ public static class DevelopmentDataSeeder
     public const string DoctorJonesEmail = "dr.jones@uat.careshift.local";
     public const string PatientAliceEmail = "patient.alice@uat.careshift.local";
     public const string PatientBobEmail = "patient.bob@uat.careshift.local";
+    public const string PatientCarolEmail = "patient.carol@uat.careshift.local";
 
     private static readonly string[] AvailabilityDays = ["Monday", "Wednesday", "Friday"];
 
@@ -313,6 +314,13 @@ public static class DevelopmentDataSeeder
                 Name = "Bob Martinez",
                 Address = "456 Oak Avenue, Portland, OR 97201",
                 Image = "images/patients/patients-2.jpg",
+            },
+            new
+            {
+                Email = PatientCarolEmail,
+                Name = "Carol Chen",
+                Address = "789 Pine Road, Austin, TX 78701",
+                Image = "images/patients/patients-3.jpg",
             }
         };
 
@@ -381,6 +389,16 @@ public static class DevelopmentDataSeeder
         }
     }
 
+    private sealed record AppointmentSeedDefinition(
+        int DoctorIndex,
+        int PatientIndex,
+        int DateOffsetDays,
+        int StartHour,
+        AppointmentStatusEnum Status,
+        string PaymentStatus,
+        bool IsFollowUp,
+        int? DurationMinutes = null);
+
     private static async Task SeedAppointmentsAsync(
         MedicalCenterDbContext context,
         IReadOnlyList<Doctor> doctors,
@@ -397,94 +415,62 @@ public static class DevelopmentDataSeeder
             return;
         }
 
+        var medicalCenter = await context.MedicalCenter.FindAsync(medicalCenterId);
+        var firstConsultationFee = medicalCenter?.FirstConsultationFee ?? 50.00m;
+        var followupConsultationFee = medicalCenter?.FollowupConsultationFee ?? 30.00m;
         var today = DateTime.UtcNow.Date;
-        const decimal defaultFee = 30.00m;
 
-        var doctorOne = doctors[0];
-        var doctorTwo = doctors[1];
-        var patientOne = patients[0];
-        var patientTwo = patients[1];
-
-        var appointments = new[]
+        var definitions = new AppointmentSeedDefinition[]
         {
-            new Appointment
-            {
-                DoctorId = doctorOne.Id,
-                PatientId = patientOne.Id,
-                MedicalCenterId = medicalCenterId,
-                DoctorName = doctorOne.Name,
-                Name = patientOne.Name,
-                Email = patientOne.Email,
-                Phone = "555-0101",
-                AppointmentStatusId = (int)AppointmentStatusEnum.Active,
-                AppointmentTakenDate = today,
-                ProbableStartTime = today.AddHours(10),
-                Amount = defaultFee,
-                PaymentStatus = "Pending",
-            },
-            new Appointment
-            {
-                DoctorId = doctorOne.Id,
-                PatientId = patientTwo.Id,
-                MedicalCenterId = medicalCenterId,
-                DoctorName = doctorOne.Name,
-                Name = patientTwo.Name,
-                Email = patientTwo.Email,
-                Phone = "555-0102",
-                AppointmentStatusId = (int)AppointmentStatusEnum.Complete,
-                AppointmentTakenDate = today.AddDays(-1),
-                ProbableStartTime = today.AddDays(-1).AddHours(14),
-                ActualEndTime = today.AddDays(-1).AddHours(14).AddMinutes(30),
-                Amount = defaultFee,
-                PaymentStatus = "Paid",
-            },
-            new Appointment
-            {
-                DoctorId = doctorTwo.Id,
-                PatientId = patientOne.Id,
-                MedicalCenterId = medicalCenterId,
-                DoctorName = doctorTwo.Name,
-                Name = patientOne.Name,
-                Email = patientOne.Email,
-                Phone = "555-0103",
-                AppointmentStatusId = (int)AppointmentStatusEnum.Canceled,
-                AppointmentTakenDate = today.AddDays(-2),
-                ProbableStartTime = today.AddDays(-2).AddHours(9),
-                Amount = defaultFee,
-                PaymentStatus = "Refunded",
-            },
-            new Appointment
-            {
-                DoctorId = doctorTwo.Id,
-                PatientId = patientTwo.Id,
-                MedicalCenterId = medicalCenterId,
-                DoctorName = doctorTwo.Name,
-                Name = patientTwo.Name,
-                Email = patientTwo.Email,
-                Phone = "555-0104",
-                AppointmentStatusId = (int)AppointmentStatusEnum.Active,
-                AppointmentTakenDate = today.AddDays(-7),
-                ProbableStartTime = today.AddDays(-7).AddHours(11),
-                Amount = defaultFee,
-                PaymentStatus = "Pending",
-            },
-            new Appointment
-            {
-                DoctorId = doctorOne.Id,
-                PatientId = patientOne.Id,
-                MedicalCenterId = medicalCenterId,
-                DoctorName = doctorOne.Name,
-                Name = patientOne.Name,
-                Email = patientOne.Email,
-                Phone = "555-0105",
-                AppointmentStatusId = (int)AppointmentStatusEnum.Complete,
-                AppointmentTakenDate = today.AddDays(-14),
-                ProbableStartTime = today.AddDays(-14).AddHours(16),
-                ActualEndTime = today.AddDays(-14).AddHours(16).AddMinutes(45),
-                Amount = defaultFee,
-                PaymentStatus = "Paid",
-            },
+            new(0, 0, 0, 9, AppointmentStatusEnum.Active, "Pending", false),
+            new(0, 0, 0, 14, AppointmentStatusEnum.Active, "Paid", true),
+            new(0, 1, 0, 11, AppointmentStatusEnum.Active, "Pending", false),
+            new(0, 1, 7, 10, AppointmentStatusEnum.Active, "Pending", false),
+            new(0, 2, 14, 15, AppointmentStatusEnum.Active, "Pending", false),
+            new(0, 2, -1, 16, AppointmentStatusEnum.Complete, "Paid", true),
+            new(1, 0, 0, 10, AppointmentStatusEnum.Active, "Pending", false),
+            new(1, 0, 3, 13, AppointmentStatusEnum.Active, "Pending", false),
+            new(1, 1, -2, 9, AppointmentStatusEnum.Canceled, "Refunded", false),
+            new(1, 1, 21, 11, AppointmentStatusEnum.Active, "Pending", false),
+            new(1, 2, 0, 15, AppointmentStatusEnum.Active, "Pending", false),
+            new(1, 2, -7, 12, AppointmentStatusEnum.Complete, "Paid", true),
+            new(0, 0, -14, 10, AppointmentStatusEnum.Complete, "Paid", false),
+            new(0, 1, -3, 13, AppointmentStatusEnum.Complete, "Paid", true),
+            new(0, 2, 5, 9, AppointmentStatusEnum.Active, "Pending", false),
+            new(1, 0, -5, 14, AppointmentStatusEnum.Canceled, "Refunded", false),
+            new(1, 1, 10, 16, AppointmentStatusEnum.Active, "Pending", false),
+            new(1, 2, 28, 10, AppointmentStatusEnum.Active, "Pending", false),
         };
+
+        var appointments = definitions
+            .Select(definition =>
+            {
+                var doctor = doctors[Math.Min(definition.DoctorIndex, doctors.Count - 1)];
+                var patient = patients[Math.Min(definition.PatientIndex, patients.Count - 1)];
+                var appointmentDate = today.AddDays(definition.DateOffsetDays);
+                var startTime = appointmentDate.AddHours(definition.StartHour);
+                var fee = definition.IsFollowUp ? followupConsultationFee : firstConsultationFee;
+
+                return new Appointment
+                {
+                    DoctorId = doctor.Id,
+                    PatientId = patient.Id,
+                    MedicalCenterId = medicalCenterId,
+                    DoctorName = doctor.Name,
+                    Name = patient.Name,
+                    Email = patient.Email,
+                    Phone = $"555-01{definition.DoctorIndex}{definition.PatientIndex}{Math.Abs(definition.DateOffsetDays) % 10}",
+                    AppointmentStatusId = (int)definition.Status,
+                    AppointmentTakenDate = appointmentDate,
+                    ProbableStartTime = startTime,
+                    ActualEndTime = definition.Status == AppointmentStatusEnum.Complete
+                        ? startTime.AddMinutes(definition.DurationMinutes ?? 30)
+                        : null,
+                    Amount = fee,
+                    PaymentStatus = definition.PaymentStatus,
+                };
+            })
+            .ToArray();
 
         context.Appointments.AddRange(appointments);
         await context.SaveChangesAsync();
