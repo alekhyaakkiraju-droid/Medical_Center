@@ -6,8 +6,8 @@ import { DoctorDashboardComponent } from './pages/dashboard/doctor-dashboard.com
 
 export const DOCTOR_ROUTES: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-  { path: 'dashboard', component: DoctorDashboardComponent },
-  { path: 'doctor-appointments', component: RelatedAppointmentsComponent },
-  { path: 'doctor-profile', component: DoctorProfileComponent },
-  { path: 'patient-reviews', component: PatientReviewsComponent },
+  { path: 'dashboard', component: DoctorDashboardComponent, data: { title: 'Doctor Dashboard - CareShift' } },
+  { path: 'doctor-appointments', component: RelatedAppointmentsComponent, data: { title: 'Appointments - CareShift Doctor' } },
+  { path: 'doctor-profile', component: DoctorProfileComponent, data: { title: 'Profile - CareShift Doctor' } },
+  { path: 'patient-reviews', component: PatientReviewsComponent, data: { title: 'Patient Reviews - CareShift Doctor' } },
 ];

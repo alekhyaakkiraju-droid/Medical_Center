@@ -1,5 +1,6 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, HostListener, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { A11yModule } from '@angular/cdk/a11y';
 import { SnakebarService } from '../../../shared/service/SnakebarService.service';
 import { ReloadService } from '../../../shared/service/reload.service';
 import { Router } from '@angular/router';
@@ -9,14 +10,16 @@ import { ChangePasswordService } from '../services/change-password.service';
 import { ProfileService } from '../services/Profile.service';
 import { Profile, ProfileDetails } from '../../models';
 import { NgClass } from '@angular/common';
+import { ModalFocusService } from '../../../shared/services/modal-focus.service';
 
 @Component({
     selector: 'app-user-profile',
     changeDetection: ChangeDetectionStrategy.Eager,
     templateUrl: './user-profile.component.html',
-    imports: [ReactiveFormsModule, NgClass]
+    imports: [ReactiveFormsModule, NgClass, A11yModule]
 })
 export class UserProfileComponent implements OnInit {
+  private readonly modalFocus = inject(ModalFocusService);
 
   constructor(private fb: FormBuilder,
     private profileService: ProfileService,
@@ -39,6 +42,7 @@ this.reload.initializeLoader();
   isDialogOpen = false;
   isDialogMounted = false;
   openDialog(): void {
+    this.modalFocus.open();
     this.isDialogOpen = true;
     setTimeout(() => {
       this.isDialogMounted = true;
@@ -48,6 +52,7 @@ this.reload.initializeLoader();
     this.isDialogMounted = false;
     setTimeout(() => {
       this.isDialogOpen = false;
+      this.modalFocus.close();
     }, 150);
   }
   confirm(): void {
@@ -182,6 +187,7 @@ this.reload.initializeLoader();
   isDialogOpen2 = false;
   isDialogMounted2 = false;
   openDialog2(): void {
+    this.modalFocus.open();
     this.isDialogOpen2 = true;
     setTimeout(() => {
       this.isDialogMounted2 = true;
@@ -191,9 +197,16 @@ this.reload.initializeLoader();
     this.isDialogMounted2 = false;
     setTimeout(() => {
       this.isDialogOpen2 = false;
+      this.modalFocus.close();
     }, 150);
   }
 
-  
-
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.isDialogOpen2) {
+      this.closeDialog2();
+    } else if (this.isDialogOpen) {
+      this.closeDialog();
+    }
+  }
 }

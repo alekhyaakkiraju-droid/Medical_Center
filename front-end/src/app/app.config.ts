@@ -19,6 +19,8 @@ export const appConfig: ApplicationConfig = {
       closeButton: true,
       timeOut: 5000,
       progressBar: true,
+      toastClass: 'ngx-toastr',
+      tapToDismiss: true,
     }),
     provideHttpClient(withFetch(), withInterceptors([credentialsInterceptor])),
   ],
