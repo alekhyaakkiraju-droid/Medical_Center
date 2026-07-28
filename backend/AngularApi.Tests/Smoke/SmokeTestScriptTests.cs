@@ -56,10 +56,10 @@ public class SmokeTestScriptTests
 
         pipeline.Should().Contain("Expanded Smoke Tests");
         pipeline.Should().Contain("run-e2e-smoke.sh");
-        pipeline.Should().Contain("Staging Smoke Tests");
+        pipeline.Should().Contain("Post-Deploy Verification Gate");
         pipeline.Should().Contain("Patient Journey E2E");
         pipeline.Should().Contain("e2e-patient-journey.sh");
-        pipeline.Should().Contain("./scripts/smoke-tests.sh");
+        pipeline.Should().Contain("post-deploy-gate.sh");
 
         ssrSmoke.Should().Contain("WO-059");
         ssrSmoke.Should().Contain("/api/nonexistent");
