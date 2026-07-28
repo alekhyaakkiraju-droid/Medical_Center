@@ -258,6 +258,12 @@ steps:
       # WO-038/WO-040: expanded image, routerLink navigation, and structured 401 assertions
       testCommand: SMOKE_BASE_URL="${STAGING_BASE_URL}" SMOKE_API_URL="${STAGING_API_URL}" ./scripts/run-e2e-smoke.sh
 
+  - name: Static Asset Journey Smoke Tests
+    variantId: test:generic
+    config:
+      # WO-053: crawls public pages and verifies img/css/js assets return HTTP 200
+      testCommand: SMOKE_BASE_URL="${STAGING_BASE_URL}" ./scripts/journey-smoke-assets.sh
+
   - name: Static Asset Verification
     variantId: test:generic
     config:
@@ -386,6 +392,7 @@ environments:
       - Staging Deploy Frontend
       - Staging Smoke Tests
       - Expanded Smoke Tests
+      - Static Asset Journey Smoke Tests
       - Static Asset Verification
       - Patient Journey E2E
       - DAST Scan

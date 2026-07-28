@@ -137,6 +137,25 @@ public class SmokeTestScriptTests
     }
 
     [Fact]
+    public void JourneyAssetsSmokeScript_ExistsAndCrawlsPublicPageAssets()
+    {
+        var scriptPath = Path.Combine(RepoRoot, "scripts", "journey-smoke-assets.sh");
+        File.Exists(scriptPath).Should().BeTrue(because: "WO-053 requires a static asset journey smoke script");
+
+        var script = File.ReadAllText(scriptPath);
+        script.Should().Contain("SMOKE_BASE_URL");
+        script.Should().Contain("/pages/gallery");
+        script.Should().Contain("/pages/team");
+        script.Should().Contain("localhost");
+        script.Should().Contain("http_code");
+        script.Should().Contain("exit 1");
+
+        var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
+        pipeline.Should().Contain("Static Asset Journey Smoke Tests");
+        pipeline.Should().Contain("journey-smoke-assets.sh");
+    }
+
+    [Fact]
     public void OpenApiGenerationScripts_ContainOutputValidation()
     {
         var generateOpenApi = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "generate-openapi.sh"));
