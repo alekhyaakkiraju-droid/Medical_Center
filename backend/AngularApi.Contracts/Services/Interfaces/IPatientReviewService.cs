@@ -1,4 +1,4 @@
-using AngularApi.Contracts.DTO; using AngularApi.Contracts.Models; using System.Security.Claims;
+using AngularApi.Contracts.DTO; using AngularApi.Contracts.Models; using AngularApi.Contracts.Services; using System.Security.Claims;
 namespace AngularApi.Contracts.Services.Interfaces;
 public interface IPatientReviewService {
     Task<PagedResult<ReviewDTO>> GetAllAsync(PaginationParameters pagination, CancellationToken cancellationToken = default);
