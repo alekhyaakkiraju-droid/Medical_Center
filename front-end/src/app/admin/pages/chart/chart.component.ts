@@ -32,6 +32,7 @@ export class ChartComponent implements AfterViewInit {
     }
 
     const options = {
+      noData: { text: 'No data available', align: 'center', verticalAlign: 'middle' },
       chart: {
         height: 400,
         type: 'line',
@@ -137,6 +138,7 @@ export class ChartComponent implements AfterViewInit {
           data: [76, 85, 101, 98, 87, 105],
         },
       ],
+      noData: { text: 'No data available', align: 'center', verticalAlign: 'middle' },
       chart: {
         type: 'bar',
         height: 400,

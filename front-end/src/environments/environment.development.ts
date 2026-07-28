@@ -4,4 +4,5 @@ export const environment = {
   assetBaseUrl: "",
   recaptchaSiteKey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
   baaExecuted: true,
+  demoPassword: "UatSeed123!",
 };

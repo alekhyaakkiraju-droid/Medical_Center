@@ -34,26 +34,20 @@ export class PatientReviewsComponent implements OnInit, OnDestroy {
   reviews: any[] = [];
   setDoctorId(): void {
     const id = this.authService.getNameIdentifier();
-    console.log("id", id);
     if (id) {
       this.doctorId = id;
     } else {
-      console.log("Please enter adoctorId ")
-      console.error(this.errorMessage);
     }
   }
 
   getPatientsReview(): void {
     if (this.doctorId == null) {
-      console.error(this.errorMessage);
     }
     this.patientReviewsSubscribtion = this.patientsReviewService.getPatientsReview(this.doctorId).subscribe({
       next: (data) => {
         this.reviews = data.items ?? [];
-        console.log("reviews", this.reviews);
       },
       error: (error) => {
-        console.error(error);
       },
     });
   }

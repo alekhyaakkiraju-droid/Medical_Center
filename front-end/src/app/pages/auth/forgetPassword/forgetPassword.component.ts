@@ -53,7 +53,6 @@ export class ForgetPasswordComponent implements OnInit, OnDestroy {
 
   onForgotSubmit() {
     const emailForgetVal = this.forgetForm.value.emailForgot;
-    console.log("emailForgot", emailForgetVal);
     this.forgetpasswordService.forgetPassword(emailForgetVal).subscribe({
       next: (res) => {
         this.toaster.success(`Success: ${res.message}`);

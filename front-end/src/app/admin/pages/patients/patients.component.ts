@@ -40,7 +40,6 @@ export class PatientsComponent implements OnInit , OnDestroy{
     const appointmentItem = this.menuItems.find(item => item.title === 'Appointment');
     if (appointmentItem) {
       appointmentItem.badge = this.numOfAppointments.toString();
-      console.log('Appointment badge set to:', appointmentItem.badge);
     }
   }
 
@@ -48,11 +47,9 @@ export class PatientsComponent implements OnInit , OnDestroy{
    this.patientSubscription= this.patientService.getAllPatient().subscribe({
       next: (data) => {
         this.patientData = data.items ?? [];
-        console.log("Patient retrieved successfully ", this.patientData)
       },
       error: (error) => {
         this.errorMessage = 'Failed to fetch patient reviews.';
-        console.error(error);
       }
     });
   }
@@ -63,7 +60,6 @@ export class PatientsComponent implements OnInit , OnDestroy{
         this.setBadgeForAppointments();
       },
       (error) => {
-        console.error('Error fetching appointments:', error);
       }
     );
   }

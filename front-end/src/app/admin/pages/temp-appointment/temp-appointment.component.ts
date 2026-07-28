@@ -25,10 +25,8 @@ export class TempAppointmentComponent implements OnInit {
       (data) => {
         this.appointments = data.items;
         this.numOfAppointments = data['totalCount'];
-        console.log('Fetched appointments:', this.appointments);
       },
       (error) => {
-        console.error('Error fetching appointments:', error);
       }
     );
   }

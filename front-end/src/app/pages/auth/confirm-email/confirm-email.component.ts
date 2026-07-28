@@ -48,7 +48,6 @@ export class ConfirmEmailComponent implements OnInit, OnDestroy {
       (response: any) => {
         this.confirmationMessage = response.message || 'Email confirmed successfully.';
         this.toaster.success('Email confirmed successfully.');
-        console.log("confirmationMessage", this.confirmationMessage);
         this.errorMessage = null;         
         this.router.navigate(['/auth/login']);
       },

@@ -32,14 +32,19 @@ export const MENU = [
 
   export const DoctorMENU = [
     {
-      title: 'Appointment',
+      title: 'Dashboard',
+      path: '/doctor/dashboard',
+      icon: 'fa-solid fa-gauge-high'
+    },
+    {
+      title: 'My Appointments',
       path: '/doctor/doctor-appointments',
       icon: 'fa-solid fa-calendar-check'
     },
     {
-      title: 'Patients Review',
-      path: '/doctor/patient-reviews',
-      icon: 'fa-solid fa-comments'
+      title: 'My Schedule',
+      path: '/doctor/doctor-appointments',
+      icon: 'fa-solid fa-clock'
     },
     {
       title: 'Profile',

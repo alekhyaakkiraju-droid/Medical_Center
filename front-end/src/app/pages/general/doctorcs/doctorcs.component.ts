@@ -24,7 +24,6 @@ export class DoctorcsComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.doctorSubscription) {
       this.doctorSubscription.unsubscribe();
-      console.log('Doctor subscription unsubscribed.');
     }
   }
   loadDoctor() {
@@ -32,13 +31,10 @@ export class DoctorcsComponent implements OnInit, OnDestroy {
       (result) => {
         if (result?.items) {
           this.doctorsData = result.items;
-          console.log('Fetched doctorsData :', this.doctorsData, this.doctorsData.length);
         } else {
-          console.log('No doctorsData');
         }
       },
       (error) => {
-        console.error('Error fetching doctorsData :', error);
       }
     );
   }
