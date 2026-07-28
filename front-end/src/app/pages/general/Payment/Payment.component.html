@@ -1,7 +1,13 @@
 <!-- Modal Overlay -->
-<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" role="presentation">
   <!-- Modal Container -->
-  <div class="bg-white rounded-lg shadow-lg  w-full max-w-2xl">
+  <div
+    class="bg-white rounded-lg shadow-lg  w-full max-w-2xl"
+    cdkTrapFocus
+    cdkTrapFocusAutoCapture
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="payment-modal-title">
     <!-- Close Button -->
 
     <!-- Payment Form -->
@@ -13,7 +19,7 @@
       </button>
       <div class="space-y-4 w-full max-w-xl">
         <div class="lg:col-span-2">
-          <h3 class="text-lg font-bold text-gray-800 text-center">Payment</h3>
+          <h3 id="payment-modal-title" class="text-lg font-bold text-gray-800 text-center">Payment</h3>
           <div class="grid gap-4 sm:grid-cols-2 mt-4">
             <!-- Card Payment Option -->
             <div class="flex items-center">
