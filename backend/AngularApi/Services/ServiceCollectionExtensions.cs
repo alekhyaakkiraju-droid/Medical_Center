@@ -23,6 +23,10 @@ namespace AngularApi.Services
             services.Configure<SmtpSettings>(configuration.GetSection(SmtpSettings.SectionName));
             services.Configure<CorsSettings>(configuration.GetSection(CorsSettings.SectionName));
             services.Configure<BreachDetectionOptions>(configuration.GetSection(BreachDetectionOptions.SectionName));
+            services.Configure<RecaptchaSettings>(configuration.GetSection(RecaptchaSettings.SectionName));
+
+            services.AddHttpClient(RecaptchaService.HttpClientName);
+            services.AddScoped<IRecaptchaService, RecaptchaService>();
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>(); // should be addTrasient
