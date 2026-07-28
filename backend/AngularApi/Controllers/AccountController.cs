@@ -37,6 +37,7 @@ namespace AngularApi.Controllers
         private readonly IAuthCookieService _authCookieService;
         private readonly IAntiforgery _antiforgery;
         private readonly AuthCookieOptions _authCookieOptions;
+        private readonly GoogleAuthOptions _googleAuthOptions;
         private readonly IAuditService _auditService;
         private readonly ILogger<AccountController> _logger;
 
@@ -50,6 +51,7 @@ namespace AngularApi.Controllers
             IAuthCookieService authCookieService,
             IAntiforgery antiforgery,
             IOptions<AuthCookieOptions> authCookieOptions,
+            IOptions<GoogleAuthOptions> googleAuthOptions,
             IAuditService auditService,
             ILogger<AccountController> logger)
         {
@@ -62,6 +64,7 @@ namespace AngularApi.Controllers
             _authCookieService = authCookieService;
             _antiforgery = antiforgery;
             _authCookieOptions = authCookieOptions.Value;
+            _googleAuthOptions = googleAuthOptions.Value;
             _auditService = auditService;
             _logger = logger;
         }
@@ -206,6 +209,15 @@ namespace AngularApi.Controllers
         [HttpGet("LoginWithGoogle")]
         public IActionResult LoginWithGoogle()
         {
+            if (!_googleAuthOptions.IsConfigured)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+                {
+                    error = "OAuthNotConfigured",
+                    message = "Google OAuth is not configured for this environment.",
+                });
+            }
+
             var properties = _googleService.GetGoogleLoginProperties(Url.Action(nameof(GoogleLoginCallback)));
             return Challenge(properties, "Google");
         }
@@ -216,6 +228,15 @@ namespace AngularApi.Controllers
         [HttpGet("GoogleLoginCallback")]
         public async Task<IActionResult> GoogleLoginCallback()
         {
+            if (!_googleAuthOptions.IsConfigured)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+                {
+                    error = "OAuthNotConfigured",
+                    message = "Google OAuth is not configured for this environment.",
+                });
+            }
+
             try
             {
                 var user = await _googleService.GoogleLoginCallbackAsync();

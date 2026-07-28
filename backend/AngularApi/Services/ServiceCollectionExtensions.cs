@@ -25,6 +25,7 @@ namespace AngularApi.Services
             services.Configure<CorsSettings>(configuration.GetSection(CorsSettings.SectionName));
             services.Configure<BreachDetectionOptions>(configuration.GetSection(BreachDetectionOptions.SectionName));
             services.Configure<RecaptchaSettings>(configuration.GetSection(RecaptchaSettings.SectionName));
+            services.Configure<GoogleAuthOptions>(configuration.GetSection(GoogleAuthOptions.SectionName));
 
             services.AddHttpClient(RecaptchaService.HttpClientName);
             services.AddScoped<IRecaptchaService, RecaptchaService>();

@@ -3,6 +3,7 @@ using AngularApi.Infrastructure;
 using AngularApi.Contracts.Enums;
 using AngularApi.Logging;
 using AngularApi.Middleware;
+using AngularApi.Options;
 using AngularApi.Services;
 using AngularApi.Validators;
 using FluentValidation;
@@ -10,6 +11,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace WebApiDemo
@@ -92,6 +94,13 @@ namespace WebApiDemo
             });
 
             var app = builder.Build();
+            var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
+            var googleAuthOptions = app.Services.GetRequiredService<IOptions<GoogleAuthOptions>>().Value;
+            if (!googleAuthOptions.IsConfigured)
+            {
+                startupLogger.LogWarning("Google OAuth is not configured; social login endpoints will return 503.");
+            }
+
             JwtSecretStartupValidation.Validate(
                 app.Configuration,
                 app.Services.GetRequiredService<ILogger<Program>>());
