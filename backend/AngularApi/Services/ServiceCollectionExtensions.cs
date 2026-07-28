@@ -26,6 +26,7 @@ namespace AngularApi.Services
             services.Configure<BreachDetectionOptions>(configuration.GetSection(BreachDetectionOptions.SectionName));
             services.Configure<RecaptchaSettings>(configuration.GetSection(RecaptchaSettings.SectionName));
             services.Configure<NppSettings>(configuration.GetSection(NppSettings.SectionName));
+            services.Configure<BaaFeatureFlags>(configuration.GetSection(BaaFeatureFlags.SectionName));
 
             services.AddHttpClient(RecaptchaService.HttpClientName);
             services.AddScoped<IRecaptchaService, RecaptchaService>();
