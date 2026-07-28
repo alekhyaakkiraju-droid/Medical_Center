@@ -109,14 +109,12 @@ export class RegisterComponent implements OnInit,AfterViewInit {
         this.confirmPassword?.value
       ).subscribe({
         next: (response: any) => {
-          console.log('User registered:', this.fullName?.value);
           this.router.navigate(['/auth/login']);  
           this.toastr.success('Registration successful');
           this.toastr.info('Please check your google account for verification');
 
         },
         error: (error: any) => {
-          console.log('Registration failed:', error);  
             this.usernameTakenError = true;  
                   
         }

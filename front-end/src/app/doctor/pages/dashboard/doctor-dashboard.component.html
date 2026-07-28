@@ -1,0 +1,39 @@
+<app-side-bar></app-side-bar>
+<main class="doctor-dashboard p-4 sm:ml-64">
+  <header class="doctor-dashboard__header">
+    <h1>Welcome, {{ welcomeName }}</h1>
+    <p>{{ today | date:'fullDate' }}</p>
+  </header>
+  @if (loadError) {
+    <section class="doctor-dashboard__state doctor-dashboard__state--error" aria-live="polite">
+      <p>Unable to load appointments. Please try again.</p>
+      <button type="button" class="doctor-dashboard__retry" (click)="retryLoad()">Retry</button>
+    </section>
+  } @else if (!isLoading && todaysBookings.length === 0) {
+    <section class="doctor-dashboard__state" aria-live="polite">
+      <i class="fa-solid fa-calendar-xmark" aria-hidden="true"></i>
+      <p>No appointments scheduled for today</p>
+    </section>
+  } @else if (todaysBookings.length > 0) {
+    <section class="doctor-dashboard__section">
+      <h2>Today's Bookings</h2>
+      <div class="doctor-dashboard__cards">
+        @for (booking of todaysBookings; track booking.appointmentId) {
+          <article class="doctor-dashboard__card">
+            <h3>{{ booking.patientName || 'Unknown patient' }}</h3>
+            <p><strong>Time:</strong> {{ booking.appointmentTakenDate | date:'shortTime' }}</p>
+            <p><strong>Status:</strong> {{ booking.appointmentStatus || 'Unknown' }}</p>
+            <p><strong>Medical center:</strong> {{ booking.doctorName || 'CareShift Medical Center' }}</p>
+          </article>
+        }
+      </div>
+    </section>
+  }
+  <section class="doctor-dashboard__summary">
+    <article class="doctor-dashboard__card doctor-dashboard__card--summary">
+      <h2>Upcoming Appointments</h2>
+      <p class="doctor-dashboard__count">{{ upcomingCount }}</p>
+      <a routerLink="/doctor/doctor-appointments" class="doctor-dashboard__link">View All</a>
+    </article>
+  </section>
+</main>

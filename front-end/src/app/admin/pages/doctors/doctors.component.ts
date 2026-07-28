@@ -40,7 +40,6 @@ export class DoctorsComponent implements OnInit, OnDestroy {
     const appointmentItem = this.menuItems.find(item => item.title === 'Appointment');
     if (appointmentItem) {
       appointmentItem.badge = this.numOfAppointments.toString();
-      console.log('Appointment badge set to:', appointmentItem.badge);
     }
   }
   loadDoctor(): void {
@@ -48,13 +47,10 @@ export class DoctorsComponent implements OnInit, OnDestroy {
       (result) => {
         if (result?.items) {
           this.doctorsData = result.items;
-          console.log('Fetched doctorsData :', this.doctorsData, this.doctorsData.length);
         } else {
-          console.log('No  doctorsData');
         }
       },
       (error) => {
-        console.error('Error fetching doctorsData :', error);
       }
     );
   }
@@ -65,7 +61,6 @@ export class DoctorsComponent implements OnInit, OnDestroy {
         this.setBadgeForAppointments();
       },
       (error) => {
-        console.error('Error fetching appointments:', error);
       }
     );
   }

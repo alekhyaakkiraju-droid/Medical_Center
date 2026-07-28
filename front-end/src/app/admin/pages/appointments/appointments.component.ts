@@ -37,10 +37,8 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       (data) => {
         this.appointments = data.items;
         this.numOfAppointments = data['totalCount'];
-        console.log('Fetched appointments:', this.appointments);
       },
       (error) => {
-        console.error('Error fetching appointments:', error);
       }
     );
   }
@@ -49,7 +47,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     const appointmentItem = this.menuItems.find(item => item.title === 'Appointment');
     if (appointmentItem) {
       appointmentItem.badge = this.numOfAppointments.toString();
-      console.log('Appointment badge set to:', appointmentItem.badge);
     }
   }
 

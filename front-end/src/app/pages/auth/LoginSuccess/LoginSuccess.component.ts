@@ -2,6 +2,7 @@ import { RouterLink } from '@angular/router';
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthServiceService } from '../auth-services/auth-service.service';
+import { getRoleBasedRedirectUrl } from '../../../core/utils/role-redirect.util';
 
 @Component({
     selector: 'app-LoginSuccess',
@@ -19,13 +20,7 @@ export class LoginSuccessComponent implements OnInit {
   ngOnInit(): void {
     this.authService.loadCurrentUser().subscribe((user) => {
       if (user) {
-        if (this.authService.isRole('admin')) {
-          this.router.navigate(['admin/dashboard']);
-        } else if (this.authService.isRole('doctor')) {
-          this.router.navigate(['doctor/doctor-appointments']);
-        } else {
-          this.router.navigate(['/pages/home']);
-        }
+        this.router.navigate([getRoleBasedRedirectUrl(user.roles)]);
       } else {
         this.router.navigate(['/auth/login']);
       }

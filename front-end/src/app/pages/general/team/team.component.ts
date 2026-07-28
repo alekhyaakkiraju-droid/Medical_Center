@@ -38,13 +38,10 @@ export class TeamComponent implements OnInit, OnDestroy {
       (result) => {
         if (result?.items) {
           this.doctorsData = result.items;
-          console.log('Fetched doctorsData :',this.doctorsData , this.doctorsData.length);
         } else {
-          console.log('No  doctorsData');
         }
       },
       (error) => {
-        console.error('Error fetching doctorsData :', error);
       }
     );
     this.subscriptions.push(doctorSub);

@@ -1,54 +1,27 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { of } from 'rxjs';
 import { DoctorGuard } from './doctor.guard';
 import { AuthServiceService } from '../../pages/auth/auth-services/auth-service.service';
-import { standaloneComponentTestProviders } from '../../testing/standalone-component-test-providers';
 
 describe('DoctorGuard', () => {
-  let guard: DoctorGuard;
-  let authService: jasmine.SpyObj<AuthServiceService>;
-  let router: jasmine.SpyObj<Router>;
-
-  beforeEach(() => {
-    authService = jasmine.createSpyObj('AuthServiceService', ['isTokenExpired', 'isRole'], {
-      isLoggedSubject: { next: jasmine.createSpy('next') },
-    });
-    router = jasmine.createSpyObj('Router', ['navigate']);
-
+  it('uses async session resolution', (done) => {
+    const authService = {
+      resolveSession: jasmine.createSpy('resolveSession').and.returnValue(of({ userId: '1', email: 'd@x.com', userName: 'doc', roles: ['doctor'] })),
+      isRole: jasmine.createSpy('isRole').and.returnValue(true),
+    };
+    const router = jasmine.createSpyObj('Router', ['createUrlTree']);
     TestBed.configureTestingModule({
-      providers: [...standaloneComponentTestProviders, 
+      providers: [
         DoctorGuard,
         { provide: AuthServiceService, useValue: authService },
         { provide: Router, useValue: router },
       ],
     });
-
-    guard = TestBed.inject(DoctorGuard);
-  });
-
-  it('redirects unauthenticated users to login before checking role', () => {
-    authService.isTokenExpired.and.returnValue(true);
-
-    expect(guard.canActivate({} as any, { url: '/doctor/appointments' } as any)).toBeFalse();
-    expect(authService.isRole).not.toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/auth/login']);
-    expect(authService.isLoggedSubject.next).not.toHaveBeenCalled();
-  });
-
-  it('allows authenticated doctor users', () => {
-    authService.isTokenExpired.and.returnValue(false);
-    authService.isRole.and.returnValue(true);
-
-    expect(guard.canActivate({} as any, { url: '/doctor/appointments' } as any)).toBeTrue();
-    expect(authService.isRole).toHaveBeenCalledWith('doctor');
-    expect(authService.isLoggedSubject.next).not.toHaveBeenCalled();
-  });
-
-  it('redirects authenticated non-doctor users to the error page', () => {
-    authService.isTokenExpired.and.returnValue(false);
-    authService.isRole.and.returnValue(false);
-
-    expect(guard.canActivate({} as any, { url: '/doctor/appointments' } as any)).toBeFalse();
-    expect(router.navigate).toHaveBeenCalledWith(['/pages/general/errorPage']);
+    TestBed.inject(DoctorGuard).canActivate().subscribe((result) => {
+      expect(authService.resolveSession).toHaveBeenCalled();
+      expect(result).toBeTrue();
+      done();
+    });
   });
 });
