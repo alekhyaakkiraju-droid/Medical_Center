@@ -1,0 +1,29 @@
+@if (isVisible && content) {
+  <div
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="npp-title"
+    class="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 flex justify-center items-center w-full md:inset-0 h-modal md:h-full bg-black bg-opacity-50">
+    <div class="relative p-4 w-full max-w-3xl h-full md:h-auto">
+      <div class="relative p-4 bg-white rounded-lg shadow sm:p-6">
+        <h2 id="npp-title" class="text-xl font-semibold text-gray-900 mb-2">
+          Notice of Privacy Practices
+        </h2>
+        <p class="text-sm text-gray-500 mb-4">Version {{ content.version }}</p>
+        <div class="max-h-96 overflow-y-auto text-left whitespace-pre-wrap text-gray-700 mb-6">
+          {{ content.content }}
+        </div>
+        <div class="flex justify-end space-x-3">
+          <button type="button" (click)="onDismiss()"
+            class="py-2 px-4 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-100">
+            Cancel
+          </button>
+          <button type="button" (click)="onAcknowledge()"
+            class="py-2 px-4 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+            I Acknowledge
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
