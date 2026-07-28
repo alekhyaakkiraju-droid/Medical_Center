@@ -36,6 +36,7 @@ public class MedicalCenterWebApplicationFactory : WebApplicationFactory<Program>
                 ["GoogleAuth:ClientSecret"] = "test-client-secret",
                 ["CorsSettings:AllowedOrigins:0"] = "http://localhost:4200",
                 ["CorsSettings:AllowedOrigins:1"] = "http://localhost:8081",
+                ["RecaptchaSettings:Enabled"] = "false",
             });
         });
 

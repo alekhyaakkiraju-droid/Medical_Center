@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using AngularApi.Controllers;
 using AngularApi.DTO;
 using AngularApi.Services.Interfaces;
+using AngularApi.Tests.Fixtures.Recaptcha;
 using AngularApi.Tests.Infrastructure;
 using AngularApi.Tests.TestData;
 using FluentAssertions;
@@ -15,11 +16,16 @@ namespace AngularApi.Tests.Controllers;
 public class ContactControllerTests
 {
     private readonly Mock<IContactService> _contactServiceMock = new();
+    private readonly Mock<IRecaptchaService> _recaptchaServiceMock = new();
     private readonly ContactController _controller;
 
     public ContactControllerTests()
     {
-        _controller = new ContactController(_contactServiceMock.Object)
+        _recaptchaServiceMock
+            .Setup(service => service.ValidateTokenAsync(RecaptchaTokenFixtures.Valid))
+            .ReturnsAsync(true);
+
+        _controller = new ContactController(_contactServiceMock.Object, _recaptchaServiceMock.Object)
         {
             ControllerContext = new ControllerContext
             {
@@ -31,14 +37,39 @@ public class ContactControllerTests
     [Fact]
     public async Task SubmitInquiry_ValidInput_ReturnsOkWithSuccessMessage()
     {
+        var dto = ContactInquiryFixtures.Valid;
         _contactServiceMock
             .Setup(service => service.SubmitInquiryAsync(It.IsAny<ContactInquiryDTO>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        var result = await _controller.SubmitInquiry(ContactInquiryFixtures.Valid, CancellationToken.None);
+        var result = await _controller.SubmitInquiry(dto, CancellationToken.None);
 
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         okResult.Value.Should().BeEquivalentTo(new { message = "Your inquiry has been submitted successfully." });
+        _recaptchaServiceMock.Verify(
+            service => service.ValidateTokenAsync(dto.RecaptchaToken),
+            Times.Once);
+        _contactServiceMock.Verify(
+            service => service.SubmitInquiryAsync(
+                It.Is<ContactInquiryDTO>(inquiry => inquiry.RecaptchaToken == dto.RecaptchaToken),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task SubmitInquiry_InvalidRecaptchaToken_ReturnsBadRequest()
+    {
+        _recaptchaServiceMock
+            .Setup(service => service.ValidateTokenAsync(RecaptchaTokenFixtures.Invalid))
+            .ReturnsAsync(false);
+
+        var result = await _controller.SubmitInquiry(ContactInquiryFixtures.InvalidRecaptchaToken, CancellationToken.None);
+
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequestResult.Value.Should().BeEquivalentTo(new { error = "reCAPTCHA validation failed" });
+        _contactServiceMock.Verify(
+            service => service.SubmitInquiryAsync(It.IsAny<ContactInquiryDTO>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
@@ -67,7 +98,8 @@ public class ContactControllerRateLimitTests : IClassFixture<MedicalCenterWebApp
     [Fact]
     public async Task SubmitInquiry_ExceedingThreeRequestsPerMinute_ReturnsTooManyRequests()
     {
-        var client = _factory.CreateClient();
+        var client = AntiforgeryTestHelper.CreateClient(_factory);
+        await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
 
         for (var attempt = 0; attempt < 3; attempt++)
         {
@@ -86,9 +118,22 @@ public class ContactControllerValidationTests
     public async Task SubmitInquiry_InvalidPayload_ReturnsBadRequest()
     {
         await using var factory = new MedicalCenterWebApplicationFactory();
-        var client = factory.CreateClient();
+        var client = AntiforgeryTestHelper.CreateClient(factory);
+        await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
 
         var response = await client.PostAsJsonAsync("/api/Contact", ContactInquiryFixtures.InvalidEmail);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task SubmitInquiry_MissingRecaptchaToken_ReturnsBadRequest()
+    {
+        await using var factory = new MedicalCenterWebApplicationFactory();
+        var client = AntiforgeryTestHelper.CreateClient(factory);
+        await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
+
+        var response = await client.PostAsJsonAsync("/api/Contact", ContactInquiryFixtures.MissingRecaptchaToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }

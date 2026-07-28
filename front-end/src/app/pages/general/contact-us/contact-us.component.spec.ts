@@ -5,6 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { of, throwError } from 'rxjs';
 import { ContactUsComponent } from './contact-us.component';
 import { ContactService } from '../services/contact.service';
+import { RecaptchaService } from '../services/recaptcha.service';
 import { AuthServiceService } from '../../auth/auth-services/auth-service.service';
 import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
 
@@ -12,19 +13,23 @@ describe('ContactUsComponent', () => {
   let component: ContactUsComponent;
   let fixture: ComponentFixture<ContactUsComponent>;
   let contactService: jasmine.SpyObj<ContactService>;
+  let recaptchaService: jasmine.SpyObj<RecaptchaService>;
   let toastr: jasmine.SpyObj<ToastrService>;
   let authService: jasmine.SpyObj<AuthServiceService>;
 
   beforeEach(waitForAsync(() => {
     contactService = jasmine.createSpyObj('ContactService', ['submitInquiry']);
+    recaptchaService = jasmine.createSpyObj('RecaptchaService', ['execute']);
     toastr = jasmine.createSpyObj('ToastrService', ['success', 'error']);
     authService = jasmine.createSpyObj('AuthServiceService', ['ensureCsrfToken']);
     authService.ensureCsrfToken.and.returnValue(of(void 0));
+    recaptchaService.execute.and.returnValue(Promise.resolve('test-recaptcha-token'));
 
     TestBed.configureTestingModule({
     imports: [ReactiveFormsModule, ContactUsComponent],
     providers: [...standaloneComponentTestProviders, 
         { provide: ContactService, useValue: contactService },
+        { provide: RecaptchaService, useValue: recaptchaService },
         { provide: ToastrService, useValue: toastr },
         { provide: AuthServiceService, useValue: authService }
     ]
@@ -75,7 +80,7 @@ describe('ContactUsComponent', () => {
     expect(component.message?.hasError('maxlength')).toBeTrue();
   });
 
-  it('should call ContactService.submitInquiry with form values on submit', () => {
+  it('should call ContactService.submitInquiry with form values and reCAPTCHA token on submit', () => {
     contactService.submitInquiry.and.returnValue(of({}));
 
     component.contactForm.setValue({
@@ -87,12 +92,14 @@ describe('ContactUsComponent', () => {
 
     component.onSubmit();
 
+    expect(recaptchaService.execute).toHaveBeenCalledWith('contact_submit');
     expect(authService.ensureCsrfToken).toHaveBeenCalled();
     expect(contactService.submitInquiry).toHaveBeenCalledWith({
       name: 'Jane Doe',
       email: 'jane@example.com',
       phone: '5551234567',
-      message: 'Need help'
+      message: 'Need help',
+      recaptchaToken: 'test-recaptcha-token'
     });
   });
 

@@ -24,6 +24,10 @@ namespace AngularApi.Validators
             RuleFor(x => x.Message)
                 .NotEmpty()
                 .MaximumLength(ValidationConstants.ReviewMaxLength);
+
+            RuleFor(x => x.RecaptchaToken)
+                .NotEmpty()
+                .WithMessage("reCAPTCHA token is required");
         }
     }
 }

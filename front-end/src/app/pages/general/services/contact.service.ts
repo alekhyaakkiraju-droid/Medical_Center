@@ -9,6 +9,7 @@ export interface ContactInquiryDTO {
   email: string;
   phone?: string;
   message: string;
+  recaptchaToken: string;
 }
 
 @Injectable({
