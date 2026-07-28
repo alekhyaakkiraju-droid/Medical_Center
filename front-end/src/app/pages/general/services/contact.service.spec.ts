@@ -53,7 +53,8 @@ describe('ContactService', () => {
         name: 'Jane Doe',
         email: 'jane@example.com',
         phone: '5551234567',
-        message: 'Hello'
+        message: 'Hello',
+        recaptchaToken: 'test-token',
       };
 
       service.submitInquiry(inquiry).subscribe();
