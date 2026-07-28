@@ -38,11 +38,8 @@ public class ContactInquiryDTOValidatorTests
         _validator.TestValidate(ContactInquiryFixtures.MessageTooLong).ShouldHaveValidationErrorFor(x => x.Message);
 
     [Fact]
-    public void Validate_MissingMessage_Fails() =>
-        _validator.TestValidate(new ContactInquiryDTO
-        {
-            Name = "Jane Doe",
-            Email = "jane.doe@example.com",
-            Message = "",
-        }).ShouldHaveValidationErrorFor(x => x.Message);
+    public void Validate_MissingRecaptchaToken_Fails() =>
+        _validator.TestValidate(ContactInquiryFixtures.MissingRecaptchaToken)
+            .ShouldHaveValidationErrorFor(x => x.RecaptchaToken)
+            .WithErrorMessage("reCAPTCHA token is required");
 }

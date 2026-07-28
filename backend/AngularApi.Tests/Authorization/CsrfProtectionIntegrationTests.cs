@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using AngularApi.Models;
 using AngularApi.Services;
 using AngularApi.Tests.Infrastructure;
+using AngularApi.Tests.TestData;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +33,31 @@ public class CsrfProtectionIntegrationTests : AuthorizationIntegrationTestBase
         var response = await client.PostAsJsonAsync("/api/Appointments", payload);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task ContactSubmitWithoutXsrfToken_ReturnsBadRequest()
+    {
+        var client = Factory.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            HandleCookies = true,
+        });
+
+        var response = await client.PostAsJsonAsync("/api/Contact", ContactInquiryFixtures.Valid);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task ContactSubmitWithValidXsrfToken_ReturnsSuccess()
+    {
+        var client = AntiforgeryTestHelper.CreateClient(Factory);
+        await AntiforgeryTestHelper.ApplyAntiforgeryTokenAsync(client);
+
+        var response = await client.PostAsJsonAsync("/api/Contact", ContactInquiryFixtures.Valid);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]

@@ -3,8 +3,10 @@ import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Subject, Subscription, switchMap, takeUntil } from 'rxjs';
+import { from } from 'rxjs';
 import { AuthServiceService } from '../../auth/auth-services/auth-service.service';
 import { ContactInquiryDTO, ContactService } from '../services/contact.service';
+import { RecaptchaService } from '../services/recaptcha.service';
 import { RouterLink } from '@angular/router';
 import { NgClass } from '@angular/common';
 
@@ -25,6 +27,7 @@ export class ContactUsComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private contactService: ContactService,
+    private recaptchaService: RecaptchaService,
     private toastr: ToastrService,
     private authService: AuthServiceService
   ) {}
@@ -69,10 +72,17 @@ export class ContactUsComponent implements OnInit, OnDestroy {
     }
 
     this.isSubmitting = true;
-    const inquiry: ContactInquiryDTO = this.contactForm.getRawValue();
+    const formValues = this.contactForm.getRawValue();
 
     this.submitSubscription = this.authService.ensureCsrfToken().pipe(
-      switchMap(() => this.contactService.submitInquiry(inquiry))
+      switchMap(() => from(this.recaptchaService.execute('contact_submit'))),
+      switchMap((recaptchaToken) => {
+        const inquiry: ContactInquiryDTO = {
+          ...formValues,
+          recaptchaToken
+        };
+        return this.contactService.submitInquiry(inquiry);
+      })
     ).subscribe({
       next: () => {
         this.toastr.success('Your inquiry has been submitted successfully.');

@@ -13,18 +13,25 @@ namespace AngularApi.Controllers
     public class ContactController : ControllerBase
     {
         private readonly IContactService _contactService;
+        private readonly IRecaptchaService _recaptchaService;
 
-        public ContactController(IContactService contactService)
+        public ContactController(IContactService contactService, IRecaptchaService recaptchaService)
         {
             _contactService = contactService;
+            _recaptchaService = recaptchaService;
         }
 
         [AllowAnonymous]
-        [IgnoreAntiforgeryToken]
         [EnableRateLimiting(AuthRateLimitingExtensions.ContactSubmitPolicy)]
         [HttpPost]
         public async Task<IActionResult> SubmitInquiry([FromBody] ContactInquiryDTO dto, CancellationToken cancellationToken)
         {
+            var isHuman = await _recaptchaService.ValidateTokenAsync(dto.RecaptchaToken);
+            if (!isHuman)
+            {
+                return BadRequest(new { error = "reCAPTCHA validation failed" });
+            }
+
             var success = await _contactService.SubmitInquiryAsync(dto, cancellationToken);
             if (!success)
             {
