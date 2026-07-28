@@ -22,7 +22,7 @@ public class MedicalCentersControllerTests : IDisposable
             .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
         _context = new MedicalCenterDbContext(options);
         _controller = new MedicalCentersController(
-            new MedicalCenterService(_context, new OwnershipValidator(), NullLogger<MedicalCenterService>.Instance));
+            new MedicalCenterService(_context, new OwnershipValidator(_context), NullLogger<MedicalCenterService>.Instance));
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, "admin1"),

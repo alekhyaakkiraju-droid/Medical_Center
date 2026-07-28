@@ -43,7 +43,7 @@ namespace AngularApi.Tests.Controllers
                 .Setup(env => env.WebRootPath)
                 .Returns(Path.Combine(AppContext.BaseDirectory, "wwwroot"));
             _emailTemplateService = new EmailTemplateService(webHostEnvironmentMock.Object);
-            _ownershipValidator = new OwnershipValidator();
+            _ownershipValidator = new OwnershipValidator(_context);
             _appointmentServiceMock = new Mock<IAppointmentService>();
 
             _controller = CreateController(_appointmentServiceMock.Object);
