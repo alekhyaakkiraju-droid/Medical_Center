@@ -34,7 +34,6 @@ cartItems$ = this.doctorsSubject.asObservable();
     ).pipe(
       tap((result: PagedResult<Doctor>) => {
         this.doctorsSubject.next(result.items ?? []);
-        console.log('Doctors fetched from API:', (result.items?.length ?? 0));
       }),
       catchError(this.handeErrorService.handleError)
     );

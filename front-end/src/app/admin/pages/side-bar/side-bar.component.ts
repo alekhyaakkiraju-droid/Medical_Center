@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { DoctorMENU, MENU } from '../../menu';
+import { PATIENT_MENU } from '../../../patient/menu';
 import { LogoutComponent } from '../../../pages/auth/logout/logout.component';
 import { AuthServiceService } from '../../../pages/auth/auth-services/auth-service.service';
 import { AssetUrlPipe } from '../../../shared/asset-url.pipe';
@@ -28,6 +29,8 @@ export class SideBarComponent implements OnInit {
   checkIfDoctorRoute(): void {
     if (this.router.url.includes('doctor/')) {
       this.menuItems = DoctorMENU;
+    } else if (this.router.url.includes('patient/')) {
+      this.menuItems = PATIENT_MENU;
     } else {
       this.menuItems = MENU;
     }

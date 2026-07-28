@@ -9,6 +9,7 @@ using AngularApi.Validators;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -63,10 +64,12 @@ namespace WebApiDemo
 
             builder.Services.AddScoped<ValidateAntiforgeryForMutatingRequestsFilter>();
             builder.Services.AddScoped<OwnershipValidationFilter>();
+            builder.Services.AddScoped<NoCachePhiActionFilter>();
             builder.Services.AddControllers(options =>
             {
                 options.Filters.AddService<ValidateAntiforgeryForMutatingRequestsFilter>();
                 options.Filters.AddService<OwnershipValidationFilter>();
+                options.Filters.AddService<NoCachePhiActionFilter>();
             });
             builder.Services.AddFluentValidationAutoValidation();
             builder.Services.AddValidatorsFromAssemblyContaining<RegisterUserDTOValidator>();
@@ -109,6 +112,22 @@ namespace WebApiDemo
                 startupLogger.LogInformation("SMTP configured for production delivery.");
             }
 
+            var googleAuthOptions = app.Services.GetRequiredService<IOptions<GoogleAuthOptions>>().Value;
+            if (!googleAuthOptions.IsConfigured)
+            {
+                startupLogger.LogWarning("Google OAuth is not configured; social login endpoints will return 503.");
+            }
+
+            var frontendBaseUrl = app.Configuration["Jwt:FrontendBaseUrl"] ?? "http://localhost:8081";
+            startupLogger.LogInformation("Resolved FrontendBaseUrl: {FrontendBaseUrl}", frontendBaseUrl);
+
+            var corsOrigins = app.Configuration.GetSection("CorsSettings:AllowedOrigins").Get<string[]>();
+            if (corsOrigins is null || corsOrigins.Length == 0)
+            {
+                startupLogger.LogWarning(
+                    "CorsSettings:AllowedOrigins is empty; falling back to localhost defaults. Configure explicit origins for non-local environments.");
+            }
+
             JwtSecretStartupValidation.Validate(
                 app.Configuration,
                 app.Services.GetRequiredService<ILogger<Program>>());
@@ -135,6 +154,10 @@ namespace WebApiDemo
             }
 
             app.UseResponseCompression();
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+            });
             app.UseMiddleware<CorrelationIdMiddleware>();
             app.UseRateLimiter();
             app.UseStaticFiles();

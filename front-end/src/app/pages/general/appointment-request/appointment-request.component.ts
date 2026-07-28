@@ -62,7 +62,6 @@ export class AppointmentRequestComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    console.log('Component destroyed. Unsubscribing...');
     this.subscriptions.unsubscribe();
   }
 
@@ -98,10 +97,8 @@ export class AppointmentRequestComponent implements OnInit, OnDestroy {
     const specSub = this.specializationService.getSpecializations().subscribe(
       (data) => {
         this.specializations = data.items;
-        console.log('specializations ', this.specializations);
       },
       (error) => {
-        console.error('Error fetching specializations', error);
       }
     );
     this.subscriptions.add(specSub);
@@ -112,13 +109,10 @@ export class AppointmentRequestComponent implements OnInit, OnDestroy {
       (result) => {
         if (result?.items) {
           this.doctorsData = result.items;
-          console.log('Fetched doctorsData :', this.doctorsData, this.doctorsData.length);
         } else {
-          console.log('No doctorsData');
         }
       },
       (error) => {
-        console.error('Error fetching doctorsData :', error);
       }
     );
     this.subscriptions.add(docSub);
@@ -144,7 +138,6 @@ export class AppointmentRequestComponent implements OnInit, OnDestroy {
   postAppointment(appointmentData: any) {
     const appointmentSub = this.appointmentsService.postAppointment(appointmentData).subscribe(
       (response) => {
-        console.log('Appointment posted successfully:', response);
         this.toastr.success('Appointment saved!', 'Success', {
           positionClass: 'toast-bottom-left'
         });
@@ -153,7 +146,6 @@ export class AppointmentRequestComponent implements OnInit, OnDestroy {
         });
       },
       (error) => {
-        console.error('Error posting appointment:', error);
         this.toastr.info('Please fill all required fields.');
       }
     );
@@ -180,7 +172,6 @@ export class AppointmentRequestComponent implements OnInit, OnDestroy {
           positionClass: 'toast-bottom-left'
         });
         this.showModal = true;
-        console.log('appointmentData:', appointmentData);
         this.pendingAppointment = appointmentData;
       } else {
         this.toastr.info('Please fill all required fields.');
@@ -193,9 +184,7 @@ export class AppointmentRequestComponent implements OnInit, OnDestroy {
 
   handlePaymentStatus(status: boolean) {
     this.paymentSuccessful = status;
-    console.log('handlePaymentStatus called:', this.paymentSuccessful);
     if (this.paymentSuccessful && this.pendingAppointment) {
-      console.log('Payment successful! Posting appointment...');
       this.postAppointment(this.pendingAppointment);
       this.appointmentForm.reset();
       this.showModal = false;
@@ -223,10 +212,8 @@ export class AppointmentRequestComponent implements OnInit, OnDestroy {
       (result) => {
         this.userAppointments = result.items;
         this.isLoading = false;
-        console.log('User appointments loaded:', this.userAppointments);
       },
       (error) => {
-        console.error('Error fetching user appointments:', error);
         this.toastr.error('Unable to load appointments', 'Error');
         this.isLoading = false;
       }
@@ -241,7 +228,6 @@ export class AppointmentRequestComponent implements OnInit, OnDestroy {
           this.userAppointments = this.userAppointments.filter(app => app.id !== appointmentId);
         },
         (error) => {
-          console.error('Error cancelling appointment:', error);
           this.toastr.error('Failed to cancel appointment', 'Error');
         }
       );

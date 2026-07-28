@@ -9,16 +9,18 @@ import { MedicalServiceComponent } from './medical-service/medical-service.compo
 import { GalleryComponent } from './gallery/gallery.component';
 import { TeamComponent } from './team/team.component';
 import { PaymentComponent } from './Payment/Payment.component';
+import { AuthGuard } from '../auth/guard/auth.guard';
+import { nppGuard } from '../../core/guards/npp.guard';
 
 export const GENERAL_ROUTES: Routes = [
   { path: 'about-us', component: AboutUsComponent },
   { path: 'contact', component: ContactUsComponent },
   { path: 'home', component: HomeComponent },
   { path: 'blog', component: BlogComponent },
-  { path: 'profile', component: UserProfileComponent },
-  { path: 'appointment', component: RequestAppointmentComponent },
+  { path: 'profile', component: UserProfileComponent, canActivate: [AuthGuard, nppGuard] },
+  { path: 'appointment', component: RequestAppointmentComponent, canActivate: [AuthGuard, nppGuard] },
   { path: 'service', component: MedicalServiceComponent },
   { path: 'gallery', component: GalleryComponent },
   { path: 'team', component: TeamComponent },
-  { path: 'payment', component: PaymentComponent },
+  { path: 'payment', component: PaymentComponent, canActivate: [AuthGuard, nppGuard] },
 ];

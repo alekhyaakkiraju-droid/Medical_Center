@@ -16,10 +16,10 @@ HIPAA requires covered entities to obtain Business Associate Agreements (BAAs) w
 
 ## BAA Register
 
-| Vendor Name | Service Type | PHI Access Description | BAA Status | Execution Date | Renewal Date | Responsible Party | Notes |
-|-------------|--------------|------------------------|------------|----------------|--------------|-------------------|-------|
-| SMTP Provider (configured via `SmtpSettings`) | Email Delivery | T3/T4 — patient names and email addresses in appointment confirmation, registration, and password reset emails (see [`data-classification.md`](data-classification.md)) | Pending | — | — | Privacy / Security Officer | BAA required before production email flows carry PHI |
-| AWS (ECS Fargate, RDS SQL Server) | Cloud Infrastructure | T4 — full database including patient records, appointments, payments, and audit logs containing PHI (see [`data-classification.md`](data-classification.md)) | Pending | — | — | Privacy / Security Officer | AWS BAA available through AWS Artifact |
+| Vendor Name | Service Type | PHI Access Description | BAA Status | Target Execution Date | Actual Execution Date | Responsible Party | Notes |
+|-------------|--------------|------------------------|------------|----------------------|----------------------|-------------------|-------|
+| SMTP Provider (configured via `SmtpSettings`) | Email Delivery | T3/T4 — patient names and email addresses in appointment confirmation, registration, and password reset emails (see [`data-classification.md`](data-classification.md)) | Pending | 2026-09-30 | — | Privacy / Security Officer | BAA required before production email flows carry PHI; gated by `BaaFeatureFlags.SmtpBaaExecuted` |
+| AWS (ECS Fargate, RDS SQL Server) | Cloud Infrastructure | T4 — full database including patient records, appointments, payments, and audit logs containing PHI (see [`data-classification.md`](data-classification.md)) | Pending | 2026-10-15 | — | Privacy / Security Officer | AWS BAA available through AWS Artifact; gated by `BaaFeatureFlags.AwsBaaExecuted` |
 | Analytics Vendor (placeholder) | Application Monitoring | N/A — no analytics vendor currently integrated | Not Applicable | — | — | Engineering Lead | Re-evaluate when observability vendor is selected |
 
 ## PHI Access Matrix

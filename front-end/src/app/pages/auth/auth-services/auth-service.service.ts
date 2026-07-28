@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import {
   BehaviorSubject,
   catchError,
@@ -38,12 +39,15 @@ export class AuthServiceService {
   private readonly registerUrl = `${environment.api}/Account/register/user`;
   private readonly meUrl = `${environment.api}/Account/me`;
   private readonly logoutUrl = `${environment.api}/Account/logout`;
+  private readonly sessionTimeoutUrl = `${environment.api}/Account/session-timeout`;
+  private readonly refreshTokenUrl = `${environment.api}/Account/refresh-token`;
   private readonly antiforgeryUrl = `${environment.api}/Account/antiforgery-token`;
 
   constructor(
     private http: HttpClient,
     private toaster: ToastrService,
-    private csrfTokenStore: CsrfTokenStore
+    private csrfTokenStore: CsrfTokenStore,
+    private router: Router
   ) {
     this.ensureCsrfToken().subscribe();
     this.loadCurrentUser().subscribe();
@@ -138,7 +142,39 @@ export class AuthServiceService {
     );
   }
 
-  private clearSession(): void {
+  refreshToken(): Observable<void> {
+    return this.ensureCsrfToken().pipe(
+      switchMap(() =>
+        this.http.post(this.refreshTokenUrl, {}, this.getHttpOptions())
+      ),
+      map(() => void 0),
+      catchError((error) => throwError(() => error))
+    );
+  }
+
+  sessionTimeout(): Observable<void> {
+    return this.ensureCsrfToken().pipe(
+      switchMap(() =>
+        this.http.post(this.sessionTimeoutUrl, {}, this.getHttpOptions())
+      ),
+      catchError(() => of(void 0)),
+      tap(() => {
+        this.csrfTokenStore.clearToken();
+        this.clearSession();
+        if (typeof window !== 'undefined') {
+          window.history.replaceState(null, '', '/auth/login?reason=session-expired');
+        }
+      }),
+      switchMap(() =>
+        this.router.navigate(['/auth/login'], {
+          queryParams: { reason: 'session-expired' },
+        })
+      ),
+      map(() => void 0)
+    );
+  }
+
+  clearSession(): void {
     this.currentUser = null;
     this.csrfTokenStore.clearToken();
     this.isLoggedSubject.next(false);
@@ -174,6 +210,10 @@ export class AuthServiceService {
 
   getUsernameFromToken(): string | null {
     return this.getUserName();
+  }
+
+  getCurrentUserRoles(): string[] {
+    return this.currentUser?.roles ?? [];
   }
 
   public getHeaders(): HttpHeaders {

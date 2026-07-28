@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
+import { CanActivate, Router, UrlTree } from '@angular/router';
+import { map, Observable } from 'rxjs';
 import { AuthServiceService } from '../../pages/auth/auth-services/auth-service.service';
 
 @Injectable({
@@ -12,17 +13,17 @@ export class DoctorGuard implements CanActivate {
     private router: Router
   ) {}
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    if (this.authService.isTokenExpired()) {
-      this.router.navigate(['/auth/login']);
-      return false;
-    }
-
-    if (this.authService.isRole('doctor')) {
-      return true;
-    }
-
-    this.router.navigate(['/pages/general/errorPage']);
-    return false;
+  canActivate(): Observable<boolean | UrlTree> {
+    return this.authService.resolveSession().pipe(
+      map((user) => {
+        if (!user) {
+          return this.router.createUrlTree(['/auth/login']);
+        }
+        if (this.authService.isRole('doctor')) {
+          return true;
+        }
+        return this.router.createUrlTree(['/pages/general/errorPage']);
+      })
+    );
   }
 }
