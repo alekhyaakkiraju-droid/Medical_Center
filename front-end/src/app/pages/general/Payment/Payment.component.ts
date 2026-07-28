@@ -42,7 +42,6 @@ export class PaymentComponent implements OnInit {
   onSubmitPayment(event: Event) {
     event.preventDefault();
     if (this.checkoutForm.valid) {
-      console.log('Payment successful:', this.checkoutForm.value);
       this.paymentSuccess.emit(true); 
     } else {
       this.paymentSuccess.emit(false); 

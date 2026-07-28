@@ -22,37 +22,37 @@
 
             <div class="flex lg:flex-row md:flex-col sm:flex-col xs:flex-col gap-2 justify-center w-full">
               <div class="w-full   mt-6">
-                <h5 for="">Your Name</h5>
-                <input type="text" class="mt-2 p-2 w-full border-2 rounded-lg  " formControlName="userName" [readonly]="true" />
+                <label for="profile-user-name">Your Name</label>
+                <input id="profile-user-name" type="text" class="mt-2 p-2 w-full border-2 rounded-lg  " formControlName="userName" [readonly]="true" />
                 <!-- value="{{this.profileData.userName}}"> -->
               </div>
               <div class="w-full  mb-4 lg:mt-6">
-                <h5 for="" class=" ">Email </h5>
-                <input type="email" class="mt-2 p-2 w-full border-2 rounded-lg  "formControlName="email"  [readonly]="true">
+                <label for="profile-email">Email</label>
+                <input id="profile-email" type="email" class="mt-2 p-2 w-full border-2 rounded-lg  "formControlName="email"  [readonly]="true">
               </div>
             </div>
 
             <div class="flex lg:flex-row md:flex-col mb-4 sm:flex-col xs:flex-col gap-2 justify-center w-full">
               <div class="w-full">
-                <h5>Phone Number</h5>
-                <input type="text" class="mt-2 p-2 w-full border-2 rounded-lg  " formControlName="phoneNumber" [readonly]="true" />
+                <label for="profile-phone">Phone Number</label>
+                <input id="profile-phone" type="text" class="mt-2 p-2 w-full border-2 rounded-lg  " formControlName="phoneNumber" [readonly]="true" />
                 <!-- value="{{this.profileData.phoneNumber}}"> -->
               </div>
               <div class="w-full">
-                <h5 class="mb-2">Address</h5>
-                <input type="text" class="text-grey p-2 w-full border-2 rounded-lg" formControlName="address" [readonly]="true" />
+                <label for="profile-address" class="mb-2 block">Address</label>
+                <input id="profile-address" type="text" class="text-grey p-2 w-full border-2 rounded-lg" formControlName="address" [readonly]="true" />
                 <!-- value="{{this.profileData.address}}"> -->
               </div>
             </div>
 
-            <div class="w-full rounded-lg bg-blue-500 text-white text-lg font-semibold" style="background-color: #dfa974;">
+            <div class="w-full rounded-lg bg-blue-500 text-white text-lg font-semibold" style="background-color: var(--color-accent);">
               <div class="flex">
                 <button (click)="openDialog()" type="button" class="w-1/2 p-4 border-r border-white">Edit</button>
                 <button (click)="openDialog2()" type="button" class="w-1/2 p-4">Change Password</button>
               </div>
             </div>
             <!-- <div class="w-full rounded-lg bg-blue-500  text-white text-lg font-semibold"
-            style="background-color: #dfa974;">
+            style="background-color: var(--color-accent);">
             <button (click)="openDialog()" type="submit" class="w-full p-4">Edite</button>
           </div>   -->
 
@@ -72,8 +72,9 @@
       <div
         [ngClass]="{ 'opacity-100 translate-y-0 scale-100': isDialogMounted, 'opacity-0 -translate-y-28 scale-90 pointer-events-none': !isDialogMounted }"
         class="relative m-4 p-6 w-11/12 sm:w-2/3 md:w-1/2 lg:w-2/5 min-w-[280px] rounded-lg bg-white shadow-sm transition-all duration-300"
+        role="dialog" aria-modal="true" aria-labelledby="profile-edit-modal-title"
         (click)="$event.stopPropagation()">
-        <div class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800">
+        <div id="profile-edit-modal-title" class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800">
           Update Your Profile
         </div>
         <div class="space-y-4">
@@ -134,7 +135,8 @@
         <div
           [ngClass]="{ 'opacity-100 translate-y-0 scale-100': isDialogMounted2, 'opacity-0 -translate-y-28 scale-90 pointer-events-none': !isDialogMounted2 }"
           class="relative m-4 p-6 w-11/12 sm:w-1/3 md:w-1/2 lg:w-1/5 min-w-[280px] rounded-lg bg-white shadow-sm transition-all duration-300"
-          (click)="$event.stopPropagation()">
+          role="dialog" aria-modal="true" aria-labelledby="change-password-modal-title"
+        (click)="$event.stopPropagation()">
           <div class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800">
             Change Your Password
           </div>

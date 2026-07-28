@@ -1,0 +1,8 @@
+.patient-home__header h1 { font-size: 1.75rem; font-weight: 700; }
+.patient-home__section { margin-bottom: 2rem; }
+.patient-home__cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.patient-home__card { background: #fff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1rem; }
+.patient-home__state { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 0.75rem; padding: 1.5rem; text-align: center; }
+.patient-home__state--error { border-color: #fecaca; color: #b91c1c; }
+.patient-home__cta { background: #2563eb; border-radius: 0.5rem; color: #fff; display: inline-block; margin-top: 0.75rem; padding: 0.5rem 1rem; text-decoration: none; }
+.patient-home__list { list-style: none; padding: 0; }

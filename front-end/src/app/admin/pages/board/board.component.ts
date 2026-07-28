@@ -19,7 +19,6 @@ import { ChartComponent } from '../chart/chart.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { AssetUrlPipe } from '../../../shared/asset-url.pipe';
 
-
 @Component({
     selector: 'app-board',
     templateUrl: './board.component.html',
@@ -28,7 +27,6 @@ import { AssetUrlPipe } from '../../../shared/asset-url.pipe';
     imports: [SideBarComponent, NgClass, ChartComponent, DeleteModalComponent, ReactiveFormsModule, FormsModule, CurrencyPipe, DatePipe, AssetUrlPipe]
 })
 export class BoardComponent implements OnInit, OnDestroy {
-
   appointments: any[] = [];
   currentPage = 1;
   pageSize = 20;
@@ -36,14 +34,24 @@ export class BoardComponent implements OnInit, OnDestroy {
   totalCount = 0;
   infoBoxes: any[] = [];
   doctorsData: Doctor[] = [];
-  numOfAppointments: number = 0;
-  numOfDoctors: number = 0;
-  numOfPatients: number = 0;
-  totalAmountEarning: number = 0;
+  numOfAppointments = 0;
+  numOfDoctors = 0;
+  numOfPatients = 0;
+  totalAmountEarning = 0;
   selectedAppointmentId!: number;
   menuItems = MENU;
 
-  private subscriptions: Subscription[] = [];  // Store subscriptions
+  hasAppointments = false;
+  hasDoctors = false;
+  hasPatients = false;
+  hasEarnings = false;
+  appointmentsLoadError = false;
+  doctorsLoadError = false;
+  patientsLoadError = false;
+  earningsLoadError = false;
+  dataLoaded = false;
+
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private appointmentService: AppointmentService,
@@ -76,20 +84,24 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   loadAppointments(page = 1): void {
-    const appointmentSub = this.appointmentService.getAppointments(page, this.pageSize).subscribe(
-      (data) => {
+    this.appointmentsLoadError = false;
+    const appointmentSub = this.appointmentService.getAppointments(page, this.pageSize).subscribe({
+      next: (data) => {
         this.appointments = data.items;
         this.currentPage = data['currentPage'];
         this.pageCount = data['pageCount'];
         this.totalCount = data['totalCount'];
         this.numOfAppointments = data['totalCount'];
+        this.hasAppointments = (data.items?.length ?? 0) > 0;
+        this.dataLoaded = true;
         this.optimizeWidget();
         this.setBadgeForAppointments();
       },
-      (error) => {
-        console.error('Error fetching appointments:', error);
-      }
-    );
+      error: () => {
+        this.appointmentsLoadError = true;
+        this.dataLoaded = true;
+      },
+    });
     this.subscriptions.push(appointmentSub);
   }
 
@@ -101,47 +113,57 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   loadDoctor(): void {
-    const doctorSub = this.doctorService.getAllDoctors().subscribe(
-      (result) => {
-        if (result?.items) {
-          this.doctorsData = result.items;
-          this.numOfDoctors = result['totalCount'];
-        }
+    this.doctorsLoadError = false;
+    const doctorSub = this.doctorService.getAllDoctors().subscribe({
+      next: (result) => {
+        this.doctorsData = result?.items ?? [];
+        this.numOfDoctors = result['totalCount'] ?? this.doctorsData.length;
+        this.hasDoctors = this.doctorsData.length > 0;
+        this.dataLoaded = true;
       },
-      (error) => {
-        console.error('Error fetching doctors:', error);
-      }
-    );
+      error: () => {
+        this.doctorsLoadError = true;
+        this.dataLoaded = true;
+      },
+    });
     this.subscriptions.push(doctorSub);
   }
 
   fetchPatientLength(): void {
+    this.patientsLoadError = false;
     const patientSub = this.patientService.getAllPatient().subscribe({
       next: (data) => {
         this.numOfPatients = data['totalCount'] ?? data.items?.length ?? 0;
+        this.hasPatients = this.numOfPatients > 0;
         this.optimizeWidget();
+        this.dataLoaded = true;
       },
-      error: (err) => {
-        console.error('Error fetching patients:', err);
-      }
+      error: () => {
+        this.patientsLoadError = true;
+        this.dataLoaded = true;
+      },
     });
     this.subscriptions.push(patientSub);
   }
 
   getTotalEarning(): void {
+    this.earningsLoadError = false;
     const earningSub = this.totalEarningService.getTotalEarnings().subscribe({
       next: (data) => {
         this.totalAmountEarning = data.totalEarnings ?? 0;
+        this.hasEarnings = this.totalAmountEarning > 0;
         this.optimizeWidget();
+        this.dataLoaded = true;
       },
-      error: (err) => {
-        console.error('Error fetching total earnings:', err);
-      }
+      error: () => {
+        this.earningsLoadError = true;
+        this.dataLoaded = true;
+      },
     });
     this.subscriptions.push(earningSub);
   }
 
-  setBadgeForAppointments() {
+  setBadgeForAppointments(): void {
     const appointmentItem = this.menuItems.find(item => item.title === 'Appointment');
     if (appointmentItem) {
       appointmentItem.badge = this.numOfAppointments.toString();
@@ -150,57 +172,33 @@ export class BoardComponent implements OnInit, OnDestroy {
 
   optimizeWidget(): void {
     this.infoBoxes = [
-      {
-        accentClass: 'admin-stat-card--blue',
-        iconClass: 'fa-solid fa-calendar-check',
-        text: 'Appointments',
-        number: this.numOfAppointments,
-      },
-      {
-        accentClass: 'admin-stat-card--orange',
-        iconClass: 'fa-solid fa-hospital-user',
-        text: 'Patients',
-        number: this.numOfPatients,
-      },
-      {
-        accentClass: 'admin-stat-card--purple',
-        iconClass: 'fa-solid fa-user-doctor',
-        text: 'Doctors',
-        number: this.numOfDoctors,
-      },
-      {
-        accentClass: 'admin-stat-card--green',
-        iconClass: 'fa-solid fa-sack-dollar',
-        text: 'Total Earnings',
-        number: this.totalAmountEarning,
-        isCurrency: true,
-      },
+      { accentClass: 'admin-stat-card--blue', iconClass: 'fa-solid fa-calendar-check', text: 'Appointments', number: this.numOfAppointments },
+      { accentClass: 'admin-stat-card--orange', iconClass: 'fa-solid fa-hospital-user', text: 'Patients', number: this.numOfPatients },
+      { accentClass: 'admin-stat-card--purple', iconClass: 'fa-solid fa-user-doctor', text: 'Doctors', number: this.numOfDoctors },
+      { accentClass: 'admin-stat-card--green', iconClass: 'fa-solid fa-sack-dollar', text: 'Total Earnings', number: this.totalAmountEarning, isCurrency: true },
     ];
   }
 
-  openDeleteModal(id: number) {
+  openDeleteModal(id: number): void {
     this.selectedAppointmentId = id;
     this.deleteModal.showModal();
   }
 
   @ViewChild(DeleteModalComponent) deleteModal!: DeleteModalComponent;
 
-  onDeleteAppointment(id: number) {
+  onDeleteAppointment(id: number): void {
     const deleteSub = this.appointmentService.deleteBookingById(id).subscribe({
       next: () => {
-        this.toaster.success("Appointment deleted successfully");
+        this.toaster.success('Appointment deleted successfully');
         this.loadAppointments();
       },
-      error: (err) => {
-        console.error('Error deleting appointment:', err);
-        this.toaster.error("Error deleting appointment");
-      }
+      error: () => this.toaster.error('Error deleting appointment'),
     });
     this.subscriptions.push(deleteSub);
   }
 
-  appointmentDate: string = '';
-  appointmentTime: string = '';
+  appointmentDate = '';
+  appointmentTime = '';
   showEditModal = false;
 
   onEditeAppointment(id: number, appointmentDate: string): void {
@@ -210,64 +208,48 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.showEditModal = true;
   }
 
-  closeModal(): void {
-    this.showEditModal = false;
-  }
+  closeModal(): void { this.showEditModal = false; }
 
   saveAppointment(): void {
     const updatedAppointment = {
       id: this.selectedAppointmentId,
       appointmentTakenDate: this.appointmentDate + 'T' + this.appointmentTime,
     };
-
     if (!this.selectedAppointmentId) {
-      this.toaster.error("No appointment selected!");
+      this.toaster.error('No appointment selected!');
       return;
     }
-
     const editSub = this.appointmentService.editeBooking(this.selectedAppointmentId, updatedAppointment).subscribe({
       next: () => {
-        this.toaster.success("Appointment Updated successfully");
+        this.toaster.success('Appointment Updated successfully');
         this.closeModal();
         this.loadAppointments();
       },
-      error: (err) => {
-        console.error('Error Updating appointment:', err);
-        this.toaster.error("Error Updating appointment");
-      }
+      error: () => this.toaster.error('Error Updating appointment'),
     });
     this.subscriptions.push(editSub);
-
     this.closeModal();
   }
 
-
-  downloadAsPDF(){
+  downloadAsPDF(): void {
     const doc = new jsPDF();
-
-    autoTable(doc,{
-      head:[["Patient Name","Assigned Doctor","Date","Time"]],
-      body:this.appointments.map(i => [
-        i.patient?.name,
-        i.doctor?.name,
-        i.appointmentDate,
-        i.appointmentTime ?? ''
-      ])
-    })
-    doc.save("table.pdf")
-  }
-@ViewChild('tableRef') tableRef!: ElementRef;
-  downloadAsExcel(){
-   const ws: XLSX.WorkSheet  = XLSX.utils.table_to_sheet(this.tableRef.nativeElement); // Converts an HTML <table> element into an Excel-compatible worksheet (XLSX.WorkSheet).
-   console.log("WorkSheet",this.tableRef.nativeElement, ws)
-   const wb: XLSX.WorkBook  = XLSX.utils.book_new();//  like a new Excel file with no sheets in it yet.
-   XLSX.utils.book_append_sheet(wb,ws,'appointments'); //Adds the worksheet ws (your table data) into the workbook wb
-   XLSX.writeFile(wb,'appointments.xlsx');
+    autoTable(doc, {
+      head: [['Patient Name', 'Assigned Doctor', 'Date', 'Time']],
+      body: this.appointments.map(i => [i.patient?.name, i.doctor?.name, i.appointmentDate, i.appointmentTime ?? '']),
+    });
+    doc.save('table.pdf');
   }
 
-  // Clean up when component is destroyed
+  @ViewChild('tableRef') tableRef!: ElementRef;
+
+  downloadAsExcel(): void {
+    const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(this.tableRef.nativeElement);
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'appointments');
+    XLSX.writeFile(wb, 'appointments.xlsx');
+  }
+
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
-    console.log("BoardComponent destroyed and subscriptions cleaned up.");
   }
 }

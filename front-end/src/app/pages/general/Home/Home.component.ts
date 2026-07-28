@@ -48,7 +48,6 @@ export class HomeComponent implements  OnInit , AfterViewInit {
           this.specializations = data.items.slice(0, 6);
         },
         (error) => {
-          console.error('Error fetching specializations', error);
         }
       )
     );
@@ -56,7 +55,6 @@ export class HomeComponent implements  OnInit , AfterViewInit {
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
-    console.log('All subscriptions unsubscribed.');
   }
 
 

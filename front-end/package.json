@@ -10,9 +10,9 @@
     "generate-api-types": "bash ../scripts/generate-api-types.sh",
     "serve:ssr:MedicalCenter": "node dist/medical-center/server/server.mjs",
     "test:ci": "ng test --no-watch --browsers=ChromeHeadless",
+    "lint:no-console": "node -e \"const{execSync}=require('child_process');const o=execSync('grep -rn \\\"console\\\\.\\\\(log\\\\|error\\\\)\\\" src/app --include=*.ts || true',{encoding:'utf8'});if(o.trim()){console.error(o);process.exit(1)}\"",
     "lint:placeholders": "bash ../scripts/check-public-placeholder-content.sh"
   },
-  "private": true,
   "dependencies": {
     "@angular/animations": "^22.0.8",
     "@angular/cdk": "^22.0.6",

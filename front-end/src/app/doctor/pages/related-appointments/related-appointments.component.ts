@@ -78,7 +78,7 @@ export class RelatedAppointmentsComponent implements OnInit, OnDestroy {
     if (id) {
       this.doctorId = id;
     } else {
-      console.error(this.errorMessage);
+      this.errorMessage = 'Unable to identify the signed-in doctor.';
     }
   }
 
@@ -88,8 +88,8 @@ export class RelatedAppointmentsComponent implements OnInit, OnDestroy {
         this.allBookings = response.items;
         this.applyFiltersAndPagination();
       },
-      error: (error) => {
-        console.error(error);
+      error: () => {
+        this.errorMessage = 'Unable to load appointments.';
       }
     });
     this.subscriptions.push(sub);
@@ -101,8 +101,7 @@ export class RelatedAppointmentsComponent implements OnInit, OnDestroy {
         this.toaster.success("Appointment deleted successfully");
         this.loadBookings();
       },
-      (error) => {
-        console.error('Error deleting appointment', error);
+      () => {
         this.toaster.error("Error deleting appointment");
       }
     );
