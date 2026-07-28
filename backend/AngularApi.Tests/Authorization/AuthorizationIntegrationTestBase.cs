@@ -74,4 +74,22 @@ public abstract class AuthorizationIntegrationTestBase : IClassFixture<MedicalCe
             await context.SaveChangesAsync();
         }
     }
+
+    protected async Task<int> SeedAppointmentAsync(string patientId, string? doctorId = null)
+    {
+        using var scope = Factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<MedicalCenterDbContext>();
+
+        var appointment = new Appointment
+        {
+            PatientId = patientId,
+            DoctorId = doctorId,
+            DoctorName = doctorId ?? "Unassigned",
+            AppointmentTakenDate = DateTime.UtcNow,
+        };
+
+        context.Appointments.Add(appointment);
+        await context.SaveChangesAsync();
+        return appointment.Id;
+    }
 }

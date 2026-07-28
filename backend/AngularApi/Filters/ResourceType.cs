@@ -6,4 +6,5 @@ public enum ResourceType
     Doctor,
     PatientReview,
     MedicalCenter,
+    Appointment,
 }

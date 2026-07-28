@@ -20,7 +20,7 @@ public class PatientReviewsControllerTests : IDisposable
     {
         _context = new MedicalCenterDbContext(new DbContextOptionsBuilder<MedicalCenterDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
         _controller = new PatientReviewsController(
-            new PatientReviewService(_context, new OwnershipValidator(), NullLogger<PatientReviewService>.Instance));
+            new PatientReviewService(_context, new OwnershipValidator(_context), NullLogger<PatientReviewService>.Instance));
         _controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, "patient1"), new Claim(ClaimTypes.Role, "admin") }, "TestAuth")) } };
     }
 

@@ -20,7 +20,8 @@ public class OwnershipValidationFilterTests
     [Fact]
     public async Task OnActionExecutionAsync_WithoutValidateOwnershipAttribute_AllowsRequest()
     {
-        var filter = CreateFilter(new OwnershipValidator(), CreateDbContext());
+        await using var dbContext = CreateDbContext();
+        var filter = CreateFilter(new OwnershipValidator(dbContext), dbContext);
         var context = CreateContext(userId: "patient-1", roles: ["user"]);
         var nextCalled = false;
 
@@ -58,7 +59,8 @@ public class OwnershipValidationFilterTests
     [Fact]
     public async Task OnActionExecutionAsync_AdminUpdatingMedicalCenter_AllowsRequest()
     {
-        var filter = CreateFilter(new OwnershipValidator(), CreateDbContext());
+        await using var dbContext = CreateDbContext();
+        var filter = CreateFilter(new OwnershipValidator(dbContext), dbContext);
         var context = CreateContext(
             userId: "admin-user",
             roles: ["admin"],
@@ -79,7 +81,8 @@ public class OwnershipValidationFilterTests
     [Fact]
     public async Task OnActionExecutionAsync_NonAdminUpdatingMedicalCenter_ReturnsForbidden()
     {
-        var filter = CreateFilter(new OwnershipValidator(), CreateDbContext());
+        await using var dbContext = CreateDbContext();
+        var filter = CreateFilter(new OwnershipValidator(dbContext), dbContext);
         var context = CreateContext(
             userId: "doctor-1",
             roles: ["doctor"],
@@ -100,7 +103,7 @@ public class OwnershipValidationFilterTests
         dbContext.PatientReviews.Add(new PatientReview { Id = 7, PatientId = "patient-1", OverallRating = 4 });
         await dbContext.SaveChangesAsync();
 
-        var filter = CreateFilter(new OwnershipValidator(), dbContext);
+        var filter = CreateFilter(new OwnershipValidator(dbContext), dbContext);
         var context = CreateContext(
             userId: "patient-1",
             roles: ["user"],
@@ -125,7 +128,7 @@ public class OwnershipValidationFilterTests
         dbContext.PatientReviews.Add(new PatientReview { Id = 8, PatientId = "patient-2", OverallRating = 4 });
         await dbContext.SaveChangesAsync();
 
-        var filter = CreateFilter(new OwnershipValidator(), dbContext);
+        var filter = CreateFilter(new OwnershipValidator(dbContext), dbContext);
         var context = CreateContext(
             userId: "patient-1",
             roles: ["user"],
@@ -172,7 +175,7 @@ public class OwnershipValidationFilterTests
         dbContext.PatientReviews.Add(new PatientReview { Id = 9, PatientId = "patient-2", OverallRating = 3 });
         await dbContext.SaveChangesAsync();
 
-        var filter = CreateFilter(new OwnershipValidator(), dbContext);
+        var filter = CreateFilter(new OwnershipValidator(dbContext), dbContext);
         var context = CreateContext(
             userId: "admin-user",
             roles: ["admin"],
@@ -188,6 +191,110 @@ public class OwnershipValidationFilterTests
 
         nextCalled.Should().BeTrue();
         context.Result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task OnActionExecutionAsync_PatientAccessingOwnAppointment_AllowsRequest()
+    {
+        await using var dbContext = CreateDbContext();
+        var appointmentId = await SeedAppointmentAsync(dbContext, "patient-1", "doctor-1");
+
+        var filter = CreateFilter(new OwnershipValidator(dbContext), dbContext);
+        var context = CreateContext(
+            userId: "patient-1",
+            roles: ["user"],
+            attributes: [new ValidateOwnershipAttribute(ResourceType.Appointment)],
+            actionArguments: new Dictionary<string, object?> { ["id"] = appointmentId });
+
+        var nextCalled = false;
+        await filter.OnActionExecutionAsync(context, () =>
+        {
+            nextCalled = true;
+            return Task.FromResult<ActionExecutedContext>(null!);
+        });
+
+        nextCalled.Should().BeTrue();
+        context.Result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task OnActionExecutionAsync_DoctorAccessingAssignedAppointment_AllowsRequest()
+    {
+        await using var dbContext = CreateDbContext();
+        var appointmentId = await SeedAppointmentAsync(dbContext, "patient-1", "doctor-1");
+
+        var filter = CreateFilter(new OwnershipValidator(dbContext), dbContext);
+        var context = CreateContext(
+            userId: "doctor-1",
+            roles: ["doctor"],
+            attributes: [new ValidateOwnershipAttribute(ResourceType.Appointment)],
+            actionArguments: new Dictionary<string, object?> { ["id"] = appointmentId });
+
+        var nextCalled = false;
+        await filter.OnActionExecutionAsync(context, () =>
+        {
+            nextCalled = true;
+            return Task.FromResult<ActionExecutedContext>(null!);
+        });
+
+        nextCalled.Should().BeTrue();
+        context.Result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task OnActionExecutionAsync_NonOwnerAccessingAppointment_ReturnsForbidden()
+    {
+        await using var dbContext = CreateDbContext();
+        var appointmentId = await SeedAppointmentAsync(dbContext, "patient-1", "doctor-1");
+
+        var filter = CreateFilter(new OwnershipValidator(dbContext), dbContext);
+        var context = CreateContext(
+            userId: "patient-2",
+            roles: ["user"],
+            attributes: [new ValidateOwnershipAttribute(ResourceType.Appointment)],
+            actionArguments: new Dictionary<string, object?> { ["id"] = appointmentId });
+
+        await filter.OnActionExecutionAsync(context, () => Task.FromResult<ActionExecutedContext>(null!));
+
+        context.Result.Should().BeOfType<ObjectResult>();
+        var result = (ObjectResult)context.Result!;
+        result.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
+    }
+
+    [Fact]
+    public async Task OnActionExecutionAsync_InvalidAppointmentId_ReturnsForbidden()
+    {
+        await using var dbContext = CreateDbContext();
+        var filter = CreateFilter(new OwnershipValidator(dbContext), dbContext);
+        var context = CreateContext(
+            userId: "patient-1",
+            roles: ["user"],
+            attributes: [new ValidateOwnershipAttribute(ResourceType.Appointment)],
+            actionArguments: new Dictionary<string, object?> { ["id"] = "not-an-int" });
+
+        await filter.OnActionExecutionAsync(context, () => Task.FromResult<ActionExecutedContext>(null!));
+
+        context.Result.Should().BeOfType<ObjectResult>();
+        var result = (ObjectResult)context.Result!;
+        result.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
+    }
+
+    private static async Task<int> SeedAppointmentAsync(
+        MedicalCenterDbContext context,
+        string patientId,
+        string? doctorId)
+    {
+        var appointment = new Appointment
+        {
+            PatientId = patientId,
+            DoctorId = doctorId,
+            DoctorName = doctorId ?? "Unassigned",
+            AppointmentTakenDate = DateTime.UtcNow,
+        };
+
+        context.Appointments.Add(appointment);
+        await context.SaveChangesAsync();
+        return appointment.Id;
     }
 
     private static OwnershipValidationFilter CreateFilter(

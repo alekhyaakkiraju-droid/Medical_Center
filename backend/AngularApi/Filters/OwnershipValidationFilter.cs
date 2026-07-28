@@ -85,6 +85,7 @@ public class OwnershipValidationFilter : IAsyncActionFilter
             ResourceType.Doctor => ValidateDoctorOwnership(context, user, attribute),
             ResourceType.PatientReview => await ValidatePatientReviewOwnershipAsync(context, user, attribute),
             ResourceType.MedicalCenter => _ownershipValidator.CanAccessMedicalCenterResource(user),
+            ResourceType.Appointment => await ValidateAppointmentOwnershipAsync(context, user, attribute),
             _ => true,
         };
     }
@@ -117,6 +118,26 @@ public class OwnershipValidationFilter : IAsyncActionFilter
         }
 
         return _ownershipValidator.CanAccessDoctorResource(user, doctorId);
+    }
+
+    private async Task<bool> ValidateAppointmentOwnershipAsync(
+        ActionExecutingContext context,
+        System.Security.Claims.ClaimsPrincipal user,
+        ValidateOwnershipAttribute attribute)
+    {
+        var appointmentIdValue = TryGetResourceId(context, attribute.IdParameterName);
+        if (appointmentIdValue == null || !int.TryParse(appointmentIdValue, out var appointmentId))
+        {
+            _logger.LogWarning(
+                "Ownership validation denied for action {Action}: route parameter '{ParameterName}' was missing or invalid for resource type {ResourceType}.",
+                context.ActionDescriptor.DisplayName,
+                attribute.IdParameterName,
+                attribute.ResourceType);
+
+            return false;
+        }
+
+        return await _ownershipValidator.CanAccessAppointmentResource(user, appointmentId);
     }
 
     private async Task<bool> ValidatePatientReviewOwnershipAsync(
