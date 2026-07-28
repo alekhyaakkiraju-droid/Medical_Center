@@ -3,6 +3,7 @@ using AngularApi.Infrastructure;
 using AngularApi.Contracts.Enums;
 using AngularApi.Logging;
 using AngularApi.Middleware;
+using AngularApi.Options;
 using AngularApi.Services;
 using AngularApi.Validators;
 using FluentValidation;
@@ -10,6 +11,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace WebApiDemo
@@ -92,6 +94,21 @@ namespace WebApiDemo
             });
 
             var app = builder.Build();
+            var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
+            var smtpSettings = app.Services.GetRequiredService<IOptions<SmtpSettings>>().Value;
+            if (!smtpSettings.IsConfigured)
+            {
+                startupLogger.LogWarning("SMTP is not configured; email delivery will fail.");
+            }
+            else if (smtpSettings.IsDevMode)
+            {
+                startupLogger.LogInformation("SMTP configured for dev capture mode (MailHog).");
+            }
+            else
+            {
+                startupLogger.LogInformation("SMTP configured for production delivery.");
+            }
+
             JwtSecretStartupValidation.Validate(
                 app.Configuration,
                 app.Services.GetRequiredService<ILogger<Program>>());
