@@ -10,6 +10,7 @@ import { ResetPasswordService } from '../auth-services/resetPassword.service';
 import { ModelService } from '../auth-services/model.service';
 import { ToastrService } from 'ngx-toastr';
 import { ForgetPasswordComponent } from '../forgetPassword/forgetPassword.component';
+import { getRoleBasedRedirectUrl } from '../../../core/utils/role-redirect.util';
 
 @Component({
     selector: 'app-login',
@@ -111,15 +112,7 @@ export class LoginComponent implements OnInit, AfterViewInit{
       const loginSub = this.authService.login(email, password).subscribe(
         () => {
           this.onLoginSuccess();
-          if (this.authService.isRole('admin')) {
-            this.router.navigate(['admin/dashboard']);
-          } else if (this.authService.isRole('doctor')) {
-            this.router.navigate(['doctor/dashboard']);
-          } else if (this.authService.isRole('user')) {
-            this.router.navigate(['/patient/home']);
-          } else {
-            this.router.navigate(['/pages/home']);
-          }
+          this.navigateAfterLogin();
         },
         (error: any) => {
           this.errorMessage = 'Email or password is incorrect';
@@ -132,6 +125,11 @@ export class LoginComponent implements OnInit, AfterViewInit{
 
   loginWithGoogle(): void {
     window.location.href = this.authService.googleloginUrl;
+  }
+
+  navigateAfterLogin(): void {
+    const roles = this.authService.getCurrentUserRoles();
+    this.router.navigate([getRoleBasedRedirectUrl(roles)]);
   }
 
 // ------------------------------Forget password-------------------------------------
