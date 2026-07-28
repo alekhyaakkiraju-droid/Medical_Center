@@ -20,7 +20,7 @@
   }
   
   .contact .address-block .media i {
-    color: #48bdc5;
+    color: var(--color-primary);
     font-size: 30px;
     margin-right: 35px;
     width: 40px;
@@ -58,7 +58,7 @@
   
   .form-control:focus {
     box-shadow: none;
-    border: 1px solid #48bdc5;
+    border: 1px solid var(--color-primary);
   }
   
   .form-control.main {
