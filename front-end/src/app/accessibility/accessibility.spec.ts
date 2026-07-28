@@ -7,6 +7,9 @@ import { of } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
 import { LoginComponent } from '../pages/auth/login/login.component';
+import { HeaderComponent } from '../layout/header/header.component';
+import { FooterComponent } from '../layout/footer/footer.component';
+import { BlogComponent } from '../pages/general/blog/blog.component';
 import { RegisterComponent } from '../pages/auth/register/register.component';
 import { AppointmentRequestComponent } from '../pages/general/appointment-request/appointment-request.component';
 import { BoardComponent } from '../admin/pages/board/board.component';
@@ -203,6 +206,73 @@ describe('WCAG 2.1 AA accessibility', () => {
       fixture.detectChanges();
       const tableText = fixture.nativeElement.textContent as string;
       expect(tableText).toMatch(/07\/23\/2026/);
+    });
+  });
+
+  describe('Header navigation', () => {
+    let fixture: ComponentFixture<HeaderComponent>;
+
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({
+        imports: [HeaderComponent],
+        providers: [
+          ...standaloneComponentTestProviders,
+          { provide: AuthServiceService, useValue: { getloggedStatus: () => of(false) } },
+        ],
+      }).compileComponents();
+
+      fixture = TestBed.createComponent(HeaderComponent);
+      fixture.detectChanges();
+    });
+
+    it('should have no critical WCAG 2.1 AA violations', async () => {
+      await expectNoA11yViolations(fixture.nativeElement);
+    });
+
+    it('should expose labeled main navigation landmark', () => {
+      const nav = fixture.nativeElement.querySelector('nav[aria-label="Main navigation"]');
+      expect(nav).toBeTruthy();
+    });
+  });
+
+  describe('Footer', () => {
+    let fixture: ComponentFixture<FooterComponent>;
+
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({
+        imports: [FooterComponent],
+        providers: standaloneComponentTestProviders,
+      }).compileComponents();
+
+      fixture = TestBed.createComponent(FooterComponent);
+      fixture.detectChanges();
+    });
+
+    it('should have no critical WCAG 2.1 AA violations', async () => {
+      await expectNoA11yViolations(fixture.nativeElement);
+    });
+  });
+
+  describe('Blog page', () => {
+    let fixture: ComponentFixture<BlogComponent>;
+
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({
+        imports: [BlogComponent],
+        providers: standaloneComponentTestProviders,
+      }).compileComponents();
+
+      fixture = TestBed.createComponent(BlogComponent);
+      fixture.detectChanges();
+    });
+
+    it('should have no critical WCAG 2.1 AA violations', async () => {
+      await expectNoA11yViolations(fixture.nativeElement);
+    });
+
+    it('should expose keyboard-operable pagination controls', () => {
+      const buttons = fixture.nativeElement.querySelectorAll('.styled-pagination button');
+      expect(buttons.length).toBeGreaterThan(0);
     });
   });
 });

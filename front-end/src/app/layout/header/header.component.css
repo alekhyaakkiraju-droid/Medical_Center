@@ -148,6 +148,18 @@
     padding-left: 0;
   }
 
+  .header-uper .contact-info .item .logout-trigger {
+    position: relative;
+    display: inline-block;
+    padding-left: 70px;
+    border: none;
+    background: transparent;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+  }
+
   .header-uper .contact-info .item .login-link {
     position: relative;
     display: inline-block;

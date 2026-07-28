@@ -36,4 +36,21 @@ describe('HeaderComponent', () => {
     expect(logo).toBeTruthy();
     expect(logo.nativeElement.getAttribute('src')).toContain('loggggo-3.png');
   });
+
+  it('should label social links for keyboard and screen reader users', () => {
+    const socialAnchors = fixture.nativeElement.querySelectorAll('.social-links a');
+    expect(socialAnchors.length).toBeGreaterThan(0);
+    socialAnchors.forEach((anchor: HTMLAnchorElement) => {
+      expect(anchor.getAttribute('aria-label')).toMatch(/Visit our .+ page/);
+      expect(anchor.tabIndex).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  it('should expose keyboard-focusable logout control when logged in', () => {
+    component.isLoggedIn = true;
+    fixture.detectChanges();
+    const logoutButton = fixture.nativeElement.querySelector('.logout-trigger');
+    expect(logoutButton?.tagName.toLowerCase()).toBe('button');
+    expect(logoutButton?.getAttribute('aria-label')).toBe('Log out');
+  });
 });

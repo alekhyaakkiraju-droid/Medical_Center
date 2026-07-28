@@ -5,12 +5,13 @@ import { ReloadService } from './shared/service/reload.service';
 import { NgIf } from '@angular/common';
 import { HeaderComponent } from './layout/header/header.component';
 import { FooterComponent } from './layout/footer/footer.component';
+import { SkipToContentComponent } from './shared/components/skip-to-content/skip-to-content.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
-  imports: [NgIf, HeaderComponent, FooterComponent, RouterOutlet]
+  imports: [NgIf, HeaderComponent, FooterComponent, RouterOutlet, SkipToContentComponent]
 })
 export class AppComponent implements OnInit, AfterViewInit {
   title = 'MedicalCenter';

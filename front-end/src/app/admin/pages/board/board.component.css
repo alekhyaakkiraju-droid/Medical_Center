@@ -129,10 +129,12 @@ a:hover {
   color: #23527c;
 }
 a:active,
-a:focus,
 a:hover {
-  outline: 0;
   text-decoration: none;
+}
+a:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #1a7a82);
+  outline-offset: 2px;
 }
 hr {
   border: 0;
@@ -1153,7 +1155,6 @@ body {
     height: 9px;
     background-repeat: no-repeat !important;
     text-indent: -10000px;
-    outline: 0;
     /* background-image: url(../img/remove-icon-small.png) !important; */
   }
   .help-block {

@@ -27,4 +27,12 @@ describe('LoginComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should not suppress focus styles on interactive login controls', () => {
+    const buttons = fixture.nativeElement.querySelectorAll('button');
+    buttons.forEach((button: HTMLButtonElement) => {
+      expect(button.className).not.toContain('outline-none');
+      expect(button.className).toContain('focus-visible:ring-2');
+    });
+  });
 });

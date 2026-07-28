@@ -1,3 +1,4 @@
+<app-skip-to-content></app-skip-to-content>
 <div class=" text-center" style="background-color: #ffffff;">
   @if (showHeaderAndNavbar) {
     <div  class="col-12 ">
@@ -6,8 +7,9 @@
   }
 </div>
 
-
-<router-outlet style="background-color: #f8f8f8;"></router-outlet>
+<main id="main-content" tabindex="-1">
+  <router-outlet style="background-color: #f8f8f8;"></router-outlet>
+</main>
 
 @if (showHeaderAndNavbar) {
   <footer class="container-fluid p-0 text-center">
