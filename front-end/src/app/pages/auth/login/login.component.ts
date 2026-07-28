@@ -74,7 +74,6 @@ export class LoginComponent implements OnInit, AfterViewInit{
 
   confirm(): void {
     // Handle confirm logic here
-    console.log('Confirmed');
     this.closeDialog();
   }
 
@@ -123,7 +122,6 @@ export class LoginComponent implements OnInit, AfterViewInit{
           }
         },
         (error: any) => {
-          console.error('Login failed', error);
           this.errorMessage = 'Email or password is incorrect';
           this.onLoginFailed();
         }
@@ -150,7 +148,6 @@ get Forgotemail() {
 }
 onForgotSubmit() {
   const emailForgetVal = this.forgetForm.value.emailForgot;
-  console.log("emailForgot",emailForgetVal);
   const forgetSub = this.forgetpasswordService.forgetPassword(emailForgetVal).subscribe({
     next: (res) => {
       this.toastr.success(`Success: ${res.message}`);   

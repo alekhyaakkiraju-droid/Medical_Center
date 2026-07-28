@@ -8,13 +8,17 @@
     </p>
     <div class="demo-hero__actions">
       <a routerLink="/pages/appointment" class="demo-btn demo-btn--ghost">Browse public site first</a>
-      <button type="button" class="demo-btn demo-btn--secondary" (click)="copyPassword()">
-        Copy demo password
-      </button>
+      @if (showDemoPassword) {
+        <button type="button" class="demo-btn demo-btn--secondary" (click)="copyPassword()">
+          Copy demo password
+        </button>
+      }
     </div>
-    <p class="demo-hero__note">
-      UAT only — password <code>{{ demoPassword }}</code>. Do not reuse in production.
-    </p>
+    @if (showDemoPassword) {
+      <p class="demo-hero__note">
+        UAT only — use the configured demo credentials. Do not reuse in production.
+      </p>
+    }
   </div>
 </section>
 
