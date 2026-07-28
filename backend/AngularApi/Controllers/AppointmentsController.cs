@@ -1,4 +1,5 @@
 ﻿using AngularApi.DTO;
+using AngularApi.Filters;
 using AngularApi.Models;
 using AngularApi.Services;
 using AngularApi.Services.Interfaces;
@@ -48,7 +49,8 @@ namespace AngularApi.Controllers
             return await _appointmentService.GetAllAppointmentsAsync(pagination);
         }
 
-        [Authorize(Policy = "UserPolicy")]
+        [Authorize(Roles = "user,doctor,admin")]
+        [ValidateOwnership(ResourceType.Appointment)]
         [HttpGet("{id}")]
         public async Task<ActionResult<Appointment>> GetAppointment(int id)
         {
@@ -62,7 +64,8 @@ namespace AngularApi.Controllers
             return appointment;
         }
 
-        [Authorize(Policy = "UserPolicy")]
+        [Authorize(Roles = "user,doctor,admin")]
+        [ValidateOwnership(ResourceType.Appointment)]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAppointment(int id, [FromBody] UpdateAppointmentDTO appointmentDto)
         {
@@ -129,6 +132,7 @@ namespace AngularApi.Controllers
         }
 
         [Authorize(Roles = "admin,doctor")]
+        [ValidateOwnership(ResourceType.Appointment)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAppointment(int id)
         {
