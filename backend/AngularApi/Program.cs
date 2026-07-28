@@ -4,16 +4,20 @@ using AngularApi.Contracts.Enums;
 using AngularApi.Logging;
 using AngularApi.Middleware;
 using AngularApi.Options;
+using AngularApi.Models;
 using AngularApi.Services;
 using AngularApi.Validators;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using Serilog;
+using System.Text.Json;
 
 namespace WebApiDemo
 {
@@ -81,7 +85,8 @@ namespace WebApiDemo
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerServices();
             builder.Services.AddAuthRateLimiting();
-            builder.Services.AddHealthChecks();
+            builder.Services.AddHealthChecks()
+                .AddDbContextCheck<MedicalCenterDbContext>(name: "database", tags: ["ready"]);
             builder.Services.AddApplicationServices(builder.Configuration);
             builder.Services.AddAuthenticationServices(builder.Configuration);
             builder.Services.AddAuthorization(options =>
@@ -167,8 +172,32 @@ namespace WebApiDemo
             app.UseAuthorization();
             app.UseMiddleware<AuditMiddleware>();
             app.MapControllers();
-            app.MapHealthChecks("/health").AllowAnonymous();
+            app.MapHealthChecks("/health", new HealthCheckOptions
+            {
+                Predicate = _ => false,
+                ResponseWriter = WriteHealthCheckResponse
+            }).AllowAnonymous();
+            app.MapHealthChecks("/health/ready", new HealthCheckOptions
+            {
+                Predicate = check => check.Tags.Contains("ready"),
+                ResponseWriter = WriteHealthCheckResponse
+            }).AllowAnonymous();
             app.Run();
+        }
+
+        internal static Task WriteHealthCheckResponse(HttpContext context, HealthReport report)
+        {
+            context.Response.ContentType = "application/json";
+            var payload = new
+            {
+                status = report.Status.ToString(),
+                checks = report.Entries.Select(entry => new
+                {
+                    name = entry.Key,
+                    status = entry.Value.Status.ToString()
+                })
+            };
+            return context.Response.WriteAsync(JsonSerializer.Serialize(payload));
         }
     }
 }
