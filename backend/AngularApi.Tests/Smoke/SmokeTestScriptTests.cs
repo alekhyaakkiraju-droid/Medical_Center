@@ -90,12 +90,14 @@ public class SmokeTestScriptTests
 
         var smokeIndex = stagingSteps.IndexOf("- Staging Smoke Tests", StringComparison.Ordinal);
         var expandedIndex = stagingSteps.IndexOf("- Expanded Smoke Tests", StringComparison.Ordinal);
+        var staticAssetIndex = stagingSteps.IndexOf("- Static Asset Verification", StringComparison.Ordinal);
         var patientIndex = stagingSteps.IndexOf("- Patient Journey E2E", StringComparison.Ordinal);
         var dastIndex = stagingSteps.IndexOf("- DAST Scan", StringComparison.Ordinal);
 
         smokeIndex.Should().BeGreaterThan(-1);
         expandedIndex.Should().BeGreaterThan(smokeIndex);
-        patientIndex.Should().BeGreaterThan(expandedIndex);
+        staticAssetIndex.Should().BeGreaterThan(expandedIndex);
+        patientIndex.Should().BeGreaterThan(staticAssetIndex);
         dastIndex.Should().BeGreaterThan(patientIndex);
 
         devSteps.Should().NotContain("Expanded Smoke Tests");
@@ -112,6 +114,26 @@ public class SmokeTestScriptTests
         pipelineSmoke.Exists.Should().BeTrue();
         e2eSmoke.Exists.Should().BeTrue();
         patientJourney.Exists.Should().BeTrue();
+    }
+
+    [Fact]
+    public void StaticAssetVerificationScript_ExistsAndChecksImageAssets()
+    {
+        var scriptPath = Path.Combine(RepoRoot, "scripts", "check-static-assets.sh");
+        File.Exists(scriptPath).Should().BeTrue(because: "WO-022 requires a static asset verification script");
+
+        var script = File.ReadAllText(scriptPath);
+        script.Should().Contain("curl");
+        script.Should().Contain("http_code");
+        script.Should().Contain("image");
+        script.Should().Contain("/pages/about-us");
+        script.Should().Contain("/pages/service");
+        script.Should().Contain("/pages/contact");
+        script.Should().Contain("exit 1");
+
+        var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
+        pipeline.Should().Contain("Static Asset Verification");
+        pipeline.Should().Contain("check-static-assets.sh");
     }
 
     [Fact]
