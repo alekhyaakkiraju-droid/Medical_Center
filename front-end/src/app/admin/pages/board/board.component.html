@@ -1,7 +1,3 @@
-<div id="preloader">
-  <div class="loader"></div>
-</div>
-
 <app-side-bar></app-side-bar>
 
 <main class="admin-main">
@@ -42,7 +38,11 @@
         </div>
       </div>
       <div class="admin-panel__body">
-        @if (appointments.length === 0) {
+        @if (appointmentsLoadError) {
+          <div class="admin-empty admin-empty--error">
+            <p>Unable to load data. <button type="button" class="admin-btn admin-btn-secondary" (click)="loadAppointments()">Click to retry</button></p>
+          </div>
+        } @else if (!hasAppointments) {
           <div class="admin-empty">
             <i class="fa-solid fa-calendar-xmark text-2xl mb-2" aria-hidden="true"></i>
             <p>No appointments booked yet.</p>
@@ -97,9 +97,13 @@
         <h2>Doctors</h2>
       </div>
       <div class="admin-panel__body">
-        @if (doctorsData.length === 0) {
+        @if (doctorsLoadError) {
+          <div class="admin-empty admin-empty--error">
+            <p>Unable to load data. <button type="button" class="admin-btn admin-btn-secondary" (click)="loadDoctor()">Click to retry</button></p>
+          </div>
+        } @else if (!hasDoctors) {
           <div class="admin-empty">
-            <p>No doctors found.</p>
+            <p>No doctors registered.</p>
           </div>
         } @else {
           <ul class="admin-doctor-list">
