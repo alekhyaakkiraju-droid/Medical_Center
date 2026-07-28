@@ -30,6 +30,7 @@ namespace AngularApi.Services
             services.AddScoped<IRecaptchaService, RecaptchaService>();
 
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IEmailTransport, MailKitEmailTransport>();
             services.AddScoped<IEmailService, EmailService>(); // should be addTrasient
             services.AddScoped<EmailTemplateService>();
             services.AddScoped<IJwtService, JwtService>();

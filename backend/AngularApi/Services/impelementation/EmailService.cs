@@ -1,10 +1,11 @@
 using AngularApi.Contracts.Services;
-﻿using AngularApi.Options;
+using AngularApi.Options;
 using AngularApi.Contracts.Services.Interfaces;
-using MailKit.Net.Smtp;
-using MailKit.Security;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using Polly;
+using Polly.Retry;
 
 namespace AngularApi.Services.impelementation
 {
@@ -12,11 +13,37 @@ namespace AngularApi.Services.impelementation
     {
         private readonly IConfiguration _configuration;
         private readonly SmtpSettings _smtpSettings;
+        private readonly IEmailTransport _emailTransport;
+        private readonly ILogger<EmailService> _logger;
+        private readonly ResiliencePipeline _retryPipeline;
 
-        public EmailService(IConfiguration configuration, IOptions<SmtpSettings> smtpSettings)
+        public EmailService(
+            IConfiguration configuration,
+            IOptions<SmtpSettings> smtpSettings,
+            IEmailTransport emailTransport,
+            ILogger<EmailService> logger)
         {
             _configuration = configuration;
             _smtpSettings = smtpSettings.Value;
+            _emailTransport = emailTransport;
+            _logger = logger;
+            _retryPipeline = new ResiliencePipelineBuilder()
+                .AddRetry(new RetryStrategyOptions
+                {
+                    MaxRetryAttempts = 3,
+                    DelayGenerator = static args =>
+                        new ValueTask<TimeSpan?>(TimeSpan.FromMilliseconds(1000 * args.AttemptNumber)),
+                    ShouldHandle = new PredicateBuilder().Handle<Exception>(),
+                    OnRetry = args =>
+                    {
+                        logger.LogWarning(
+                            "Email SMTP send retry attempt {AttemptNumber} after {Delay}ms delay",
+                            args.AttemptNumber,
+                            1000 * args.AttemptNumber);
+                        return ValueTask.CompletedTask;
+                    }
+                })
+                .Build();
         }
 
         public async Task SendEmailAsync(Message message)
@@ -36,15 +63,13 @@ namespace AngularApi.Services.impelementation
                 emailMessage.To.Add(MailboxAddress.Parse(recipient));
             }
 
-            using var smtpClient = new SmtpClient();
-            var secureSocketOptions = _smtpSettings.UseTls
-                ? SecureSocketOptions.StartTls
-                : SecureSocketOptions.None;
-
-            await smtpClient.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port, secureSocketOptions);
-            await smtpClient.AuthenticateAsync(emailUsername, emailPassword);
-            await smtpClient.SendAsync(emailMessage);
-            await smtpClient.DisconnectAsync(true);
+            await _retryPipeline.ExecuteAsync(
+                async token => await _emailTransport.SendAsync(
+                    emailMessage,
+                    _smtpSettings,
+                    emailUsername,
+                    emailPassword,
+                    token));
         }
     }
 }
