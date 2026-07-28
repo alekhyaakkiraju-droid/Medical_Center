@@ -25,7 +25,7 @@
 .team-section .section-title p {
   font-size: 15px;
   line-height: 26px;
-  color: #777777;
+  color: var(--color-text-body);
   font-weight: 400;
   padding-bottom: 30px;
 }
@@ -59,7 +59,7 @@
   content: '';
   width: 30px;
   height: 1px;
-  background: #777777;
+  background: var(--color-text-body);
   bottom: -8px;
   left: 50%;
   -webkit-transform: translateX(-50%);

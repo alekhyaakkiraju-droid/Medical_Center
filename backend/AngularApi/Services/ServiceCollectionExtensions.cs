@@ -26,6 +26,8 @@ namespace AngularApi.Services
             services.Configure<BreachDetectionOptions>(configuration.GetSection(BreachDetectionOptions.SectionName));
             services.Configure<RecaptchaSettings>(configuration.GetSection(RecaptchaSettings.SectionName));
             services.Configure<GoogleAuthOptions>(configuration.GetSection(GoogleAuthOptions.SectionName));
+            services.Configure<NppSettings>(configuration.GetSection(NppSettings.SectionName));
+            services.Configure<BaaFeatureFlags>(configuration.GetSection(BaaFeatureFlags.SectionName));
 
             services.AddHttpClient(RecaptchaService.HttpClientName);
             services.AddScoped<IRecaptchaService, RecaptchaService>();
@@ -49,6 +51,7 @@ namespace AngularApi.Services
             services.AddScoped<IPatientReviewService, PatientReviewService>();
             services.AddScoped<IContactService, ContactService>();
             services.AddScoped<IBreachNotificationService, BreachNotificationService>();
+            services.AddScoped<INppService, NppService>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 

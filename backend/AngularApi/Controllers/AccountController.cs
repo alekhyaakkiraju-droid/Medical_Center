@@ -478,6 +478,28 @@ namespace AngularApi.Controllers
             return Ok(new { message = "Logged out successfully" });
         }
 
+        [Authorize]
+        [HttpPost("session-timeout")]
+        public async Task<IActionResult> SessionTimeout()
+        {
+            var actor = User.FindFirstValue(ClaimTypes.Email)
+                ?? User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? "anonymous";
+
+            try
+            {
+                _authCookieService.ClearAuthCookies();
+                await _auditService.RecordAuthEventAsync("SessionTimeout", actor, true);
+                return Ok(new { message = "Session terminated due to inactivity" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Session timeout cleanup failed for actor {Actor}", actor);
+                _authCookieService.ClearAuthCookies();
+                return Ok(new { message = "Session terminated due to inactivity" });
+            }
+        }
+
         [Authorize(Policy = "UserPolicy")]
         [HttpGet("user-details")]
         public async Task<IActionResult> GetUserDetails()

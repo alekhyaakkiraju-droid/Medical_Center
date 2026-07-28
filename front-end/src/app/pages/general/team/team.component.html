@@ -7,12 +7,12 @@
   <div class="container">
     <div class="title-text">
       <h1>Team</h1>
-      <ul class="title-menu clearfix">
+      <nav aria-label="Breadcrumb"><ul class="title-menu clearfix">
         <li>
           <a routerLink="/pages/home">home &nbsp;/</a>
         </li>
         <li>Team</li>
-      </ul>
+      </ul></nav>
     </div>
   </div>
 </section>
@@ -55,7 +55,7 @@
                 @for (member of tab.members; track member) {
                   <div class="col-md-4 col-sm-6">
                     <div class="team-person text-center">
-                      <img [src]="member.image | assetUrl" class="img-responsive" alt="team">
+                      <img [src]="member.image | assetUrl" class="img-responsive" [alt]="member.name + ', ' + member.role">
                       <h6>{{ member.name }}</h6>
                       <p>{{ member.role }}</p>
                     </div>

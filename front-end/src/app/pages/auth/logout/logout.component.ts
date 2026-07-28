@@ -28,7 +28,6 @@ export class LogoutComponent implements OnInit {
   }
 
   cancelLogout(): void {
-    console.log('Logout cancelled.');
     this.router.navigate(['/pages/home']);
   }
 

@@ -1,0 +1,36 @@
+@if (isVisible) {
+  <div
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="session-timeout-title"
+    aria-describedby="session-timeout-description"
+    class="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 flex justify-center items-center w-full md:inset-0 h-modal md:h-full bg-black bg-opacity-50">
+    <div class="relative p-4 w-full max-w-md h-full md:h-auto">
+      <div class="relative p-4 text-center bg-white rounded-lg shadow sm:p-5">
+        <h2 id="session-timeout-title" class="text-lg font-semibold text-gray-900 mb-2">
+          Session Timeout Warning
+        </h2>
+        <p id="session-timeout-description" class="mb-4 text-gray-600">
+          Your session will expire in
+          <strong>{{ countdownSeconds ?? 0 }}</strong>
+          seconds due to inactivity.
+        </p>
+        <div class="flex justify-center items-center space-x-4">
+          <button
+            #stayLoggedInButton
+            type="button"
+            (click)="onStayLoggedIn()"
+            class="py-2 px-3 text-sm font-medium text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300">
+            Stay Logged In
+          </button>
+          <button
+            type="button"
+            (click)="onLogOut()"
+            class="py-2 px-3 text-sm font-medium text-gray-500 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300">
+            Log Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
