@@ -24,17 +24,14 @@ public class AppointmentsPaginationControllerTests : IDisposable
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         _context = new MedicalCenterDbContext(options);
-        var ownershipValidator = new OwnershipValidator(_context);
         var appointmentService = new AppointmentService(
             _context,
             Microsoft.Extensions.Options.Options.Create(new AppointmentSettings()));
-
         _controller = new AppointmentsController(
             appointmentService,
             null!,
             null!,
-            null!,
-            ownershipValidator);
+            null!);
 
         var claims = new[]
         {

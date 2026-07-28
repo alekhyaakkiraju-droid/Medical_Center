@@ -1,4 +1,5 @@
 ﻿using AngularApi.DTO;
+using AngularApi.Filters;
 using AngularApi.Models;
 using AngularApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -12,16 +13,11 @@ namespace AngularApi.Controllers
     public class DoctorsController : ControllerBase
     {
         private readonly IDoctorService _doctorService;
-        private readonly IOwnershipValidator _ownershipValidator;
 
-        public DoctorsController(IDoctorService doctorService, IOwnershipValidator ownershipValidator)
+        public DoctorsController(IDoctorService doctorService)
         {
             _doctorService = doctorService;
-            _ownershipValidator = ownershipValidator;
         }
-
-        private bool IsDoctorAccessDenied(string doctorId) =>
-            !_ownershipValidator.CanAccessDoctorResource(User, doctorId);
 
         [HttpGet]
         public async Task<ActionResult<PagedResult<DoctorDTO>>> GetDoctors([FromQuery] PaginationParameters pagination)
@@ -36,14 +32,10 @@ namespace AngularApi.Controllers
             return await _doctorService.GetDoctorsWithSpecializationAsync(pagination);
         }
 
+        [ValidateOwnership(ResourceType.Doctor, "doctorId")]
         [HttpGet("{doctorId}")]
         public async Task<ActionResult<Doctor>> GetDoctor(string doctorId)
         {
-            if (IsDoctorAccessDenied(doctorId))
-            {
-                return Forbid();
-            }
-
             var doctor = await _doctorService.GetDoctorByIdAsync(doctorId);
             return doctor != null ? Ok(doctor) : NotFound();
         }
@@ -56,122 +48,82 @@ namespace AngularApi.Controllers
             return CreatedAtAction("GetDoctor", new { id = createdDoctor.Id }, createdDoctor);
         }
 
+        [ValidateOwnership(ResourceType.Doctor, "doctorId")]
         [HttpGet("{doctorId}/bookings")]
         public async Task<IActionResult> GetBookings(string doctorId, [FromQuery] PaginationParameters pagination)
         {
-            if (IsDoctorAccessDenied(doctorId))
-            {
-                return Forbid();
-            }
-
             var result = await _doctorService.GetBookingsAsync(doctorId, pagination);
             return Ok(result);
         }
 
+        [ValidateOwnership(ResourceType.Doctor, "doctorId")]
         [HttpGet("{doctorId}/bookings/status/{status}")]
         public async Task<IActionResult> GetBookingsByStatus(string doctorId, AppointmentStatusEnum status, [FromQuery] PaginationParameters pagination)
         {
-            if (IsDoctorAccessDenied(doctorId))
-            {
-                return Forbid();
-            }
-
             var bookings = await _doctorService.GetBookingsByStatusAsync(doctorId, status, pagination);
             return Ok(bookings);
         }
 
+        [ValidateOwnership(ResourceType.Doctor, "doctorId")]
         [HttpGet("{doctorId}/bookings/today")]
         public async Task<IActionResult> GetTodaysBookings(string doctorId, [FromQuery] PaginationParameters pagination)
         {
-            if (IsDoctorAccessDenied(doctorId))
-            {
-                return Forbid();
-            }
-
             var bookings = await _doctorService.GetTodaysBookingsAsync(doctorId, pagination);
             return Ok(bookings);
         }
 
+        [ValidateOwnership(ResourceType.Doctor, "doctorId")]
         [HttpGet("{doctorId}/bookings/UpComing")]
         public async Task<IActionResult> GetUpComingBookings(string doctorId, [FromQuery] PaginationParameters pagination)
         {
-            if (IsDoctorAccessDenied(doctorId))
-            {
-                return Forbid();
-            }
-
             var bookings = await _doctorService.GetUpcomingBookingsAsync(doctorId, pagination);
             return Ok(bookings);
         }
 
+        [ValidateOwnership(ResourceType.Doctor, "doctorId")]
         [HttpGet("{doctorId}/bookings/Last30Days")]
         public async Task<IActionResult> GetLast30DaysBookings(string doctorId, [FromQuery] PaginationParameters pagination)
         {
-            if (IsDoctorAccessDenied(doctorId))
-            {
-                return Forbid();
-            }
-
             var bookings = await _doctorService.GetLast30DaysBookingsAsync(doctorId, pagination);
             return Ok(bookings);
         }
 
+        [ValidateOwnership(ResourceType.Doctor, "doctorId")]
         [HttpGet("{doctorId}/reviews")]
         public async Task<IActionResult> GetReviews(string doctorId, [FromQuery] PaginationParameters pagination)
         {
-            if (IsDoctorAccessDenied(doctorId))
-            {
-                return Forbid();
-            }
-
             var reviews = await _doctorService.GetReviewsAsync(doctorId, pagination);
             return Ok(reviews);
         }
 
+        [ValidateOwnership(ResourceType.Doctor, "doctorId")]
         [HttpGet("{doctorId}/rating")]
         public async Task<IActionResult> GetRating(string doctorId)
         {
-            if (IsDoctorAccessDenied(doctorId))
-            {
-                return Forbid();
-            }
-
             var rating = await _doctorService.GetRatingAsync(doctorId);
             return Ok(rating);
         }
 
+        [ValidateOwnership(ResourceType.Doctor, "doctorId")]
         [HttpGet("{doctorId}/qualifications")]
         public async Task<IActionResult> GetQualifications(string doctorId, [FromQuery] PaginationParameters pagination)
         {
-            if (IsDoctorAccessDenied(doctorId))
-            {
-                return Forbid();
-            }
-
             var qualifications = await _doctorService.GetQualificationsAsync(doctorId, pagination);
             return Ok(qualifications);
         }
 
+        [ValidateOwnership(ResourceType.Doctor, "doctorId")]
         [HttpGet("{doctorId}/specializations")]
         public async Task<IActionResult> GetSpecializations(string doctorId, [FromQuery] PaginationParameters pagination)
         {
-            if (IsDoctorAccessDenied(doctorId))
-            {
-                return Forbid();
-            }
-
             var specializations = await _doctorService.GetSpecializationsAsync(doctorId, pagination);
             return Ok(specializations);
         }
 
+        [ValidateOwnership(ResourceType.Doctor, "doctorId")]
         [HttpPut("{doctorId}")]
         public async Task<IActionResult> PutDoctor(string id, Doctor doctor)
         {
-            if (IsDoctorAccessDenied(id))
-            {
-                return Forbid();
-            }
-
             if (id != doctor.Id)
             {
                 return BadRequest();
@@ -188,6 +140,7 @@ namespace AngularApi.Controllers
             return updated ? NoContent() : NotFound();
         }
 
+        [ValidateOwnership(ResourceType.Doctor, "doctorId")]
         [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{doctorId}")]
         public async Task<IActionResult> DeleteDoctor(string id)
@@ -196,14 +149,10 @@ namespace AngularApi.Controllers
             return deleted ? NoContent() : NotFound();
         }
 
+        [ValidateOwnership(ResourceType.Doctor, "doctorId")]
         [HttpDelete("{doctorId}/appointments/{appointmentId}")]
         public async Task<IActionResult> DeleteAppointment(string doctorId, int appointmentId)
         {
-            if (IsDoctorAccessDenied(doctorId))
-            {
-                return Forbid();
-            }
-
             var canceled = await _doctorService.CancelDoctorAppointmentAsync(doctorId, appointmentId);
             return canceled
                 ? NoContent()
