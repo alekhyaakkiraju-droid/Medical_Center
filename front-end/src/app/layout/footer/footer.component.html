@@ -7,34 +7,28 @@
             <div class="pb-4 justify-content-center">
               <figure>
                 <a routerLink="/pages/home" class="flex justify-center items-center">
-                  <img class="media-object" src="images/loggggo-3.png" class="rounded-2" alt="post-thumb">
+                  <img class="media-object rounded-2" [src]="'images/loggggo-3.png' | assetUrl" alt="CareShift logo">
                 </a>
               </figure>
             </div>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias, temporibus?</p>
+            <p>CareShift connects patients with trusted medical centers for seamless appointment booking and coordinated care.</p>
             <ul class="location-link">
               <li class="item">
                 <span>
                   <i class="fa fa-map-marker"></i>
-                  <p>Modamba, NY 80021, United States</p>
+                  <p>CareShift Healthcare Platform (Demo Address)</p>
                 </span>
               </li>
               <li class="item">
                 <i class="fa fa-envelope-o" aria-hidden="true"></i>
-                <a href="#">
-                  <p>Supportmedic.com</p>
+                <a href="mailto:support@careshift.com">
+                  <p>support@careshift.com</p>
                 </a>
               </li>
               <li class="item">
                 <i class="fa fa-phone" aria-hidden="true"></i>
-                <p>(88017) +123 4567</p>
+                <p>CareShift Support Line (Demo)</p>
               </li>
-            </ul>
-            <ul class="list-inline social-icons">
-              <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-              <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-              <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
-              <li><a href="#"><i class="fa fa-vimeo"></i></a></li>
             </ul>
           </div>
         </div>
@@ -42,24 +36,24 @@
           <h6>Services</h6>
           <ul class="menu-link">
             <li>
-              <a href="#">
-                <i class="fa fa-angle-right" aria-hidden="true"></i>Orthopadic Liabilities</a>
+              <a routerLink="/pages/medical-service">
+                <i class="fa fa-angle-right" aria-hidden="true"></i>General Medicine</a>
             </li>
             <li>
-              <a href="#">
-                <i class="fa fa-angle-right" aria-hidden="true"></i>Dental Clinic</a>
+              <a routerLink="/pages/medical-service">
+                <i class="fa fa-angle-right" aria-hidden="true"></i>Cardiology</a>
             </li>
             <li>
-              <a href="#">
-                <i class="fa fa-angle-right" aria-hidden="true"></i>Dormamu Clinic</a>
+              <a routerLink="/pages/medical-service">
+                <i class="fa fa-angle-right" aria-hidden="true"></i>CareShift Clinic</a>
             </li>
             <li>
-              <a href="#">
-                <i class="fa fa-angle-right" aria-hidden="true"></i>Psycological Clinic</a>
+              <a routerLink="/pages/medical-service">
+                <i class="fa fa-angle-right" aria-hidden="true"></i>Pediatrics</a>
             </li>
             <li>
-              <a href="#">
-                <i class="fa fa-angle-right" aria-hidden="true"></i>Gynaecological Clinic</a>
+              <a routerLink="/pages/medical-service">
+                <i class="fa fa-angle-right" aria-hidden="true"></i>Orthopedics</a>
             </li>
           </ul>
         </div>
@@ -71,12 +65,12 @@
                 <div class="media">
                   <div class="media-left">
                     <a routerLink="/pages/blog">
-                      <img class="footer-post-thumb" src="images/blog/5.jpg" alt="Preventive care update">
+                      <img class="footer-post-thumb" [src]="'images/blog/5.jpg' | assetUrl" alt="Preventive care update">
                     </a>
                   </div>
                   <div class="media-body">
                     <h4 class="media-heading"><a routerLink="/pages/blog">Advances in Preventive Care</a></h4>
-                    <p>How PrimeCare Center is expanding screening programs for better long-term outcomes.</p>
+                    <p>How CareShift partner centers are expanding screening programs for better long-term outcomes.</p>
                   </div>
                 </div>
               </li>
@@ -84,14 +78,14 @@
                 <div class="media">
                   <div class="media-left">
                     <a routerLink="/pages/blog">
-                      <img class="footer-post-thumb" src="images/blog/6.jpg" alt="Patient wellness update">
+                      <img class="footer-post-thumb" [src]="'images/blog/6.jpg' | assetUrl" alt="Patient wellness update">
                     </a>
                   </div>
                   <div class="media-body">
                     <h4 class="media-heading">
                       <a routerLink="/pages/blog">Patient Wellness Programs</a>
                     </h4>
-                    <p>New rehabilitation and nutrition services now available across our departments.</p>
+                    <p>New rehabilitation and nutrition services now available across CareShift partner facilities.</p>
                   </div>
                 </div>
               </li>
@@ -105,11 +99,10 @@
   <div class="footer-bottom bg-gray-800 text-white py-4">
     <div class="container max-w-screen-xl px-4 mx-auto flex flex-col items-center">
       <div class="copyright-text text-center">
-        <p>&copy; Copyright 2025. All Rights Reserved by
-          <a routerLink="/pages/home" class="text-blue-400 hover:underline">PrimeCare</a>
+        <p>&copy; Copyright 2026. All Rights Reserved by
+          <a routerLink="/pages/home" class="text-blue-400 hover:underline">CareShift</a>
         </p>
       </div>
-      <p class="mt-2 text-center font-semibold">Developed By Mostafa Sharaby</p>
       <ul class="footer-bottom-link flex space-x-4 mt-3">
         <li><a routerLink="/pages/home" class="hover:text-gray-400">Home</a></li>
         <li><a routerLink="/pages/about-us" class="hover:text-gray-400">About</a></li>
