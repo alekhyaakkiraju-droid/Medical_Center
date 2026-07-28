@@ -1,39 +1,46 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DeleteModalComponent } from './delete-modal.component';
-import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
+import { ModalFocusService } from '../../../shared/services/modal-focus.service';
 
 describe('DeleteModalComponent', () => {
   let component: DeleteModalComponent;
+  let fixture: ComponentFixture<DeleteModalComponent>;
+  let modalFocus: jasmine.SpyObj<ModalFocusService>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-    imports: [DeleteModalComponent],
-    providers: standaloneComponentTestProviders,
-});
-    component = TestBed.createComponent(DeleteModalComponent).componentInstance;
+  beforeEach(async () => {
+    modalFocus = jasmine.createSpyObj('ModalFocusService', ['open', 'close']);
+
+    await TestBed.configureTestingModule({
+      imports: [DeleteModalComponent],
+      providers: [{ provide: ModalFocusService, useValue: modalFocus }],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(DeleteModalComponent);
+    component = fixture.componentInstance;
+    component.itemId = 42;
+    fixture.detectChanges();
   });
 
-  it('shows and hides using Angular state instead of Flowbite JS', () => {
+  it('should not be visible initially', () => {
     expect(component.isVisible).toBeFalse();
+  });
 
+  it('opens focus trap when showModal is called', () => {
     component.showModal();
     expect(component.isVisible).toBeTrue();
-
-    component.onCancel();
-    expect(component.isVisible).toBeFalse();
+    expect(modalFocus.open).toHaveBeenCalled();
   });
 
-  it('emits confirm with the selected item id', () => {
-    component.itemId = 42;
+  it('returns focus when modal is cancelled', () => {
     component.showModal();
-
-    let confirmedId: number | undefined;
-    component.confirm.subscribe((id) => {
-      confirmedId = id;
-    });
-
-    component.onConfirm();
-    expect(confirmedId).toBe(42);
+    component.onCancel();
     expect(component.isVisible).toBeFalse();
+    expect(modalFocus.close).toHaveBeenCalled();
+  });
+
+  it('closes on escape key when visible', () => {
+    component.showModal();
+    component.onEscape();
+    expect(modalFocus.close).toHaveBeenCalled();
   });
 });

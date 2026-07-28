@@ -13,14 +13,14 @@ import { AuthGuard } from '../auth/guard/auth.guard';
 import { nppGuard } from '../../core/guards/npp.guard';
 
 export const GENERAL_ROUTES: Routes = [
-  { path: 'about-us', component: AboutUsComponent },
-  { path: 'contact', component: ContactUsComponent },
-  { path: 'home', component: HomeComponent },
-  { path: 'blog', component: BlogComponent },
-  { path: 'profile', component: UserProfileComponent, canActivate: [AuthGuard, nppGuard] },
-  { path: 'appointment', component: RequestAppointmentComponent, canActivate: [AuthGuard, nppGuard] },
-  { path: 'service', component: MedicalServiceComponent },
-  { path: 'gallery', component: GalleryComponent },
-  { path: 'team', component: TeamComponent },
-  { path: 'payment', component: PaymentComponent, canActivate: [AuthGuard, nppGuard] },
+  { path: 'about-us', component: AboutUsComponent, data: { title: 'About Us - CareShift' } },
+  { path: 'contact', component: ContactUsComponent, data: { title: 'Contact - CareShift' } },
+  { path: 'home', component: HomeComponent, data: { title: 'Home - CareShift' } },
+  { path: 'blog', component: BlogComponent, data: { title: 'Blog - CareShift' } },
+  { path: 'profile', component: UserProfileComponent, canActivate: [AuthGuard, nppGuard], data: { title: 'Profile - CareShift' } },
+  { path: 'appointment', component: RequestAppointmentComponent, canActivate: [AuthGuard, nppGuard], data: { title: 'Appointment - CareShift' } },
+  { path: 'service', component: MedicalServiceComponent, data: { title: 'Services - CareShift' } },
+  { path: 'gallery', component: GalleryComponent, data: { title: 'Gallery - CareShift' } },
+  { path: 'team', component: TeamComponent, data: { title: 'Team - CareShift' } },
+  { path: 'payment', component: PaymentComponent, canActivate: [AuthGuard, nppGuard], data: { title: 'Payment - CareShift' } },
 ];

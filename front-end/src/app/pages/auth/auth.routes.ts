@@ -8,12 +8,12 @@ import { LoginSuccessComponent } from './LoginSuccess/LoginSuccess.component';
 import { ConfirmEmailComponent } from './confirm-email/confirm-email.component';
 
 export const AUTH_ROUTES: Routes = [
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
-  { path: 'logout', component: LogoutComponent },
-  { path: 'forgot-password', component: ForgetPasswordComponent },
-  { path: 'reset-password', component: ResetPasswordComponent },
-  { path: 'reset-password/:token/:email', component: ForgetPasswordComponent },
-  { path: 'login-success', component: LoginSuccessComponent },
-  { path: 'confirm-email', component: ConfirmEmailComponent },
+  { path: 'login', component: LoginComponent, data: { title: 'Login - CareShift' } },
+  { path: 'register', component: RegisterComponent, data: { title: 'Register - CareShift' } },
+  { path: 'logout', component: LogoutComponent, data: { title: 'Logout - CareShift' } },
+  { path: 'forgot-password', component: ForgetPasswordComponent, data: { title: 'Forgot Password - CareShift' } },
+  { path: 'reset-password', component: ResetPasswordComponent, data: { title: 'Reset Password - CareShift' } },
+  { path: 'reset-password/:token/:email', component: ForgetPasswordComponent, data: { title: 'Reset Password - CareShift' } },
+  { path: 'login-success', component: LoginSuccessComponent, data: { title: 'Login Success - CareShift' } },
+  { path: 'confirm-email', component: ConfirmEmailComponent, data: { title: 'Confirm Email - CareShift' } },
 ];
