@@ -8,6 +8,7 @@ using AngularApi.Validators;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
@@ -94,6 +95,17 @@ namespace WebApiDemo
             });
 
             var app = builder.Build();
+            var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
+            var frontendBaseUrl = app.Configuration["Jwt:FrontendBaseUrl"] ?? "http://localhost:8081";
+            startupLogger.LogInformation("Resolved FrontendBaseUrl: {FrontendBaseUrl}", frontendBaseUrl);
+
+            var corsOrigins = app.Configuration.GetSection("CorsSettings:AllowedOrigins").Get<string[]>();
+            if (corsOrigins is null || corsOrigins.Length == 0)
+            {
+                startupLogger.LogWarning(
+                    "CorsSettings:AllowedOrigins is empty; falling back to localhost defaults. Configure explicit origins for non-local environments.");
+            }
+
             JwtSecretStartupValidation.Validate(
                 app.Configuration,
                 app.Services.GetRequiredService<ILogger<Program>>());
@@ -120,6 +132,10 @@ namespace WebApiDemo
             }
 
             app.UseResponseCompression();
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+            });
             app.UseMiddleware<CorrelationIdMiddleware>();
             app.UseRateLimiter();
             app.UseStaticFiles();
