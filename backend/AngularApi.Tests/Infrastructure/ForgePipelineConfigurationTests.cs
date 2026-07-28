@@ -45,6 +45,8 @@ public class ForgePipelineConfigurationTests
         var yaml = File.ReadAllText(PipelinePath);
 
         yaml.Should().Contain("dockerfile: backend/AngularApi/Dockerfile");
+        yaml.Should().Contain("buildContext: backend");
+        yaml.Should().Contain("build-api-docker.sh");
         yaml.Should().Contain("dockerfile: backend/YARPReverseProxy/Dockerfile");
         yaml.Should().Contain("dockerfile: front-end/Dockerfile");
         yaml.Should().Contain("variantId: build:docker");

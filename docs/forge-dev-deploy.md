@@ -36,6 +36,8 @@ Forge stores AWS credentials in the **connector**. Pipelines use that connector 
 **Phase 1 — Build + push (target: green)**  
 scan → sync/build api → build yarp → build frontend → bootstrap ECR → push all three images
 
+**API Docker build context:** use `./scripts/build-api-docker.sh` (context is `backend/`, not `backend/AngularApi/` — the Dockerfile copies `AngularApi.Contracts/`).
+
 **Phase 2 — Deploy (secrets + SQL/MailHog applied by pipeline)**  
 render manifests with `$GIT_SHA_SHORT` → kubectl apply → rollout wait
 

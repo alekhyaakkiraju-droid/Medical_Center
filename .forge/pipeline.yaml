@@ -131,6 +131,8 @@ steps:
       repoFullName: alekhyaakkiraju-droid/Medical_Center
       branch: main
       dockerfile: backend/AngularApi/Dockerfile
+      buildContext: backend
+      buildCommand: ./scripts/build-api-docker.sh medical-center-api:$GIT_SHA
       imageName: medical-center-api
 
   - name: Docker YARP Image

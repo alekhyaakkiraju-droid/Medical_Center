@@ -22,6 +22,23 @@ public class DockerfileConfigurationTests
     }
 
     [Fact]
+    public void ApiDockerfile_RequiresBackendDirectoryAsBuildContext()
+    {
+        var dockerfile = File.ReadAllText(Path.Combine(RepoRoot, "backend/AngularApi/Dockerfile"));
+        var compose = File.ReadAllText(Path.Combine(RepoRoot, "docker-compose.yml"));
+
+        dockerfile.Should().Contain("AngularApi.Contracts/", because: "API Dockerfile copies the contracts project sibling");
+        compose.Should().Contain("context: ./backend");
+        compose.Should().Contain("dockerfile: AngularApi/Dockerfile");
+
+        File.Exists(Path.Combine(RepoRoot, "scripts/build-api-docker.sh")).Should().BeTrue();
+        var buildScript = File.ReadAllText(Path.Combine(RepoRoot, "scripts/build-api-docker.sh"));
+        buildScript.Should().Contain("backend/AngularApi/Dockerfile");
+        buildScript.Should().Contain(" backend");
+        buildScript.Should().NotContain("backend/AngularApi\"");
+    }
+
+    [Fact]
     public void BackendDockerfiles_UseDotNet10UbuntuBaseImages()
     {
         foreach (var relativePath in new[] { "backend/AngularApi/Dockerfile", "backend/YARPReverseProxy/Dockerfile" })
