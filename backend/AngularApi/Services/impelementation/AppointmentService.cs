@@ -69,28 +69,37 @@ public class AppointmentService : IAppointmentService
     public async Task<decimal> GetTotalEarningsAsync(CancellationToken cancellationToken = default) =>
         await _context.Appointments.SumAsync(p => p.Amount, cancellationToken) ?? 0m;
 
-    public async Task<(Appointment? Appointment, string? ErrorMessage)> CreateAppointmentAsync(
-        Appointment appointment,
+    public async Task<(AppointmentDTO? Appointment, string? ErrorMessage)> CreateAppointmentAsync(
+        CreateAppointmentDTO dto,
         string patientId,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(appointment.DoctorId))
+        if (string.IsNullOrEmpty(dto.DoctorId))
         {
             return (null, "DoctorId is required");
         }
 
-        var doctor = await _context.Doctors.FindAsync([appointment.DoctorId], cancellationToken);
+        var doctor = await _context.Doctors.FindAsync([dto.DoctorId], cancellationToken);
         if (doctor == null)
         {
             return (null, "Invalid DoctorId");
         }
 
-        appointment.DoctorName = doctor.Name;
-        appointment.PatientId = patientId;
-        appointment.MedicalCenterId = _appointmentSettings.DefaultCenterId;
-        appointment.AppointmentStatusId = (int)AppointmentStatusEnum.Active;
-        appointment.Amount = _appointmentSettings.DefaultFee;
-        appointment.PaymentStatus = "Pending";
+        var appointment = new Appointment
+        {
+            DoctorId = dto.DoctorId,
+            MedicalCenterId = dto.MedicalCenterId > 0 ? dto.MedicalCenterId : _appointmentSettings.DefaultCenterId,
+            AppointmentTakenDate = dto.AppointmentTakenDate,
+            ProbableStartTime = dto.ProbableStartTime,
+            Name = dto.Name,
+            Email = dto.Email,
+            Phone = dto.Phone,
+            DoctorName = doctor.Name,
+            PatientId = patientId,
+            AppointmentStatusId = (int)AppointmentStatusEnum.Active,
+            Amount = _appointmentSettings.DefaultFee,
+            PaymentStatus = "Pending",
+        };
 
         _context.Appointments.Add(appointment);
         await _context.SaveChangesAsync(cancellationToken);
@@ -103,7 +112,12 @@ public class AppointmentService : IAppointmentService
             appointment.Id,
             cancellationToken);
 
-        return (appointment, null);
+        var createdDto = await _context.Appointments
+            .Where(a => a.Id == appointment.Id)
+            .SelectAppointmentDto()
+            .FirstAsync(cancellationToken);
+
+        return (createdDto, null);
     }
 
     private async Task TrySendConfirmationEmailAsync(

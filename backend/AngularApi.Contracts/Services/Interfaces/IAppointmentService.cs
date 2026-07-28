@@ -16,7 +16,7 @@ public interface IAppointmentService
 
     Task<decimal> GetTotalEarningsAsync(CancellationToken cancellationToken = default);
 
-    Task<(Appointment? Appointment, string? ErrorMessage)> CreateAppointmentAsync(Appointment appointment, string patientId, CancellationToken cancellationToken = default);
+    Task<(AppointmentDTO? Appointment, string? ErrorMessage)> CreateAppointmentAsync(CreateAppointmentDTO dto, string patientId, CancellationToken cancellationToken = default);
 
     Task<bool> DeleteAppointmentAsync(int id, CancellationToken cancellationToken = default);
 

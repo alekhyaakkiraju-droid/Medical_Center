@@ -90,7 +90,7 @@ namespace AngularApi.Controllers
 
         [Authorize(Policy = "UserPolicy")]
         [HttpPost]
-        public async Task<ActionResult<Appointment>> PostAppointment(Appointment appointment)
+        public async Task<ActionResult<AppointmentDTO>> PostAppointment([FromBody] CreateAppointmentDTO dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var user = await _userManager.FindByIdAsync(userId!);
@@ -99,13 +99,13 @@ namespace AngularApi.Controllers
                 return NotFound("User not found");
             }
 
-            var (createdAppointment, errorMessage) = await _appointmentService.CreateAppointmentAsync(appointment, userId!);
+            var (createdAppointment, errorMessage) = await _appointmentService.CreateAppointmentAsync(dto, userId!);
             if (errorMessage != null)
             {
                 return BadRequest(errorMessage);
             }
 
-            return CreatedAtAction("GetAppointment", new { id = createdAppointment!.Id }, createdAppointment);
+            return CreatedAtAction(nameof(GetAppointment), new { id = createdAppointment!.AppointmentId }, createdAppointment);
         }
 
         [Authorize(Roles = "admin,doctor")]

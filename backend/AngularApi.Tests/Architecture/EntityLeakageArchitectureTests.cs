@@ -20,7 +20,6 @@ public class EntityLeakageArchitectureTests
     private static readonly HashSet<string> KnownLegacyEntityReturnActions =
     [
         $"{nameof(AppointmentsController)}.{nameof(AppointmentsController.GetAppointment)}",
-        $"{nameof(AppointmentsController)}.{nameof(AppointmentsController.PostAppointment)}",
         $"{nameof(AppointmentStatusController)}.{nameof(AppointmentStatusController.PostAppointmentStatus)}",
         $"{nameof(DoctorsController)}.{nameof(DoctorsController.PostDoctor)}",
         $"{nameof(MedicalCentersController)}.{nameof(MedicalCentersController.PostMedicalCenter)}",

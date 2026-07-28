@@ -55,24 +55,24 @@ public class AppointmentServiceTests : IDisposable
         _context.Doctors.Add(new Doctor { Id = "doctor-id", Name = "Dr. Smith" });
         await _context.SaveChangesAsync();
 
-        var appointment = new Appointment
+        var dto = new CreateAppointmentDTO
         {
             DoctorId = "doctor-id",
-            AppointmentTakenDate = DateTime.UtcNow,
+            MedicalCenterId = 9,
+            AppointmentTakenDate = DateTime.UtcNow.AddDays(1),
+            ProbableStartTime = DateTime.UtcNow.AddDays(1).AddHours(10),
             Email = "patient@example.com",
             Name = "Jane Patient",
+            Phone = "5551234567",
         };
 
-        var (created, error) = await CreateService().CreateAppointmentAsync(appointment, "patient1");
+        var (created, error) = await CreateService().CreateAppointmentAsync(dto, "patient1");
 
         error.Should().BeNull();
         created.Should().NotBeNull();
-        created!.DoctorName.Should().Be("Dr. Smith");
-        created.PatientId.Should().Be("patient1");
-        created.MedicalCenterId.Should().Be(9);
-        created.Amount.Should().Be(55);
-        created.AppointmentStatusId.Should().Be((int)AppointmentStatusEnum.Active);
-        created.PaymentStatus.Should().Be("Pending");
+        created!.Doctor.Should().NotBeNull();
+        created.Doctor!.Id.Should().Be("doctor-id");
+        created.Patient!.PatientId.Should().Be("patient1");
         (await _context.Appointments.CountAsync()).Should().Be(1);
     }
 
@@ -88,15 +88,18 @@ public class AppointmentServiceTests : IDisposable
             .Returns(Task.CompletedTask);
 
         var appointmentDate = new DateTime(2026, 8, 15, 10, 0, 0, DateTimeKind.Utc);
-        var appointment = new Appointment
+        var dto = new CreateAppointmentDTO
         {
             DoctorId = "doctor-id",
+            MedicalCenterId = 9,
             AppointmentTakenDate = appointmentDate,
+            ProbableStartTime = appointmentDate,
             Email = "patient@example.com",
             Name = "Jane Patient",
+            Phone = "5551234567",
         };
 
-        await CreateService().CreateAppointmentAsync(appointment, "patient1");
+        await CreateService().CreateAppointmentAsync(dto, "patient1");
 
         captured.Should().NotBeNull();
         captured!.To.Should().Contain("patient@example.com");
@@ -115,15 +118,18 @@ public class AppointmentServiceTests : IDisposable
             .Setup(s => s.SendEmailAsync(It.IsAny<Message>()))
             .ThrowsAsync(new InvalidOperationException("SMTP unavailable"));
 
-        var appointment = new Appointment
+        var dto = new CreateAppointmentDTO
         {
             DoctorId = "doctor-id",
-            AppointmentTakenDate = DateTime.UtcNow,
+            MedicalCenterId = 9,
+            AppointmentTakenDate = DateTime.UtcNow.AddDays(1),
+            ProbableStartTime = DateTime.UtcNow.AddDays(1).AddHours(10),
             Email = "patient@example.com",
             Name = "Jane Patient",
+            Phone = "5551234567",
         };
 
-        var (created, error) = await CreateService().CreateAppointmentAsync(appointment, "patient1");
+        var (created, error) = await CreateService().CreateAppointmentAsync(dto, "patient1");
 
         error.Should().BeNull();
         created.Should().NotBeNull();
@@ -133,9 +139,9 @@ public class AppointmentServiceTests : IDisposable
     [Fact]
     public async Task CreateAppointmentAsync_InvalidDoctorId_ReturnsError()
     {
-        var appointment = new Appointment { DoctorId = "missing-doctor" };
+        var dto = new CreateAppointmentDTO { DoctorId = "missing-doctor", MedicalCenterId = 1, AppointmentTakenDate = DateTime.UtcNow.AddDays(1), ProbableStartTime = DateTime.UtcNow.AddDays(1), Name = "Jane", Email = "j@example.com", Phone = "555" };
 
-        var (created, error) = await CreateService().CreateAppointmentAsync(appointment, "patient1");
+        var (created, error) = await CreateService().CreateAppointmentAsync(dto, "patient1");
 
         created.Should().BeNull();
         error.Should().Be("Invalid DoctorId");
@@ -144,9 +150,9 @@ public class AppointmentServiceTests : IDisposable
     [Fact]
     public async Task CreateAppointmentAsync_MissingDoctorId_ReturnsError()
     {
-        var appointment = new Appointment();
+        var dto = new CreateAppointmentDTO { DoctorId = string.Empty, MedicalCenterId = 1, AppointmentTakenDate = DateTime.UtcNow.AddDays(1), ProbableStartTime = DateTime.UtcNow.AddDays(1), Name = "Jane", Email = "j@example.com", Phone = "555" };
 
-        var (created, error) = await CreateService().CreateAppointmentAsync(appointment, "patient1");
+        var (created, error) = await CreateService().CreateAppointmentAsync(dto, "patient1");
 
         created.Should().BeNull();
         error.Should().Be("DoctorId is required");

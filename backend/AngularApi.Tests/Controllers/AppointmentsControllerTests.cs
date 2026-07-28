@@ -182,45 +182,46 @@ namespace AngularApi.Tests.Controllers
         [Fact]
         public async Task PostAppointment_UserNotFound_ReturnsNotFound()
         {
-            var appointment = new Appointment { Id = 1, DoctorId = "doctor-id" };
+            var dto = new CreateAppointmentDTO { DoctorId = "doctor-id", MedicalCenterId = 1, AppointmentTakenDate = DateTime.UtcNow.AddDays(1), ProbableStartTime = DateTime.UtcNow.AddDays(1), Name = "Jane", Email = "j@example.com", Phone = "555" };
             _userManagerMock.Setup(x => x.FindByIdAsync("patient1")).ReturnsAsync((AppUser?)null);
 
-            var result = await _controller.PostAppointment(appointment);
+            var result = await _controller.PostAppointment(dto);
 
             var notFoundResult = result.Result.Should().BeOfType<NotFoundObjectResult>().Subject;
             notFoundResult.Value.Should().Be("User not found");
         }
 
         [Fact]
-        public async Task PostAppointment_ValidInput_UsesConfigurationAndDoctorId()
+        public async Task PostAppointment_ValidInput_ReturnsCreatedAppointmentDto()
         {
             var user = new AppUser { Id = "patient1", UserName = "Patient1", Email = "patient1@example.com" };
             _userManagerMock.Setup(x => x.FindByIdAsync("patient1")).ReturnsAsync(user);
 
-            var createdAppointment = new Appointment
+            var dto = new CreateAppointmentDTO
             {
-                Id = 1,
                 DoctorId = "doctor-id",
-                DoctorName = "Dr. Smith",
                 MedicalCenterId = 9,
-                Amount = 55,
-                AppointmentStatusId = (int)AppointmentStatusEnum.Active,
-                AppointmentTakenDate = DateTime.UtcNow
+                AppointmentTakenDate = DateTime.UtcNow.AddDays(1),
+                ProbableStartTime = DateTime.UtcNow.AddDays(1).AddHours(10),
+                Name = "Jane",
+                Email = "j@example.com",
+                Phone = "5551234567",
             };
-            var appointment = new Appointment { DoctorId = "doctor-id", AppointmentTakenDate = DateTime.UtcNow };
+            var createdAppointment = new AppointmentDTO
+            {
+                AppointmentId = 1,
+                Doctor = new DoctorDTO { Id = "doctor-id", Name = "Dr. Smith" },
+                Patient = new PatientDTO { PatientId = "patient1" },
+            };
             _appointmentServiceMock
-                .Setup(s => s.CreateAppointmentAsync(appointment, "patient1", It.IsAny<CancellationToken>()))
+                .Setup(s => s.CreateAppointmentAsync(dto, "patient1", It.IsAny<CancellationToken>()))
                 .ReturnsAsync((createdAppointment, null));
 
-            var result = await _controller.PostAppointment(appointment);
+            var result = await _controller.PostAppointment(dto);
 
             var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
-            var returnedAppointment = createdResult.Value.Should().BeAssignableTo<Appointment>().Subject;
-            returnedAppointment.DoctorId.Should().Be("doctor-id");
-            returnedAppointment.DoctorName.Should().Be("Dr. Smith");
-            returnedAppointment.MedicalCenterId.Should().Be(9);
-            returnedAppointment.Amount.Should().Be(55);
-            returnedAppointment.AppointmentStatusId.Should().Be((int)AppointmentStatusEnum.Active);
+            var returnedAppointment = createdResult.Value.Should().BeAssignableTo<AppointmentDTO>().Subject;
+            returnedAppointment.Doctor!.Id.Should().Be("doctor-id");
         }
 
         [Fact]
@@ -229,19 +230,22 @@ namespace AngularApi.Tests.Controllers
             var user = new AppUser { Id = "patient1", UserName = "Patient1", Email = "patient1@example.com" };
             _userManagerMock.Setup(x => x.FindByIdAsync("patient1")).ReturnsAsync(user);
 
-            var createdAppointment = new Appointment
+            var dto = new CreateAppointmentDTO
             {
-                Id = 1,
                 DoctorId = "doctor-id",
-                DoctorName = "Dr. Smith",
-                AppointmentTakenDate = DateTime.UtcNow
+                MedicalCenterId = 1,
+                AppointmentTakenDate = DateTime.UtcNow.AddDays(1),
+                ProbableStartTime = DateTime.UtcNow.AddDays(1),
+                Name = "Jane",
+                Email = "j@example.com",
+                Phone = "555",
             };
-            var appointment = new Appointment { DoctorId = "doctor-id", AppointmentTakenDate = DateTime.UtcNow };
+            var createdAppointment = new AppointmentDTO { AppointmentId = 1 };
             _appointmentServiceMock
-                .Setup(s => s.CreateAppointmentAsync(appointment, "patient1", It.IsAny<CancellationToken>()))
+                .Setup(s => s.CreateAppointmentAsync(dto, "patient1", It.IsAny<CancellationToken>()))
                 .ReturnsAsync((createdAppointment, null));
 
-            var result = await _controller.PostAppointment(appointment);
+            var result = await _controller.PostAppointment(dto);
 
             result.Result.Should().BeOfType<CreatedAtActionResult>();
         }
