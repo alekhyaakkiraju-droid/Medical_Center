@@ -22,7 +22,7 @@
   font-family: "Source Sans Pro", sans-serif;
   font-size: 20px;
   display: block;
-  background: #48bdc5;
+  background: var(--color-primary);
   color: #fff;
   padding: 20px 30px;
   transition: all .3s ease;
@@ -47,7 +47,7 @@
 }
 
 .accordion-section .accordion-holder .panel-default .panel-heading h4 a.collapsed:hover {
-  color: #48bdc5;
+  color: var(--color-primary);
 }
 
 .accordion-section .accordion-holder .panel-default .panel-body {
@@ -61,8 +61,8 @@
     color: #ffffff;
     line-height: 27px;
     padding: 8px 36px;
-    background: #48bdc5;
-    border: 1px solid #48bdc5;
+    background: var(--color-primary);
+    border: 1px solid var(--color-primary);
     display: inline-block;
     text-transform: uppercase;
     font-family: "Source Sans Pro", sans-serif;
@@ -74,8 +74,8 @@
   }
   
   .btn-style-one:hover {
-    color: #48bdc5;
-    border: 1px solid #48bdc5;
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
     background: #ffffff;
     transition: all 0.5s ease;
     -moz-transition: all 0.5s ease;

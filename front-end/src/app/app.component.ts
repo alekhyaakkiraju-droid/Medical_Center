@@ -47,6 +47,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.idleSubscription = this.idleTimeoutService.state$.subscribe((status) => {
       this.showSessionTimeoutWarning = status.state === 'warning';
       this.sessionTimeoutCountdown = status.countdownSeconds;
+
+      if (status.state === 'timeout') {
+        this.authService.sessionTimeout().subscribe();
+      }
     });
   }
 

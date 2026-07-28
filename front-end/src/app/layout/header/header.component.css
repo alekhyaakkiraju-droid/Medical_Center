@@ -36,7 +36,7 @@
   .header-top .top-left h6 {
     font-size: 15px;
     line-height: 26px;
-    color: #777777;
+    color: var(--color-text-body);
     font-weight: 400;
     padding: 14px 0px;
     font-family: "Roboto", sans-serif;
@@ -85,7 +85,7 @@
     line-height: 56px;
     margin: -1px;
     font-size: 16px;
-    color: #777777;
+    color: var(--color-text-body);
     font-weight: 600;
     text-align: center;
     border: 1px solid #ececec;
@@ -191,7 +191,7 @@
     font-size: 15px;
     line-height: 26px;
     font-weight: 400;
-    color: #777777;
+    color: var(--color-text-body);
     font-family: "Roboto", sans-serif;
   }
   
@@ -256,7 +256,7 @@
   
   .navbar {
     margin-bottom: 0;
-    background: #48bdc5;
+    background: var(--color-primary);
     border: none;
     border-radius: 0;
   }
