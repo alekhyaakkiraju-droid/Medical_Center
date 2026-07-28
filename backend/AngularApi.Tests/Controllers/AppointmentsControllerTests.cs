@@ -153,12 +153,12 @@ namespace AngularApi.Tests.Controllers
         public async Task PostAppointment_InvalidDoctorId_ReturnsBadRequest()
         {
             _userManagerMock.Setup(x => x.FindByIdAsync("patient1")).ReturnsAsync(new AppUser { Id = "patient1", UserName = "Patient1", Email = "patient1@example.com" });
-            var appointment = new Appointment { Id = 1, DoctorId = "invalid-doctor" };
+            var dto = new CreateAppointmentDTO { DoctorId = "invalid-doctor", MedicalCenterId = 1, AppointmentTakenDate = DateTime.UtcNow.AddDays(1), ProbableStartTime = DateTime.UtcNow.AddDays(1), Name = "Jane", Email = "j@example.com", Phone = "555" };
             _appointmentServiceMock
-                .Setup(s => s.CreateAppointmentAsync(appointment, "patient1", It.IsAny<CancellationToken>()))
+                .Setup(s => s.CreateAppointmentAsync(dto, "patient1", It.IsAny<CancellationToken>()))
                 .ReturnsAsync((null, "Invalid DoctorId"));
 
-            var result = await _controller.PostAppointment(appointment);
+            var result = await _controller.PostAppointment(dto);
 
             var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
             badRequestResult.Value.Should().Be("Invalid DoctorId");
@@ -168,12 +168,12 @@ namespace AngularApi.Tests.Controllers
         public async Task PostAppointment_MissingDoctorId_ReturnsBadRequest()
         {
             _userManagerMock.Setup(x => x.FindByIdAsync("patient1")).ReturnsAsync(new AppUser { Id = "patient1", UserName = "Patient1", Email = "patient1@example.com" });
-            var appointment = new Appointment { Id = 1 };
+            var dto = new CreateAppointmentDTO { DoctorId = string.Empty, MedicalCenterId = 1, AppointmentTakenDate = DateTime.UtcNow.AddDays(1), ProbableStartTime = DateTime.UtcNow.AddDays(1), Name = "Jane", Email = "j@example.com", Phone = "555" };
             _appointmentServiceMock
-                .Setup(s => s.CreateAppointmentAsync(appointment, "patient1", It.IsAny<CancellationToken>()))
+                .Setup(s => s.CreateAppointmentAsync(dto, "patient1", It.IsAny<CancellationToken>()))
                 .ReturnsAsync((null, "DoctorId is required"));
 
-            var result = await _controller.PostAppointment(appointment);
+            var result = await _controller.PostAppointment(dto);
 
             var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
             badRequestResult.Value.Should().Be("DoctorId is required");
