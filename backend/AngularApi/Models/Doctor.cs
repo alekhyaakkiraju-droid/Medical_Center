@@ -15,5 +15,6 @@
         public ICollection<DoctorSpecialization>? DoctorSpecializations { get; set; } = new List<DoctorSpecialization>();
         public ICollection<DoctorQualification>? Qualifications { get; set; } = new List<DoctorQualification>();
         public ICollection<HospitalAffiliation>? HospitalAffiliations { get; set; } = new List<HospitalAffiliation>();
+        public ICollection<PatientReview>? PatientReviews { get; set; } = new List<PatientReview>();
     }
 }

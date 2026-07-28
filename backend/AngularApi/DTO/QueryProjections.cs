@@ -18,6 +18,36 @@ namespace AngularApi.DTO
                     .ToList()
             });
 
+        public static IQueryable<DoctorDetailDTO> SelectDoctorDetailDto(this IQueryable<Doctor> query) =>
+            query.Select(d => new DoctorDetailDTO
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Image = d.Image,
+                ProfessionalStatement = d.ProfessionalStatement,
+                PracticingFrom = d.PracticingFrom,
+                Specializations = d.DoctorSpecializations!
+                    .Select(ds => ds.Specialization!.SpecializationName!)
+                    .ToList(),
+                Qualifications = d.Qualifications!
+                    .Select(q => new DoctorQualificationSummary(
+                        q.QualificationName,
+                        q.InstituteName,
+                        q.ProcurementYear))
+                    .ToList(),
+                HospitalAffiliations = d.HospitalAffiliations!
+                    .Select(h => new HospitalAffiliationSummary(
+                        h.HospitalName,
+                        h.City,
+                        h.Country,
+                        h.StartDate,
+                        h.EndDate))
+                    .ToList(),
+                AverageRating = d.PatientReviews != null && d.PatientReviews.Any()
+                    ? d.PatientReviews.Average(r => (double?)r.OverallRating) ?? 0d
+                    : 0d
+            });
+
         public static IQueryable<BookingDTO> SelectBookingDto(this IQueryable<Appointment> query) =>
             query.Select(a => new BookingDTO
             {

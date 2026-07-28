@@ -66,11 +66,38 @@ namespace AngularApi.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetDoctor_ExistingId_ReturnsDoctor()
+        public async Task GetDoctor_ExistingId_ReturnsDoctorDetailDto()
         {
             // Arrange
-            var doctor = new Doctor { Id = "doctor1", Name = "Dr. Smith" };
-            _context.Doctors.Add(doctor);
+            var practicingFrom = new DateTime(2010, 1, 1);
+            _context.Doctors.Add(new Doctor
+            {
+                Id = "doctor1",
+                Name = "Dr. Smith",
+                Image = "profile.jpg",
+                ProfessionalStatement = "Experienced cardiologist",
+                PracticingFrom = practicingFrom,
+                PasswordHash = "secret-hash",
+                SecurityStamp = "stamp",
+                NormalizedEmail = "DR@TEST.COM",
+                DoctorSpecializations = new List<DoctorSpecialization>
+                {
+                    new() { Specialization = new Specialization { SpecializationName = "Cardiology" } }
+                },
+                Qualifications = new List<DoctorQualification>
+                {
+                    new() { QualificationName = "MD", InstituteName = "Harvard", ProcurementYear = new DateTime(2005, 6, 1) }
+                },
+                HospitalAffiliations = new List<HospitalAffiliation>
+                {
+                    new() { HospitalName = "General Hospital", City = "Boston", Country = "USA" }
+                },
+                PatientReviews = new List<PatientReview>
+                {
+                    new() { OverallRating = 5 },
+                    new() { OverallRating = 3 }
+                }
+            });
             await _context.SaveChangesAsync();
 
             // Act
@@ -78,7 +105,18 @@ namespace AngularApi.Tests.Controllers
 
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-            okResult.Value.Should().BeEquivalentTo(doctor);
+            var detail = okResult.Value.Should().BeOfType<DoctorDetailDTO>().Subject;
+            detail.Id.Should().Be("doctor1");
+            detail.Name.Should().Be("Dr. Smith");
+            detail.Image.Should().Be("profile.jpg");
+            detail.ProfessionalStatement.Should().Be("Experienced cardiologist");
+            detail.PracticingFrom.Should().Be(practicingFrom);
+            detail.Specializations.Should().Contain("Cardiology");
+            detail.Qualifications.Should().ContainSingle(q =>
+                q.QualificationName == "MD" && q.InstituteName == "Harvard");
+            detail.HospitalAffiliations.Should().ContainSingle(h =>
+                h.HospitalName == "General Hospital" && h.City == "Boston");
+            detail.AverageRating.Should().Be(4.0);
         }
 
         [Fact]

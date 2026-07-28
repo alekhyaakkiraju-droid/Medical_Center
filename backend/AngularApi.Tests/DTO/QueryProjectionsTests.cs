@@ -40,6 +40,67 @@ public class QueryProjectionsTests : IDisposable
     }
 
     [Fact]
+    public async Task SelectDoctorDetailDto_ProjectsPublicFieldsWithoutIdentityOrAuditData()
+    {
+        var practicingFrom = new DateTime(2012, 3, 15);
+        _context.Doctors.Add(new Doctor
+        {
+            Id = "doctor1",
+            Name = "Dr Smith",
+            Image = "avatar.png",
+            ProfessionalStatement = "Board-certified surgeon",
+            PracticingFrom = practicingFrom,
+            PasswordHash = "must-not-leak",
+            SecurityStamp = "must-not-leak",
+            NormalizedEmail = "DR@EXAMPLE.COM",
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = "admin",
+            DoctorSpecializations = new List<DoctorSpecialization>
+            {
+                new() { Specialization = new Specialization { SpecializationName = "Cardiology" } },
+                new() { Specialization = new Specialization { SpecializationName = "Surgery" } }
+            },
+            Qualifications = new List<DoctorQualification>
+            {
+                new() { QualificationName = "MD", InstituteName = "Stanford", ProcurementYear = new DateTime(2008, 5, 1) },
+                new() { QualificationName = "FACS", InstituteName = "ACS", ProcurementYear = new DateTime(2012, 5, 1) }
+            },
+            HospitalAffiliations = new List<HospitalAffiliation>
+            {
+                new()
+                {
+                    HospitalName = "City Hospital",
+                    City = "Chicago",
+                    Country = "USA",
+                    StartDate = new DateTime(2015, 1, 1),
+                    EndDate = null
+                }
+            },
+            PatientReviews = new List<PatientReview>
+            {
+                new() { OverallRating = 4 },
+                new() { OverallRating = 2 }
+            }
+        });
+        await _context.SaveChangesAsync();
+
+        var detail = await _context.Doctors.SelectDoctorDetailDto().SingleAsync();
+
+        detail.Id.Should().Be("doctor1");
+        detail.Name.Should().Be("Dr Smith");
+        detail.Image.Should().Be("avatar.png");
+        detail.ProfessionalStatement.Should().Be("Board-certified surgeon");
+        detail.PracticingFrom.Should().Be(practicingFrom);
+        detail.Specializations.Should().BeEquivalentTo("Cardiology", "Surgery");
+        detail.Qualifications.Should().HaveCount(2);
+        detail.Qualifications![0].QualificationName.Should().Be("MD");
+        detail.Qualifications[0].InstituteName.Should().Be("Stanford");
+        detail.HospitalAffiliations.Should().ContainSingle(h =>
+            h.HospitalName == "City Hospital" && h.City == "Chicago" && h.Country == "USA");
+        detail.AverageRating.Should().Be(3.0);
+    }
+
+    [Fact]
     public async Task SelectBookingDto_ProjectsBookingFieldsWithoutNavigationGraph()
     {
         _context.Appointments.Add(new Appointment

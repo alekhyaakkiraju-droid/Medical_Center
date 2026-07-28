@@ -34,7 +34,7 @@ namespace AngularApi.Controllers
 
         [ValidateOwnership(ResourceType.Doctor, "doctorId")]
         [HttpGet("{doctorId}")]
-        public async Task<ActionResult<Doctor>> GetDoctor(string doctorId)
+        public async Task<ActionResult<DoctorDetailDTO>> GetDoctor(string doctorId)
         {
             var doctor = await _doctorService.GetDoctorByIdAsync(doctorId);
             return doctor != null ? Ok(doctor) : NotFound();

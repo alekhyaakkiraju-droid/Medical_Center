@@ -32,10 +32,11 @@ public class DoctorService : IDoctorService
     public Task<PagedResult<DoctorDTO>> GetDoctorsWithSpecializationAsync(PaginationParameters pagination, CancellationToken cancellationToken = default) =>
         _context.Doctors.SelectDoctorDto().ToPagedResultAsync(pagination, cancellationToken);
 
-    public Task<Doctor?> GetDoctorByIdAsync(string doctorId, CancellationToken cancellationToken = default) =>
-        _retryPipeline.ExecuteAsync(
-            async ct => await _context.Doctors.FindAsync([doctorId], ct),
-            cancellationToken).AsTask();
+    public Task<DoctorDetailDTO?> GetDoctorByIdAsync(string doctorId, CancellationToken cancellationToken = default) =>
+        _context.Doctors
+            .Where(d => d.Id == doctorId)
+            .SelectDoctorDetailDto()
+            .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<Doctor> CreateDoctorAsync(Doctor doctor, CancellationToken cancellationToken = default)
     {
