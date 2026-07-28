@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="AngularApi.Contracts/AngularApi.Contracts.csproj" />
+  <Project Path="AngularApi.Tests/AngularApi.Tests.csproj" />
+  <Project Path="AngularApi/AngularApi.csproj" />
+  <Project Path="YARPReverseProxy/YARPReverseProxy.csproj" />
+</Solution>
