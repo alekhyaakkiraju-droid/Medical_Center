@@ -112,6 +112,7 @@ namespace WebApiDemo
                 startupLogger.LogInformation("SMTP configured for production delivery.");
             }
 
+
             var googleAuthOptions = app.Services.GetRequiredService<IOptions<GoogleAuthOptions>>().Value;
             if (!googleAuthOptions.IsConfigured)
             {

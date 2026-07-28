@@ -50,6 +50,14 @@ describe('LoginComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should not suppress focus styles on interactive login controls', () => {
+    const buttons = fixture.nativeElement.querySelectorAll('button');
+    buttons.forEach((button: HTMLButtonElement) => {
+      expect(button.className).not.toContain('outline-none');
+      expect(button.className).toContain('focus-visible:ring-2');
+    });
+  });
+
   it('redirects admin users after login', () => {
     authService.getCurrentUserRoles.and.returnValue(mockRoleTokens.admin.roles);
     component.navigateAfterLogin();
