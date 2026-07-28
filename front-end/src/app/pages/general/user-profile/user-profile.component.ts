@@ -51,7 +51,6 @@ this.reload.initializeLoader();
     }, 150);
   }
   confirm(): void {
-    console.log('Confirmed');
     this.closeDialog();
   }
 
@@ -129,28 +128,22 @@ this.reload.initializeLoader();
   getProfileDetails(): void {
     this.profileService.getProfileDetails2().subscribe({
       next: (profile) => {
-        console.log('Profile fetched successfully:', profile);
         this.profileData = profile;
        this.profileForm.patchValue(profile);  // Populate form with fetched data
       },
       error: (error) => {
-        console.error('Error fetching profile:', error);
       }
     });
   }
 
   onSubmit(): void {
     const profileInfo: Profile = this.profileForm.value;
-    console.log('Form Submitted', profileInfo);
-
     this.profileService.updateProfileDetails(profileInfo).subscribe({
       next: (response) => {
-        console.log('Profile updated successfully:', response);
         this.toastr.success('Profile updated successfully.');
 
       },
       error: (error) => {
-        console.error('Error updating profile:', error);
         this.toastr.error('Error updating profile.');
 
       }
@@ -169,20 +162,17 @@ this.reload.initializeLoader();
         currentPassword: this.passwordForm.value.currentPassword,
         newPassword: this.passwordForm.value.newPassword,
       };
-      console.log("model",model);
       this.changePasswordService.changePassword(model).subscribe({
         next: (response) => {
           this.successMessage = response;
           this.errorMessage = '';
           this.passwordForm.reset();
-          console.log("success",this.successMessage);
           this.toastr.success('Password updated successfully');
 
         },
         error: (error) => {
           this.errorMessage = error.error?.description || 'An unexpected error occurred.';
           this.successMessage = '';
-          console.error("Error:", this.errorMessage);
           this.toastr.error(`Error updating password: ${this.errorMessage}`);
 
         },

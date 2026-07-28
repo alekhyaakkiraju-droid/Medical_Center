@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../../environments/environment';
 import { AuthServiceService } from '../../auth/auth-services/auth-service.service';
 
 export interface DemoRole {
@@ -23,7 +24,8 @@ export interface DemoRole {
   imports: [RouterLink, NgClass],
 })
 export class DemoComponent {
-  readonly demoPassword = 'UatSeed123!';
+  readonly demoPassword = environment.demoPassword;
+  readonly showDemoPassword = !!environment.demoPassword;
   loadingRole: string | null = null;
 
   readonly roles: DemoRole[] = [
@@ -42,7 +44,7 @@ export class DemoComponent {
       title: 'Doctor',
       subtitle: 'Clinical schedule and patient appointments',
       email: 'dr.smith@uat.careshift.local',
-      destination: '/doctor/doctor-appointments',
+      destination: '/doctor/dashboard',
       iconClass: 'fa-solid fa-user-doctor',
       accentClass: 'demo-card--doctor',
       highlights: ['Today & upcoming filters', 'Assigned patients', 'Profile & reviews'],
@@ -52,7 +54,7 @@ export class DemoComponent {
       title: 'Patient',
       subtitle: 'Book care and manage your visits',
       email: 'patient.alice@uat.careshift.local',
-      destination: '/pages/appointment',
+      destination: '/patient/home',
       iconClass: 'fa-solid fa-heart-pulse',
       accentClass: 'demo-card--patient',
       highlights: ['My Appointments list', 'Book with real doctors', 'Secure login flow'],
@@ -73,7 +75,7 @@ export class DemoComponent {
   ) {}
 
   enterAs(role: DemoRole): void {
-    if (this.loadingRole) {
+    if (this.loadingRole || !this.demoPassword) {
       return;
     }
 
@@ -81,12 +83,7 @@ export class DemoComponent {
     this.authService.login(role.email, this.demoPassword).subscribe({
       next: () => {
         this.toastr.success(`Welcome — exploring as ${role.title}`);
-        const destination =
-          role.id === 'patient'
-            ? '/pages/appointment'
-            : role.destination;
-        const queryParams = role.id === 'patient' ? { view: 'appointments' } : undefined;
-        this.router.navigate([destination], { queryParams });
+        this.router.navigate([role.destination]);
         this.loadingRole = null;
       },
       error: () => {
@@ -97,6 +94,9 @@ export class DemoComponent {
   }
 
   copyPassword(): void {
+    if (!this.demoPassword) {
+      return;
+    }
     navigator.clipboard?.writeText(this.demoPassword);
     this.toastr.info('Demo password copied');
   }
