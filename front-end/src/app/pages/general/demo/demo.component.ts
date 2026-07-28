@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../../environments/environment';
+import { getRoleBasedRedirectUrl } from '../../../core/utils/role-redirect.util';
 import { AuthServiceService } from '../../auth/auth-services/auth-service.service';
 
 export interface DemoRole {
@@ -83,7 +84,7 @@ export class DemoComponent {
     this.authService.login(role.email, this.demoPassword).subscribe({
       next: () => {
         this.toastr.success(`Welcome — exploring as ${role.title}`);
-        this.router.navigate([role.destination]);
+        this.router.navigate([getRoleBasedRedirectUrl([role.id === 'patient' ? 'user' : role.id])]);
         this.loadingRole = null;
       },
       error: () => {
