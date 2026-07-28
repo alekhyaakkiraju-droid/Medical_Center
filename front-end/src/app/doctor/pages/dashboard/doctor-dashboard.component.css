@@ -1,0 +1,11 @@
+.doctor-dashboard { margin-top: 1rem; }
+.doctor-dashboard__header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+.doctor-dashboard__header p { color: #64748b; margin-bottom: 1.5rem; }
+.doctor-dashboard__section h2, .doctor-dashboard__card--summary h2 { font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem; }
+.doctor-dashboard__cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); margin-bottom: 1.5rem; }
+.doctor-dashboard__card { background: #fff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1rem; }
+.doctor-dashboard__state { align-items: center; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 0.75rem; color: #64748b; display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; padding: 2rem; text-align: center; }
+.doctor-dashboard__state--error { border-color: #fecaca; color: #b91c1c; }
+.doctor-dashboard__retry { background: #2563eb; border: none; border-radius: 0.5rem; color: #fff; cursor: pointer; padding: 0.5rem 1rem; }
+.doctor-dashboard__count { font-size: 2rem; font-weight: 700; }
+.doctor-dashboard__link { color: #2563eb; font-weight: 600; text-decoration: none; }
