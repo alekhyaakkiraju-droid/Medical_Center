@@ -110,6 +110,21 @@ else
   fail "Public pages expose routerLink-based SPA navigation"     "about-us and team contain routerLink attributes (about=${ABOUT_ROUTER_COUNT}, team=${TEAM_ROUTER_COUNT})"
 fi
 
+echo "=== Smoke Test 8: Static image assets return HTTP 200 ==="
+ASSET_PATHS=(
+  "images/loggggo-3.png"
+  "images/blog/5.jpg"
+  "images/background/3.jpg"
+)
+for asset_path in "${ASSET_PATHS[@]}"; do
+  asset_code="$(curl -s -o /dev/null -w '%{http_code}' -L "${BASE_URL}/${asset_path}")"
+  if [[ "${asset_code}" == "200" ]]; then
+    pass "Asset ${asset_path} returns HTTP 200"
+  else
+    fail "Asset ${asset_path} returns HTTP 200" "got HTTP ${asset_code}"
+  fi
+done
+
 echo "=== Summary: ${PASS} passed, ${FAIL} failed ==="
 if [[ "${FAIL}" -gt 0 ]]; then
   exit 1

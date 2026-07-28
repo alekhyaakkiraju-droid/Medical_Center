@@ -2,7 +2,7 @@
   <div class="px-4 py-3 lg:px-6">
     <div class="flex items-center justify-between">
       <a routerLink="/admin/dashboard" class="flex items-center gap-3">
-        <img src="images/loggggo-3.png" class="h-9" alt="CareShift Logo" />
+        <img [src]="'images/loggggo-3.png' | assetUrl" class="h-9" alt="CareShift Logo" />
         <div>
           <span class="block text-lg font-semibold text-slate-900">CareShift</span>
           <span class="block text-xs text-slate-500">Administration Portal</span>

@@ -4,13 +4,14 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { NgClass } from '@angular/common';
 import { LogoutComponent } from '../../pages/auth/logout/logout.component';
+import { AssetUrlPipe } from '../../shared/asset-url.pipe';
 
 @Component({
     selector: 'app-header',
     templateUrl: './header.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./header.component.css'],
-    imports: [NgClass, RouterLink, RouterLinkActive, LogoutComponent]
+    imports: [NgClass, RouterLink, RouterLinkActive, LogoutComponent, AssetUrlPipe]
 })
 export class HeaderComponent implements OnInit , OnDestroy {
 

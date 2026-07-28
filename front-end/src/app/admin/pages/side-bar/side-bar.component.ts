@@ -3,12 +3,13 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { DoctorMENU, MENU } from '../../menu';
 import { LogoutComponent } from '../../../pages/auth/logout/logout.component';
 import { AuthServiceService } from '../../../pages/auth/auth-services/auth-service.service';
+import { AssetUrlPipe } from '../../../shared/asset-url.pipe';
 
 @Component({
     selector: 'app-side-bar',
     changeDetection: ChangeDetectionStrategy.Eager,
     templateUrl: './side-bar.component.html',
-    imports: [LogoutComponent, RouterLink, RouterLinkActive]
+    imports: [LogoutComponent, RouterLink, RouterLinkActive, AssetUrlPipe]
 })
 export class SideBarComponent implements OnInit {
   menuItems: typeof MENU = MENU;
