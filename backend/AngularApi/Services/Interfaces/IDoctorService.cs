@@ -9,7 +9,7 @@ public interface IDoctorService
 
     Task<PagedResult<DoctorDTO>> GetDoctorsWithSpecializationAsync(PaginationParameters pagination, CancellationToken cancellationToken = default);
 
-    Task<Doctor?> GetDoctorByIdAsync(string doctorId, CancellationToken cancellationToken = default);
+    Task<DoctorDetailDTO?> GetDoctorByIdAsync(string doctorId, CancellationToken cancellationToken = default);
 
     Task<Doctor> CreateDoctorAsync(Doctor doctor, CancellationToken cancellationToken = default);
 
