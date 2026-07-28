@@ -1,0 +1,47 @@
+<app-side-bar></app-side-bar>
+<main class="patient-home p-4 sm:ml-64">
+  <header class="patient-home__header">
+    <h1>Welcome, {{ welcomeName }}</h1>
+    <p>Your care hub — upcoming visits and recent history.</p>
+  </header>
+
+  @if (loadError) {
+    <section class="patient-home__state patient-home__state--error">
+      <p>Unable to load appointments. Please try again.</p>
+      <button type="button" (click)="loadAppointments()">Retry</button>
+    </section>
+  }
+
+  <section class="patient-home__section">
+    <h2>Upcoming Appointments</h2>
+    @if (upcomingAppointments.length === 0) {
+      <div class="patient-home__state">
+        <p>You have no upcoming appointments. Book your first appointment today!</p>
+        <a routerLink="/pages/appointment" class="patient-home__cta">Book Appointment</a>
+      </div>
+    } @else {
+      <div class="patient-home__cards">
+        @for (appointment of upcomingAppointments; track appointment.appointmentId) {
+          <article class="patient-home__card">
+            <h3>{{ appointment.doctor?.name || 'Doctor TBD' }}</h3>
+            <p>{{ appointment.appointmentDate | date:'medium' }}</p>
+            <p>Status: {{ appointment.appointmentStatus }}</p>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="patient-home__section">
+    <h2>Recent Visits</h2>
+    @if (recentVisits.length === 0) {
+      <div class="patient-home__state"><p>No recent visits yet.</p></div>
+    } @else {
+      <ul class="patient-home__list">
+        @for (visit of recentVisits; track visit.appointmentId) {
+          <li>{{ visit.doctor?.name }} — {{ visit.appointmentDate | date:'mediumDate' }} ({{ visit.appointmentStatus }})</li>
+        }
+      </ul>
+    }
+  </section>
+</main>
