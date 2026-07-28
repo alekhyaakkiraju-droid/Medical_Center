@@ -137,6 +137,29 @@ public class SmokeTestScriptTests
     }
 
     [Fact]
+    public void JourneyAuthSmokeScript_ExistsAndDefinesRoleBasedFlows()
+    {
+        var scriptPath = Path.Combine(RepoRoot, "scripts", "journey-smoke-auth.sh");
+        File.Exists(scriptPath).Should().BeTrue(because: "WO-052 requires an authenticated journey smoke script");
+
+        var script = File.ReadAllText(scriptPath);
+        script.Should().Contain("SMOKE_API_URL");
+        script.Should().Contain("admin@uat.careshift.local");
+        script.Should().Contain("dr.smith@uat.careshift.local");
+        script.Should().Contain("patient.alice@uat.careshift.local");
+        script.Should().Contain("UatSeed123!");
+        script.Should().Contain("antiforgery-token");
+        script.Should().Contain("X-XSRF-TOKEN");
+        script.Should().Contain("/Doctors/");
+        script.Should().Contain("/Appointments/patient/");
+        script.Should().Contain("exit 1");
+
+        var pipeline = File.ReadAllText(Path.Combine(RepoRoot, ".forge", "pipeline.yaml"));
+        pipeline.Should().Contain("Authenticated Journey Smoke Tests");
+        pipeline.Should().Contain("journey-smoke-auth.sh");
+    }
+
+    [Fact]
     public void OpenApiGenerationScripts_ContainOutputValidation()
     {
         var generateOpenApi = File.ReadAllText(Path.Combine(RepoRoot, "scripts", "generate-openapi.sh"));

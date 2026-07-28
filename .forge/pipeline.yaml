@@ -252,6 +252,12 @@ steps:
       # WO-031: passing /health confirms API started with IDP SMTP env vars from Staging Deploy API
       testCommand: SMOKE_BASE_URL="${STAGING_BASE_URL}" SMOKE_API_URL="${STAGING_API_URL}" ./scripts/smoke-tests.sh
 
+  - name: Authenticated Journey Smoke Tests
+    variantId: test:generic
+    config:
+      # WO-052: admin, doctor, and patient cookie-based JWT flows against seeded UAT data
+      testCommand: SMOKE_API_URL="${STAGING_API_URL}" ./scripts/journey-smoke-auth.sh
+
   - name: Expanded Smoke Tests
     variantId: test:generic
     config:
@@ -385,6 +391,7 @@ environments:
       - Staging Deploy YARP
       - Staging Deploy Frontend
       - Staging Smoke Tests
+      - Authenticated Journey Smoke Tests
       - Expanded Smoke Tests
       - Static Asset Verification
       - Patient Journey E2E
