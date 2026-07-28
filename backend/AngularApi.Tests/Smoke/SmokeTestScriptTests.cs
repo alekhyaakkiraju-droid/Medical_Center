@@ -47,6 +47,17 @@ public class SmokeTestScriptTests
         patientJourney.Should().Contain("Patient Journey Step 3");
         patientJourney.Should().Contain("Patient Journey Step 4");
         patientJourney.Should().Contain("Patient Journey Step 5");
+        patientJourney.Should().Contain("Patient Journey Step 6");
+        patientJourney.Should().Contain("Patient Journey Step 7");
+        patientJourney.Should().Contain("Patient Journey Step 8");
+        patientJourney.Should().Contain("Patient Journey Step 9");
+        patientJourney.Should().Contain("Patient Journey Step 10");
+        patientJourney.Should().Contain("Patient Journey Step 11");
+        patientJourney.Should().Contain("CreateAppointmentDTO");
+        patientJourney.Should().Contain("MedicalCenterDoctorAvailabilities");
+        patientJourney.Should().Contain("MailHog");
+        patientJourney.Should().Contain("/Doctors/");
+        patientJourney.Should().Contain("/bookings");
         patientJourney.Should().Contain("antiforgery-token");
         patientJourney.Should().Contain("X-XSRF-TOKEN");
         patientJourney.Should().Contain("/api/Account/me");
