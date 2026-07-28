@@ -258,6 +258,12 @@ steps:
       # WO-051: validates all public routes, branding, and absence of placeholder content
       testCommand: SMOKE_BASE_URL="${STAGING_BASE_URL}" ./scripts/journey-smoke-public.sh
 
+  - name: Authenticated Journey Smoke Tests
+    variantId: test:generic
+    config:
+      # WO-052: admin, doctor, and patient cookie-based JWT flows against seeded UAT data
+      testCommand: SMOKE_API_URL="${STAGING_API_URL}" ./scripts/journey-smoke-auth.sh
+
   - name: Expanded Smoke Tests
     variantId: test:generic
     config:
@@ -392,6 +398,7 @@ environments:
       - Staging Deploy Frontend
       - Staging Smoke Tests
       - Public Page Journey Smoke Tests
+      - Authenticated Journey Smoke Tests
       - Expanded Smoke Tests
       - Static Asset Verification
       - Patient Journey E2E
