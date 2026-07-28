@@ -9,7 +9,7 @@
         <ul class="social-links">
           @for (link of socialLinks; track link) {
             <li>
-              <a [href]="link.href">
+              <a [href]="link.href" [attr.aria-label]="'Visit our ' + link.aria + ' page'">
                 <i class="fa" [ngClass]="link.icon" [attr.aria-hidden]="true"></i>
               </a>
             </li>
@@ -34,7 +34,7 @@
         <ul class="contact-info">
           <li class="item">
             <div class="icon-box">
-              <i class="fa fa-phone"></i>
+              <i class="fa fa-phone" aria-hidden="true"></i>
             </div>
             <strong>Call Now</strong>
             <br>
@@ -54,13 +54,14 @@
 
               @if (isLoggedIn) {
                 <li class="item">
-                  <div class="icon-box">
-                    <a data-bs-toggle="modal" data-bs-target="#logoutModal" routerLinkActive="active">
-                      <i title="Logout" class=" fa-solid fa-arrow-right-from-bracket text-xl text-dark"></i>
-                    </a>
-                  </div>
-                  <div><strong>Log Out </strong></div>
-                  <span>Good Bye</span>
+                  <button type="button" class="logout-trigger" aria-label="Log out"
+                    data-bs-toggle="modal" data-bs-target="#logoutModal">
+                    <div class="icon-box">
+                      <i title="Logout" class=" fa-solid fa-arrow-right-from-bracket text-xl text-dark" aria-hidden="true"></i>
+                    </div>
+                    <div><strong>Log Out </strong></div>
+                    <span>Good Bye</span>
+                  </button>
                 </li>
               }
             </ul>
@@ -72,7 +73,7 @@
         </div>
       </section>
       <!--Header Upper-->
-      <nav class="bg-[var(--color-primary)] border-gray-200  ">
+      <nav class="bg-[var(--color-primary)] border-gray-200" aria-label="Main navigation">
         <div class="flex flex-wrap items-center justify-between max-w-screen-xl px-4 mx-auto ">
           <div class="flex items-center lg:order-2">
             <div class="hidden mt-2 mr-4 sm:inline-block">
