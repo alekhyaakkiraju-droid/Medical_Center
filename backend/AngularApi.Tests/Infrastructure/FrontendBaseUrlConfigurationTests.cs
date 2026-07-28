@@ -48,4 +48,14 @@ public class FrontendBaseUrlConfigurationTests
             File.ReadAllText(path).Should().NotContain("localhost:4200", because: $"{path} must use configurable FrontendBaseUrl");
         }
     }
+
+    [Fact]
+    public void ApiDeployment_FrontendBaseUrl_MatchesExpectedDevUrl()
+    {
+        var deployment = File.ReadAllText(Path.Combine(RepoRoot, ".opsera-medical-center", "k8s", "api-deployment.yaml"));
+
+        deployment.Should().Contain("Jwt__FrontendBaseUrl");
+        deployment.Should().Contain("https://medical-center-yarp-dev.agent.opsera.dev");
+        deployment.Should().NotContain("localhost");
+    }
 }
