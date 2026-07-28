@@ -1,3 +1,4 @@
+using AngularApi.Contracts.DTO;
 using Microsoft.EntityFrameworkCore;
 
 namespace AngularApi.DTO

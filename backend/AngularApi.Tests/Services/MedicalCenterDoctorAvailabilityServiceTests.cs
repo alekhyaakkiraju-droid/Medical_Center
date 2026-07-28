@@ -1,7 +1,8 @@
-using AngularApi.DTO;
 using AngularApi.Models;
+using AngularApi.Contracts.DTO;
+using AngularApi.Contracts.Models;
 using AngularApi.Services.impelementation;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Services.Interfaces;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;

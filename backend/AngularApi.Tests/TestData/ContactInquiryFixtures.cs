@@ -1,4 +1,4 @@
-using AngularApi.DTO;
+using AngularApi.Contracts.DTO;
 using AngularApi.Tests.Fixtures.Recaptcha;
 
 namespace AngularApi.Tests.TestData;

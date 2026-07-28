@@ -1,9 +1,10 @@
+using AngularApi.Contracts.Services;
 ﻿using AngularApi.Controllers;
-using AngularApi.DTO;
-using AngularApi.Models;
+using AngularApi.Contracts.DTO;
+using AngularApi.Contracts.Models;
 using AngularApi.Options;
 using AngularApi.Services;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Services.Interfaces;
 using AngularApi.Tests.TestData;
 using FluentAssertions;
 using Microsoft.AspNetCore.Antiforgery;

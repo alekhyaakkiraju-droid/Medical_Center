@@ -1,4 +1,4 @@
-using AngularApi.Models;
+using AngularApi.Contracts.Models;
 using AngularApi.Services.impelementation;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;

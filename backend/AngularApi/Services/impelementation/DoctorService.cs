@@ -1,6 +1,9 @@
 using AngularApi.DTO;
+using AngularApi.Contracts.Enums;
 using AngularApi.Models;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.DTO;
+using AngularApi.Contracts.Models;
+using AngularApi.Contracts.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Polly;
 using Polly.Retry;

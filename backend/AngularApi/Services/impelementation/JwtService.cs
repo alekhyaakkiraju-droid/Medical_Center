@@ -1,6 +1,7 @@
-﻿using AngularApi.Models;
+using AngularApi.Contracts.Services;
+﻿using AngularApi.Contracts.Models;
 using AngularApi.Services;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;

@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using AngularApi.DTO;
+using AngularApi.Contracts.DTO;
 using AngularApi.Tests.Infrastructure;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;

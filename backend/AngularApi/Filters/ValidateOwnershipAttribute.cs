@@ -1,3 +1,4 @@
+using AngularApi.Contracts.Enums;
 namespace AngularApi.Filters;
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]

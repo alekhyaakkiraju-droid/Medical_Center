@@ -1,4 +1,4 @@
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Services.Interfaces;
 
 namespace AngularApi.Middleware
 {

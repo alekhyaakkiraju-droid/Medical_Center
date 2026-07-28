@@ -1,3 +1,4 @@
+using AngularApi.Models;
 using FluentAssertions;
 
 namespace AngularApi.Tests.Infrastructure;

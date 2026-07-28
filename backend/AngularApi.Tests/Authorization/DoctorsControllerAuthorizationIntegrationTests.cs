@@ -1,7 +1,8 @@
+using AngularApi.Models;
 using System.Net;
 using System.Text.Json;
-using AngularApi.DTO;
-using AngularApi.Models;
+using AngularApi.Contracts.DTO;
+using AngularApi.Contracts.Models;
 using AngularApi.Tests.Infrastructure;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;

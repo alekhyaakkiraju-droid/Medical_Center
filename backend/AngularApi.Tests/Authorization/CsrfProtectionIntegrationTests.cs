@@ -1,7 +1,8 @@
+using AngularApi.Models;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using AngularApi.Models;
+using AngularApi.Contracts.Models;
 using AngularApi.Services;
 using AngularApi.Tests.Infrastructure;
 using AngularApi.Tests.TestData;

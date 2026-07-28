@@ -1,6 +1,7 @@
+using AngularApi.Contracts.Enums;
 using System.Text.Json;
-using AngularApi.DTO;
-using AngularApi.Models;
+using AngularApi.Contracts.DTO;
+using AngularApi.Contracts.Models;
 using FluentAssertions;
 
 namespace AngularApi.Tests.DTO;

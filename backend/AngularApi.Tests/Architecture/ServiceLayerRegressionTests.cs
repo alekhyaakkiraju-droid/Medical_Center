@@ -1,8 +1,10 @@
+using AngularApi.Contracts.Enums;
+using AngularApi.Models;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using AngularApi.Models;
+using AngularApi.Contracts.Models;
 using AngularApi.Tests.Infrastructure;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;

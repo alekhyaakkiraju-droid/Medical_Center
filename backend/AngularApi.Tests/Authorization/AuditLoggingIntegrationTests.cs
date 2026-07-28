@@ -1,4 +1,5 @@
 using AngularApi.Models;
+using AngularApi.Contracts.Models;
 using AngularApi.Services;
 using AngularApi.Tests.Infrastructure;
 using FluentAssertions;

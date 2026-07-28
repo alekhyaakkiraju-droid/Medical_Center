@@ -1,4 +1,6 @@
+using AngularApi.Contracts.Enums;
 using AngularApi.Models;
+using AngularApi.Contracts.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

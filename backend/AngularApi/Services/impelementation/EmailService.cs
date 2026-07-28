@@ -1,5 +1,6 @@
+using AngularApi.Contracts.Services;
 ﻿using AngularApi.Options;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Services.Interfaces;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;

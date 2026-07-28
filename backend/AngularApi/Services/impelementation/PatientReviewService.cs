@@ -1,4 +1,6 @@
-using AngularApi.DTO; using AngularApi.Models; using AngularApi.Services.Interfaces; using Microsoft.EntityFrameworkCore; using System.Security.Claims;
+using AngularApi.DTO;
+using AngularApi.Models;
+using AngularApi.Contracts.DTO; using AngularApi.Contracts.Models; using AngularApi.Contracts.Services.Interfaces; using Microsoft.EntityFrameworkCore; using System.Security.Claims;
 namespace AngularApi.Services.impelementation;
 public class PatientReviewService : IPatientReviewService {
     private readonly MedicalCenterDbContext _context; private readonly IOwnershipValidator _ownershipValidator; private readonly ILogger<PatientReviewService> _logger;

@@ -1,6 +1,8 @@
-using AngularApi.Middleware;
 using AngularApi.Models;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Enums;
+using AngularApi.Middleware;
+using AngularApi.Contracts.Models;
+using AngularApi.Contracts.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;

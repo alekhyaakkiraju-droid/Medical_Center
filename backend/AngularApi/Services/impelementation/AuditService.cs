@@ -1,5 +1,6 @@
 using AngularApi.Models;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Models;
+using AngularApi.Contracts.Services.Interfaces;
 using System.Security.Claims;
 
 namespace AngularApi.Services.impelementation

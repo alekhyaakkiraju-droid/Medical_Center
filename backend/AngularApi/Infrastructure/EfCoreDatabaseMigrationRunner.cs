@@ -1,4 +1,5 @@
 using AngularApi.Models;
+using AngularApi.Contracts.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace AngularApi.Infrastructure;

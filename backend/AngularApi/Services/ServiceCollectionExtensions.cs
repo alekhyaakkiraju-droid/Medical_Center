@@ -1,8 +1,9 @@
-﻿using AngularApi.Infrastructure;
 using AngularApi.Models;
+﻿using AngularApi.Infrastructure;
+using AngularApi.Contracts.Models;
 using AngularApi.Options;
 using AngularApi.Services.impelementation;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

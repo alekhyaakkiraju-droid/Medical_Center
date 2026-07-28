@@ -1,4 +1,4 @@
-using AngularApi.DTO; using AngularApi.Validators; using FluentValidation.TestHelper; namespace AngularApi.Tests.DTO;
+using AngularApi.Contracts.DTO; using AngularApi.Validators; using FluentValidation.TestHelper; namespace AngularApi.Tests.DTO;
 public class MedicalCenterDoctorAvailabilityDTOValidatorTests {
   static CreateMedicalCenterDoctorAvailabilityDTO C()=>new(){MedicalCenterId=1,DayOfWeek="Monday",StartTime=DateTime.Today.AddHours(9),EndTime=DateTime.Today.AddHours(17),IsAvailable=true};
   static UpdateMedicalCenterDoctorAvailabilityDTO U()=>new(){MedicalCenterId=1,DayOfWeek="Tuesday",StartTime=DateTime.Today.AddHours(10),EndTime=DateTime.Today.AddHours(18),IsAvailable=false,ReasonOfUnavailability="Holiday"};

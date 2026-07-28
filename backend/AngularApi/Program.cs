@@ -1,5 +1,6 @@
-using AngularApi.Infrastructure;
 using AngularApi.Filters;
+using AngularApi.Infrastructure;
+using AngularApi.Contracts.Enums;
 using AngularApi.Logging;
 using AngularApi.Middleware;
 using AngularApi.Services;

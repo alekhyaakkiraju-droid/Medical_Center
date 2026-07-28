@@ -1,5 +1,6 @@
+using AngularApi.Contracts.Services;
 using AngularApi.Services;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Services.Interfaces;
 using FluentAssertions;
 
 namespace AngularApi.Tests.Services;

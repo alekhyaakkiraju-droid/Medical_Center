@@ -1,3 +1,5 @@
+using AngularApi.Contracts.Enums;
+using AngularApi.Contracts.DTO;
 using FluentValidation;
 
 namespace AngularApi.DTO

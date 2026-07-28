@@ -1,7 +1,8 @@
+using AngularApi.Models;
 using System.Reflection;
 using AngularApi.Controllers;
-using AngularApi.DTO;
-using AngularApi.Models;
+using AngularApi.Contracts.DTO;
+using AngularApi.Contracts.Models;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,7 +11,7 @@ namespace AngularApi.Tests.Architecture;
 public class EntityLeakageArchitectureTests
 {
     private static readonly Assembly ControllersAssembly = typeof(DoctorsController).Assembly;
-    private const string ModelsNamespace = "AngularApi.Models";
+    private const string ModelsNamespace = "AngularApi.Contracts.Models";
 
     /// <summary>
     /// Legacy POST/PUT actions that still return EF entities — tracked for removal in follow-up stories.
@@ -134,6 +135,5 @@ public class EntityLeakageArchitectureTests
 
     private static bool IsEntityModelType(Type type) =>
         type.Namespace == ModelsNamespace
-        && type.IsClass
-        && type != typeof(MedicalCenterDbContext);
+        && type.IsClass;
 }
