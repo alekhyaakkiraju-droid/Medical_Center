@@ -46,8 +46,8 @@ services:
 
   api:
     build:
-      context: ./backend/AngularApi
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: AngularApi/Dockerfile
     container_name: medical-center-api
     environment:
       ASPNETCORE_ENVIRONMENT: Development
