@@ -19,20 +19,17 @@ namespace AngularApi.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly EmailTemplateService _emailTemplateService;
         private readonly IEmailService _emailService;
-        private readonly IOwnershipValidator _ownershipValidator;
 
         public AppointmentsController(
             IAppointmentService appointmentService,
             UserManager<AppUser> userManager,
             IEmailService emailService,
-            EmailTemplateService emailTemplateService,
-            IOwnershipValidator ownershipValidator)
+            EmailTemplateService emailTemplateService)
         {
             _appointmentService = appointmentService;
             _userManager = userManager;
             _emailService = emailService;
             _emailTemplateService = emailTemplateService;
-            _ownershipValidator = ownershipValidator;
         }
 
         [Authorize(Policy = "AdminPolicy")]
@@ -146,14 +143,10 @@ namespace AngularApi.Controllers
         }
 
         [Authorize(Policy = "UserOrAdminPolicy")]
+        [ValidateOwnership(ResourceType.Patient, "patientId")]
         [HttpGet("patient/{patientId}")]
         public async Task<IActionResult> GetAppointmentsByPatient(string patientId, [FromQuery] PaginationParameters pagination)
         {
-            if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
-            {
-                return Forbid();
-            }
-
             var appointments = await _appointmentService.GetAppointmentsByPatientAsync(patientId, pagination);
             return Ok(appointments);
         }
@@ -191,27 +184,19 @@ namespace AngularApi.Controllers
         }
 
         [Authorize(Policy = "UserOrAdminPolicy")]
+        [ValidateOwnership(ResourceType.Patient, "patientId")]
         [HttpGet("patient/{patientId}/status/{status}")]
         public async Task<IActionResult> GetAppointmentsByPatientAndStatus(string patientId, AppointmentStatusEnum status, [FromQuery] PaginationParameters pagination)
         {
-            if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
-            {
-                return Forbid();
-            }
-
             var appointments = await _appointmentService.GetAppointmentsByPatientAndStatusAsync(patientId, status, pagination);
             return Ok(appointments);
         }
 
         [Authorize(Policy = "UserOrAdminPolicy")]
+        [ValidateOwnership(ResourceType.Patient, "patientId")]
         [HttpGet("patient/{patientId}/history")]
         public async Task<IActionResult> GetAppointmentHistoryByPatient(string patientId, [FromQuery] PaginationParameters pagination)
         {
-            if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
-            {
-                return Forbid();
-            }
-
             var appointments = await _appointmentService.GetAppointmentHistoryByPatientAsync(patientId, pagination);
             return Ok(appointments);
         }

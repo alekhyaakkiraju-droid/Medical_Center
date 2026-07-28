@@ -25,7 +25,6 @@ namespace AngularApi.Tests.Controllers
         private readonly Mock<UserManager<AppUser>> _userManagerMock;
         private readonly Mock<IEmailService> _emailServiceMock;
         private readonly EmailTemplateService _emailTemplateService;
-        private readonly IOwnershipValidator _ownershipValidator;
         private readonly AppointmentsController _controller;
 
         public AppointmentsControllerTests()
@@ -45,7 +44,6 @@ namespace AngularApi.Tests.Controllers
                 .Setup(env => env.WebRootPath)
                 .Returns(Path.Combine(AppContext.BaseDirectory, "wwwroot"));
             _emailTemplateService = new EmailTemplateService(webHostEnvironmentMock.Object);
-            _ownershipValidator = new OwnershipValidator(_context);
             _appointmentServiceMock = new Mock<IAppointmentService>();
 
             _controller = CreateController(_appointmentServiceMock.Object);
@@ -73,8 +71,7 @@ namespace AngularApi.Tests.Controllers
                 appointmentService,
                 _userManagerMock.Object,
                 _emailServiceMock.Object,
-                _emailTemplateService,
-                _ownershipValidator);
+                _emailTemplateService);
 
         [Fact]
         public void AppointmentMutatingActions_HaveValidateOwnershipAttributeForAppointment()

@@ -1,8 +1,10 @@
 ﻿using AngularApi.DTO;
+using AngularApi.Filters;
 using AngularApi.Models;
 using AngularApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AngularApi.Controllers
 {
@@ -12,12 +14,10 @@ namespace AngularApi.Controllers
     public class PatientsController : ControllerBase
     {
         private readonly IPatientService _patientService;
-        private readonly IOwnershipValidator _ownershipValidator;
 
-        public PatientsController(IPatientService patientService, IOwnershipValidator ownershipValidator)
+        public PatientsController(IPatientService patientService)
         {
             _patientService = patientService;
-            _ownershipValidator = ownershipValidator;
         }
 
         [Authorize(Policy = "AdminPolicy")]
@@ -29,14 +29,10 @@ namespace AngularApi.Controllers
         }
 
         [Authorize(Policy = "UserOrAdminPolicy")]
+        [ValidateOwnership(ResourceType.Patient)]
         [HttpGet("{id}")]
         public async Task<ActionResult<PatientDTO>> GetPatientById(string id)
         {
-            if (!_ownershipValidator.CanAccessPatientResource(User, id))
-            {
-                return Forbid();
-            }
-
             var patient = await _patientService.GetPatientByIdAsync(id);
             if (patient == null)
             {
@@ -47,37 +43,29 @@ namespace AngularApi.Controllers
         }
 
         [Authorize(Policy = "UserOrAdminPolicy")]
+        [ValidateOwnership(ResourceType.Patient, "patientId")]
         [HttpGet("{patientId}/appointments")]
         public async Task<ActionResult<PagedResult<AppointmentDTO>>> GetPatientAppointments(string patientId, [FromQuery] PaginationParameters pagination)
         {
-            if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
-            {
-                return Forbid();
-            }
-
             return await _patientService.GetPatientAppointmentsAsync(patientId, pagination);
         }
 
         [Authorize(Policy = "UserOrAdminPolicy")]
+        [ValidateOwnership(ResourceType.Patient, "patientId")]
         [HttpGet("{patientId}/appointments/date-range")]
         public async Task<ActionResult<PagedResult<AppointmentDTO>>> GetAppointmentsByDateRange(string patientId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate, [FromQuery] PaginationParameters pagination)
         {
-            if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
-            {
-                return Forbid();
-            }
-
             return await _patientService.GetAppointmentsByDateRangeAsync(patientId, startDate, endDate, pagination);
         }
 
         [Authorize(Policy = "UserOrAdminPolicy")]
+        [ValidateOwnership(ResourceType.Patient, "patientId")]
         [HttpPut("{patientId}/reviews/{reviewId}")]
         public async Task<IActionResult> UpdateReview(string patientId, int reviewId, [FromBody] PatientReview review)
         {
-            if (!_ownershipValidator.CanAccessPatientResource(User, patientId)
-                || !string.Equals(review.PatientId, patientId, StringComparison.Ordinal)
-                || (!_ownershipValidator.IsAdmin(User)
-                    && !string.Equals(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, review.PatientId, StringComparison.Ordinal)))
+            if (!string.Equals(review.PatientId, patientId, StringComparison.Ordinal)
+                || (!User.IsInRole("admin")
+                    && !string.Equals(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, review.PatientId, StringComparison.Ordinal)))
             {
                 return Forbid();
             }
@@ -92,27 +80,19 @@ namespace AngularApi.Controllers
         }
 
         [Authorize(Policy = "UserOrAdminPolicy")]
+        [ValidateOwnership(ResourceType.Patient, "patientId")]
         [HttpDelete("{patientId}/appointments/{appointmentId}")]
         public async Task<IActionResult> DeleteAppointment(string patientId, int appointmentId)
         {
-            if (!_ownershipValidator.CanAccessPatientResource(User, patientId))
-            {
-                return Forbid();
-            }
-
             var deleted = await _patientService.DeletePatientAppointmentAsync(patientId, appointmentId);
             return deleted ? NoContent() : NotFound();
         }
 
         [Authorize(Policy = "UserOrAdminPolicy")]
+        [ValidateOwnership(ResourceType.Patient)]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePatient(string id, [FromBody] PatientDTO model)
         {
-            if (!_ownershipValidator.CanAccessPatientResource(User, id))
-            {
-                return Forbid();
-            }
-
             var updated = await _patientService.UpdatePatientAsync(id, model);
             return updated ? NoContent() : NotFound();
         }
