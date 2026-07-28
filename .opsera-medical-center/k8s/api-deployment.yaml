@@ -77,15 +77,23 @@ spec:
                 secretKeyRef:
                   name: medical-center-app-secrets
                   key: google-auth-client-secret
-          readinessProbe:
+          startupProbe:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 20
+            failureThreshold: 30
             periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
           livenessProbe:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 40
             periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
