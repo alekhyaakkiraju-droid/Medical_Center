@@ -5,6 +5,7 @@ import { DebugElement } from '@angular/core';
 
 import { HeaderComponent } from './header.component';
 import { standaloneComponentTestProviders } from '../../testing/standalone-component-test-providers';
+import { AssetUrlPipe } from '../../shared/asset-url.pipe';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
@@ -26,5 +27,13 @@ describe('HeaderComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('includes AssetUrlPipe in standalone imports', () => {
+    expect(HeaderComponent).toBeDefined();
+    expect(new AssetUrlPipe()).toBeTruthy();
+    const logo = fixture.debugElement.query(By.css('.logo img'));
+    expect(logo).toBeTruthy();
+    expect(logo.nativeElement.getAttribute('src')).toContain('loggggo-3.png');
   });
 });

@@ -2,7 +2,7 @@
     <div class="loader"></div>
 </div>
 
-<section class="page-title text-center" style="background-image:url(images/background/3.jpg);">
+<section class="page-title text-center" [style.background-image]="'url(' + ('images/background/3.jpg' | assetUrl) + ')'">
     <div class="container">
         <div class="title-text">
             <h1>about us</h1>

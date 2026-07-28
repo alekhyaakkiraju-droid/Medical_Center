@@ -5,6 +5,7 @@ import { DebugElement } from '@angular/core';
 
 import { SideBarComponent } from './side-bar.component';
 import { standaloneComponentTestProviders } from '../../../testing/standalone-component-test-providers';
+import { AssetUrlPipe } from '../../../shared/asset-url.pipe';
 
 describe('SideBarComponent', () => {
   let component: SideBarComponent;
@@ -26,5 +27,12 @@ describe('SideBarComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('includes AssetUrlPipe for admin logo binding', () => {
+    expect(new AssetUrlPipe()).toBeTruthy();
+    const logo = fixture.debugElement.query(By.css('img'));
+    expect(logo).toBeTruthy();
+    expect(logo.nativeElement.getAttribute('src')).toContain('loggggo-3.png');
   });
 });
