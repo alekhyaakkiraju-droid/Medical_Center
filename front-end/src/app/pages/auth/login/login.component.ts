@@ -10,6 +10,7 @@ import { ResetPasswordService } from '../auth-services/resetPassword.service';
 import { ModelService } from '../auth-services/model.service';
 import { ToastrService } from 'ngx-toastr';
 import { ForgetPasswordComponent } from '../forgetPassword/forgetPassword.component';
+import { getRoleBasedRedirectUrl } from '../../../core/utils/role-redirect.util';
 
 @Component({
     selector: 'app-login',
@@ -83,7 +84,6 @@ export class LoginComponent implements OnInit, AfterViewInit{
 
   confirm(): void {
     // Handle confirm logic here
-    console.log('Confirmed');
     this.closeDialog();
   }
 
@@ -121,16 +121,9 @@ export class LoginComponent implements OnInit, AfterViewInit{
       const loginSub = this.authService.login(email, password).subscribe(
         () => {
           this.onLoginSuccess();
-          if (this.authService.isRole('admin')) {
-            this.router.navigate(['admin/dashboard']);
-          } else if (this.authService.isRole('doctor')) {
-            this.router.navigate(['doctor/doctor-appointments']);
-          } else {
-            this.router.navigate(['/pages/home']);
-          }
+          this.navigateAfterLogin();
         },
         (error: any) => {
-          console.error('Login failed', error);
           this.errorMessage = 'Email or password is incorrect';
           this.onLoginFailed();
         }
@@ -141,6 +134,11 @@ export class LoginComponent implements OnInit, AfterViewInit{
 
   loginWithGoogle(): void {
     window.location.href = this.authService.googleloginUrl;
+  }
+
+  navigateAfterLogin(): void {
+    const roles = this.authService.getCurrentUserRoles();
+    this.router.navigate([getRoleBasedRedirectUrl(roles)]);
   }
 
 // ------------------------------Forget password-------------------------------------
@@ -157,7 +155,6 @@ get Forgotemail() {
 }
 onForgotSubmit() {
   const emailForgetVal = this.forgetForm.value.emailForgot;
-  console.log("emailForgot",emailForgetVal);
   const forgetSub = this.forgetpasswordService.forgetPassword(emailForgetVal).subscribe({
     next: (res) => {
       this.toastr.success(`Success: ${res.message}`);   

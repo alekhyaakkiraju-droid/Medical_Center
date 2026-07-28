@@ -13,7 +13,7 @@ body {
 
 p {
   font-family: "Source Sans Pro", sans-serif;
-  color: #848484;
+  color: var(--color-text-muted);
   font-size: 16px;
 }
 
@@ -25,7 +25,7 @@ h1, h2, h3, h4, h5, h6 {
 /*=== MEDIA QUERY ===*/
 body {
   font-size: 15px;
-  color: #777777;
+  color: var(--color-text-body);
   line-height: 1.8em;
   font-weight: 400;
   background: #ffffff;
@@ -79,7 +79,7 @@ p {
   font-size: 15px;
   line-height: 25px;
   font-weight: 400;
-  color: #777777;
+  color: var(--color-text-body);
   font-family: "Roboto", sans-serif;
 }
 
@@ -142,8 +142,8 @@ li {
   color: #ffffff;
   line-height: 27px;
   padding: 8px 36px;
-  background: #48bdc5;
-  border: 1px solid #48bdc5;
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
   display: inline-block;
   text-transform: uppercase;
   font-family: "Source Sans Pro", sans-serif;
@@ -155,8 +155,8 @@ li {
 }
 
 .btn-style-one:hover {
-  color: #48bdc5;
-  border: 1px solid #48bdc5;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
   background: #ffffff;
   transition: all 0.5s ease;
   -moz-transition: all 0.5s ease;
@@ -185,8 +185,8 @@ li {
 
 .btn-style-two:hover {
   color: #ffffff;
-  border: 1px solid #48bdc5;
-  background: #48bdc5;
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
   transition: all 0.5s ease;
   -moz-transition: all 0.5s ease;
   -webkit-transition: all 0.5s ease;
@@ -256,7 +256,7 @@ li {
 .header-top .top-left h6 {
   font-size: 15px;
   line-height: 26px;
-  color: #777777;
+  color: var(--color-text-body);
   font-weight: 400;
   padding: 14px 0px;
   font-family: "Roboto", sans-serif;
@@ -305,7 +305,7 @@ li {
   line-height: 56px;
   margin: -1px;
   font-size: 16px;
-  color: #777777;
+  color: var(--color-text-body);
   font-weight: 600;
   text-align: center;
   border: 1px solid #ececec;
@@ -394,7 +394,7 @@ li {
   font-size: 15px;
   line-height: 26px;
   font-weight: 400;
-  color: #777777;
+  color: var(--color-text-body);
   font-family: "Roboto", sans-serif;
 }
 
@@ -459,7 +459,7 @@ li {
 
 .navbar {
   margin-bottom: 0;
-  background: #48bdc5;
+  background: var(--color-primary);
   border: none;
   border-radius: 0;
 }
@@ -640,7 +640,7 @@ li {
 }
 
 .cta .cta-block .emmergency {
-  background: #48bdc5;
+  background: var(--color-primary);
 }
 
 .cta .cta-block .emmergency a {
@@ -662,14 +662,14 @@ li {
   margin-bottom:20px;
   background: #fff;
   text-transform: uppercase;
-  color: #48bdc5;
+  color: var(--color-primary);
   padding: 10px 25px;
-  border: 1px solid #48bdc5;
+  border: 1px solid var(--color-primary);
   transition: all .2s ease-in;
 }
 
  .btn-main:hover {
-  background: #48bdc5;
+  background: var(--color-primary);
   color: #fff;
 }
 
@@ -683,7 +683,7 @@ li {
 
 .cta .cta-block .top-doctor .btn-main:hover {
   background: #fff;
-  color: #48bdc5;
+  color: var(--color-primary);
 }
 
 .cta .cta-block .working-time {
@@ -895,21 +895,21 @@ li {
   font-weight: 600;
   color: #4d4d4d;
   font-family: "Source Sans Pro", sans-serif;
-  border: 2px solid #48bdc5;
+  border: 2px solid var(--color-primary);
   border-radius: 0;
   transition: all .3s ease;
 }
 
 .tabs .nav-tabs li a:hover {
-  background: #48bdc5;
+  background: var(--color-primary);
   color: #fff;
-  border: 2px solid #48bdc5;
+  border: 2px solid var(--color-primary);
 }
 
 .tabs .nav-tabs li.active a {
   color: #fff;
-  background: #48bdc5;
-  border: 2px solid #48bdc5;
+  background: var(--color-primary);
+  border: 2px solid var(--color-primary);
 }
 
 .tab-content {
@@ -1032,7 +1032,7 @@ li {
 
 .accordion-box .accordion .accord-btn::after {
   position: absolute;
-  color: #777777;
+  color: var(--color-text-body);
   content: "\f107";
   font-size: 17px;
   font-weight: 400;
@@ -1078,7 +1078,7 @@ li {
   font-size: 15px;
   line-height: 26px;
   font-weight: 400;
-  color: #777777;
+  color: var(--color-text-body);
   padding: 20px 0px;
 }
 
@@ -1139,7 +1139,7 @@ li {
   font-size: 15px;
   font-weight: 400;
   line-height: 26px;
-  color: #777777;
+  color: var(--color-text-body);
   padding-top: 15px;
 }
 
@@ -1198,7 +1198,7 @@ li {
   font-size: 15px;
   line-height: 26px;
   font-weight: 400;
-  color: #777777;
+  color: var(--color-text-body);
   margin-bottom: 0px;
 }
 
@@ -1222,7 +1222,7 @@ li {
   height: 1px;
   content: '';
   bottom: -10px;
-  background: #48bdc5;
+  background: var(--color-primary);
 }
 
 .service-overview .content-block p {
@@ -1341,7 +1341,7 @@ li {
   position: relative;
   width: 100%;
   height: 50px;
-  color: #777777;
+  color: var(--color-text-body);
   padding: 10px 25px;
   background: #f4f4f4;
   display: block;
@@ -1411,7 +1411,7 @@ li {
   content: '';
   height: 1px;
   width: 40px;
-  background: #48bdc5;
+  background: var(--color-primary);
 }
 
 .right-side .search-box input {
@@ -1420,7 +1420,7 @@ li {
   padding: 10px 20px;
   font-size: 15px;
   line-height: 26px;
-  color: #777777;
+  color: var(--color-text-body);
   font-weight: 400;
   background: #ffffff;
   border: 1px solid #ececec;
@@ -1466,7 +1466,7 @@ li {
 }
 
 .right-side .categorise-list li a:hover {
-  color: #48bdc5;
+  color: var(--color-primary);
 }
 
 .right-side .categorise-list li span {
@@ -1483,17 +1483,17 @@ li {
   font-size: 14px;
   line-height: 26px;
   font-weight: 400;
-  color: #777777;
+  color: var(--color-text-body);
   padding: 6px 26px;
   margin-right: 5px;
   margin-bottom: 10px;
   display: inline-block;
-  border: 1px solid #48bdc5;
+  border: 1px solid var(--color-primary);
   transition: all 0.5s ease;
 }
 
 .right-side .tag-list a:hover {
-  background: #48bdc5;
+  background: var(--color-primary);
   color: #fff;
 }
 
@@ -1555,7 +1555,7 @@ li {
 .about-section .section-title h3:after {
   position: absolute;
   content: '';
-  background: #48bdc5;
+  background: var(--color-primary);
   bottom: 0px;
   left: 50%;
   margin-left: -25px;
@@ -1566,7 +1566,7 @@ li {
 .about-section .section-title p {
   font-size: 15px;
   line-height: 26px;
-  color: #777777;
+  color: var(--color-text-body);
   font-weight: 400;
   padding-bottom: 30px;
 }
@@ -1655,7 +1655,7 @@ li {
   font-size: 15px;
   line-height: 26px;
   font-weight: 400;
-  color: #777777;
+  color: var(--color-text-body);
   margin-bottom: 0px;
 }
 
@@ -1693,7 +1693,7 @@ li {
 }
 
 .story .story-content .tagline {
-  color: #48bdc5;
+  color: var(--color-primary);
   font-size: 20px;
   font-weight: normal;
   font-style: italic;
@@ -1930,7 +1930,7 @@ li {
 
 .video-gallery .video-gallery-item h3 {
   text-align: center;
-  color: #48bdc5;
+  color: var(--color-primary);
   margin-top: 15px;
   text-transform: capitalize;
   font-family: "Source Sans Pro", sans-serif;
@@ -2038,7 +2038,7 @@ li {
 
 .page-title .title-text .title-menu li {
   position: relative;
-  color: #48bdc5;
+  color: var(--color-primary);
   font-size: 17px;
   display: inline-block;
   line-height: 30px;
@@ -2053,7 +2053,7 @@ li {
 }
 
 .page-title .title-text .title-menu li a:hover {
-  color: #48bdc5;
+  color: var(--color-primary);
   transition: all 500ms ease;
 }
 
@@ -2078,7 +2078,7 @@ li {
   font-size: 16px;
   width: 50px;
   height: 50px;
-  color: #777777;
+  color: var(--color-text-body);
   font-weight: 500;
   text-align: center;
   background: #f4f4f4;
@@ -2092,7 +2092,7 @@ li {
 
 .styled-pagination ul li a:hover, .styled-pagination ul li a.active {
   color: #ffffff;
-  background: #48bdc5;
+  background: var(--color-primary);
   transition: all 500ms ease;
 }
 
@@ -2282,7 +2282,7 @@ li {
     float: none !important;
     margin: 0px !important;
     width: 100% !important;
-    background: #48bdc5;
+    background: var(--color-primary);
     border: 1px solid #ffffff;
     border-top: none;
   }
@@ -2367,7 +2367,7 @@ li {
   .main-menu .navbar-collapse > .navigation > li > ul > li > ul > li:hover > a,
   .main-menu .navbar-collapse > .navigation > li.current > a,
   .main-menu .navbar-collapse > .navigation > li.current-menu-item > a {
-    background: #48bdc5;
+    background: var(--color-primary);
     color: #fff !important;
   }
   .main-menu .navbar-collapse > .navigation li.dropdown:after,

@@ -41,7 +41,6 @@ export class DoctorProfileComponent implements OnInit, OnDestroy {
       this.doctorId = id;
     } else {
       this.errorMessage = 'Failed to fetch doctor ID. Please log in again.';
-      console.error(this.errorMessage);
     }
   }
 
@@ -49,10 +48,8 @@ export class DoctorProfileComponent implements OnInit, OnDestroy {
     this.doctorSubscription = this.doctorService.getSpecialDoctor(this.doctorId).subscribe({
       next: (data) => {
         this.profile = data;
-        console.log("profile", this.profile);
       },
       error: (error) => {
-        console.error(error);
       },
     });
   }

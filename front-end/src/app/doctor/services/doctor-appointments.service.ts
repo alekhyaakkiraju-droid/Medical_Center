@@ -14,14 +14,15 @@ export class DoctorAppointmentsService {
   constructor(private http: HttpClient, private authService: AuthServiceService) {}
 
   getAllDoctorBookings(doctorId: string, page = 1, pageSize = 100): Observable<PagedResult<Booking>> {
-    const params = new HttpParams()
-      .set('page', page.toString())
-      .set('pageSize', pageSize.toString());
+    return this.getBookings(`${this.apiUrl}/${doctorId}/bookings`, page, pageSize);
+  }
 
-    return this.http.get<PagedResult<Booking>>(
-      `${this.apiUrl}/${doctorId}/bookings`,
-      { ...this.authService.getHttpOptions(), params }
-    );
+  getTodaysBookings(doctorId: string, page = 1, pageSize = 100): Observable<PagedResult<Booking>> {
+    return this.getBookings(`${this.apiUrl}/${doctorId}/bookings/today`, page, pageSize);
+  }
+
+  getUpcomingBookings(doctorId: string, page = 1, pageSize = 100): Observable<PagedResult<Booking>> {
+    return this.getBookings(`${this.apiUrl}/${doctorId}/bookings/UpComing`, page, pageSize);
   }
 
   getSpecialDoctor(doctorId: string): Observable<unknown> {
@@ -33,5 +34,13 @@ export class DoctorAppointmentsService {
       `${this.apiUrl}/${doctorId}/appointments/${bookingId}`,
       this.authService.getHttpOptions()
     );
+  }
+
+  private getBookings(url: string, page: number, pageSize: number): Observable<PagedResult<Booking>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
+    return this.http.get<PagedResult<Booking>>(url, { ...this.authService.getHttpOptions(), params });
   }
 }

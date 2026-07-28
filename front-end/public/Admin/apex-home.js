@@ -104,12 +104,9 @@ $(function () {
     };
   
     var chart = new ApexCharts(document.querySelector("#chart1"), options);
-    console.log(document.querySelector("#chart1"), chart);
     if (document.querySelector("#chart1")) {
-      console.log("chart has been created");
-    console.log(chart);
-    }
     chart.render();
+    }
   }
   
   function smallchart2() {

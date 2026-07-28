@@ -212,6 +212,10 @@ export class AuthServiceService {
     return this.getUserName();
   }
 
+  getCurrentUserRoles(): string[] {
+    return this.currentUser?.roles ?? [];
+  }
+
   public getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Content-Type': 'application/json'
