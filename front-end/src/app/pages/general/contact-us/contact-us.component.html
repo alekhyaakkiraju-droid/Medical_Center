@@ -2,7 +2,7 @@
   <div class="loader"></div>
 </div>
 <!--Page Title-->
-<section class="page-title text-center" style="background-image:url(images/background/3.jpg);">
+<section class="page-title text-center" [style.background-image]="'url(' + ('images/background/3.jpg' | assetUrl) + ')'">
   <div class="container">
     <div class="title-text">
       <h1>Contact</h1>
@@ -24,13 +24,15 @@
       <div class="col-md-4">
         <!-- address start -->
         <div class="address-block">
+          <p class="text-muted"><small>Demo placeholder contact information for CareShift platform preview.</small></p>
           <!-- Location -->
           <div class="media">
             <i class="fa fa-map-o"></i>
             <div class="media-body">
               <h3>Location</h3>
-              <p>PO Box 16122 Collins Street West
-                <br>Victoria 8007 Canada
+              <p>CareShift Healthcare Platform
+                <br>123 Wellness Avenue, Suite 100
+                <br>Healthcare City, HC 10001 (Demo)
                 </p>
               </div>
             </div>
@@ -40,8 +42,8 @@
               <div class="media-body">
                 <h3>Phone</h3>
                 <p>
-                  (+48) 564-334-21-22-34
-                  <br>(+48) 564-334-21-22-38
+                  +1 (555) 010-0200 (Demo)
+                  <br>+1 (555) 010-0201 (Demo)
                   </p>
                 </div>
               </div>
@@ -51,8 +53,8 @@
                 <div class="media-body">
                   <h3>Email</h3>
                   <p>
-                    infotemplatepath.com
-                    <br>infocleanxer.com
+                    info@careshift.com
+                    <br>support@careshift.com
                     </p>
                   </div>
                 </div>
@@ -167,9 +169,10 @@
         <!-- container end -->
       </section>
 
-      <div class="relative w-full h-96">
-        <iframe class="absolute top-0 left-0 w-full h-full"
-          src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d12080.73732861526!2d-74.0059418!3d40.7127847!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zM40zMDA2JzEwLjAiTiA3NMKwMjUnMzcuNyJX!5e0!3m2!1sen!2sus!4v1648482801994!5m2!1sen!2sus"
-          frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0">
-        </iframe>
+      <div class="relative w-full h-96 flex items-center justify-center bg-gray-100">
+        <p class="text-muted text-center px-4">
+          <i class="fa fa-map-marker fa-2x mb-2"></i><br>
+          Map preview unavailable in demo environment.<br>
+          <small>CareShift Healthcare Platform — Demo Location</small>
+        </p>
       </div>

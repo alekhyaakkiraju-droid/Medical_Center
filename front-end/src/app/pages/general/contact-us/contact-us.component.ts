@@ -9,13 +9,14 @@ import { ContactInquiryDTO, ContactService } from '../services/contact.service';
 import { RecaptchaService } from '../services/recaptcha.service';
 import { RouterLink } from '@angular/router';
 import { NgClass } from '@angular/common';
+import { AssetUrlPipe } from '../../../shared/asset-url.pipe';
 
 @Component({
     selector: 'app-contact-us',
     templateUrl: './contact-us.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./contact-us.component.css'],
-    imports: [RouterLink, ReactiveFormsModule, NgClass]
+    imports: [RouterLink, ReactiveFormsModule, NgClass, AssetUrlPipe]
 })
 export class ContactUsComponent implements OnInit, OnDestroy {
   contactForm!: FormGroup;
