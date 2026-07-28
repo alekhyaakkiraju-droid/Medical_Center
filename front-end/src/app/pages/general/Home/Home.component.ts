@@ -6,13 +6,14 @@ import { DoctorcsComponent } from '../doctorcs/doctorcs.component';
 import { FaqComponent } from '../faq/faq.component';
 import { AppointmentRequestComponent } from '../appointment-request/appointment-request.component';
 import { AssetUrlPipe } from '../../../shared/asset-url.pipe';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-Home',
     templateUrl: './Home.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./Home.component.css'],
-    imports: [DoctorcsComponent, FaqComponent, AppointmentRequestComponent, AssetUrlPipe]
+    imports: [DoctorcsComponent, FaqComponent, AppointmentRequestComponent, AssetUrlPipe, RouterLink]
 })
 export class HomeComponent implements  OnInit , AfterViewInit {
 

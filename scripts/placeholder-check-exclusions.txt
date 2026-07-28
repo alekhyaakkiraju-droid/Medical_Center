@@ -1,0 +1,6 @@
+front-end/src/app/pages/general/about-us/about-us.component.html
+front-end/src/app/pages/general/collected-shots/collected-shots.component.html
+front-end/src/app/pages/general/gallery/gallery.component.html
+front-end/src/app/pages/general/medical-service/medical-service.component.html
+front-end/src/app/pages/general/request-appointment/request-appointment.component.html
+front-end/src/app/layout/footer/footer.component.html
