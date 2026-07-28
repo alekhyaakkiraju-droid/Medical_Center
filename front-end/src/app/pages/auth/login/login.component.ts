@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { SnakebarService } from '../../../shared/service/SnakebarService.service';
 import { ReloadService } from '../../../shared/service/reload.service';
@@ -27,6 +27,7 @@ export class LoginComponent implements OnInit, AfterViewInit{
     private reload : ReloadService,
     private authService: AuthServiceService,
     private router: Router,
+    private route: ActivatedRoute,
     private forgetpasswordService :ForgotServiceService, 
     private resetPasswordService :ResetPasswordService,
     private modalService: ModelService
@@ -48,6 +49,14 @@ export class LoginComponent implements OnInit, AfterViewInit{
   }
 
   ngOnInit() {
+    this.route.queryParams.subscribe((params) => {
+      if (params['reason'] === 'session-expired') {
+        this.toastr.info(
+          'Your session has expired due to inactivity. Please log in again.',
+          'Session Expired'
+        );
+      }
+    });
   }
   ngAfterViewInit(): void {   
     this.reload.initializeLoader();

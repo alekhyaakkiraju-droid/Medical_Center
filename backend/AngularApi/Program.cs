@@ -61,10 +61,12 @@ namespace WebApiDemo
 
             builder.Services.AddScoped<ValidateAntiforgeryForMutatingRequestsFilter>();
             builder.Services.AddScoped<OwnershipValidationFilter>();
+            builder.Services.AddScoped<NoCachePhiActionFilter>();
             builder.Services.AddControllers(options =>
             {
                 options.Filters.AddService<ValidateAntiforgeryForMutatingRequestsFilter>();
                 options.Filters.AddService<OwnershipValidationFilter>();
+                options.Filters.AddService<NoCachePhiActionFilter>();
             });
             builder.Services.AddFluentValidationAutoValidation();
             builder.Services.AddValidatorsFromAssemblyContaining<RegisterUserDTOValidator>();
