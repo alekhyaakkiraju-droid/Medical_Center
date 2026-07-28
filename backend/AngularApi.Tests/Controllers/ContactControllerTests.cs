@@ -1,8 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using AngularApi.Controllers;
-using AngularApi.DTO;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.DTO;
+using AngularApi.Contracts.Services.Interfaces;
 using AngularApi.Tests.Fixtures.Recaptcha;
 using AngularApi.Tests.Infrastructure;
 using AngularApi.Tests.TestData;

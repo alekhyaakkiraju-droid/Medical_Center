@@ -1,5 +1,5 @@
 using AngularApi.Controllers;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Services.Interfaces;
 using FluentAssertions;
 using NetArchTest.Rules;
 

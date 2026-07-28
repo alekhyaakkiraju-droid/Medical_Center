@@ -1,5 +1,6 @@
-using System.Net.Http.Headers;
 using AngularApi.Models;
+using System.Net.Http.Headers;
+using AngularApi.Contracts.Models;
 using AngularApi.Tests.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;

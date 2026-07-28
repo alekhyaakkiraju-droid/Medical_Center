@@ -1,4 +1,4 @@
-using AngularApi.DTO;
+using AngularApi.Contracts.DTO;
 using FluentAssertions;
 
 namespace AngularApi.Tests.DTO;

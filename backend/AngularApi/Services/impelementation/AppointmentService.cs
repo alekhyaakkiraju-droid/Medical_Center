@@ -1,7 +1,10 @@
 using AngularApi.DTO;
+using AngularApi.Contracts.Enums;
 using AngularApi.Models;
+using AngularApi.Contracts.DTO;
+using AngularApi.Contracts.Models;
 using AngularApi.Options;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 

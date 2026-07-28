@@ -1,5 +1,6 @@
-using AngularApi.Infrastructure;
 using AngularApi.Models;
+using AngularApi.Infrastructure;
+using AngularApi.Contracts.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;

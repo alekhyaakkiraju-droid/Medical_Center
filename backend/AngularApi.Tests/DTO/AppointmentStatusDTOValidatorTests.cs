@@ -1,5 +1,7 @@
+using AngularApi.Contracts.Enums;
+using AngularApi.Contracts.DTO;
+using AngularApi.Contracts.Models;
 using AngularApi.DTO;
-using AngularApi.Models;
 using FluentValidation.TestHelper;
 
 namespace AngularApi.Tests.DTO;

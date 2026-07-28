@@ -1,7 +1,9 @@
 using AngularApi.Models;
+using AngularApi.Contracts.Models;
+using AngularApi.Contracts.Services;
 using AngularApi.Services;
 using AngularApi.Services.impelementation;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Services.Interfaces;
 using AngularApi.Tests.TestData;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;

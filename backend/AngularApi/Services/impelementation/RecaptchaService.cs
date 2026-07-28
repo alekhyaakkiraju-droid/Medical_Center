@@ -2,7 +2,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AngularApi.Options;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Services.Interfaces;
 using Microsoft.Extensions.Options;
 
 namespace AngularApi.Services.impelementation

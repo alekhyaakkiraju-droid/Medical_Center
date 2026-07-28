@@ -1,6 +1,8 @@
-using AngularApi.DTO;
 using AngularApi.Models;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Services;
+using AngularApi.Contracts.DTO;
+using AngularApi.Contracts.Models;
+using AngularApi.Contracts.Services.Interfaces;
 
 namespace AngularApi.Services.impelementation
 {

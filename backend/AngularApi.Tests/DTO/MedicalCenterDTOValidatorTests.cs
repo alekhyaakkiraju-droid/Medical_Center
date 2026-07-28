@@ -1,4 +1,4 @@
-using AngularApi.DTO; using AngularApi.Validators; using FluentValidation.TestHelper; namespace AngularApi.Tests.DTO;
+using AngularApi.Contracts.DTO; using AngularApi.Validators; using FluentValidation.TestHelper; namespace AngularApi.Tests.DTO;
 public class MedicalCenterDTOValidatorTests {
   static CreateMedicalCenterDTO C()=>new(){StreetAddress="123 Main St",City="Boston",State="MA",Zip="02101",FirstConsultationFee=100m,FollowupConsultationFee=75m,TimeSlotPerClientInMin=30};
   static UpdateMedicalCenterDTO U()=>new(){StreetAddress="123 Main St",City="Boston",State="MA",Zip="02101",FirstConsultationFee=100m,FollowupConsultationFee=75m,TimeSlotPerClientInMin=30};

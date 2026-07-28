@@ -1,6 +1,6 @@
-using AngularApi.DTO;
+using AngularApi.Contracts.DTO;
 using AngularApi.Services;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;

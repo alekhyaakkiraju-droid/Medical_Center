@@ -1,4 +1,4 @@
-using AngularApi.DTO;
+using AngularApi.Contracts.DTO;
 using AngularApi.Validators;
 using FluentAssertions;
 using FluentValidation.TestHelper;

@@ -1,5 +1,5 @@
-using AngularApi.DTO;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.DTO;
+using AngularApi.Contracts.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

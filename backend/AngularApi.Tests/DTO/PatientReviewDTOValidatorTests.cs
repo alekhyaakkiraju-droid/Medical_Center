@@ -1,4 +1,4 @@
-using AngularApi.DTO; using AngularApi.Validators; using FluentValidation.TestHelper;
+using AngularApi.Contracts.DTO; using AngularApi.Validators; using FluentValidation.TestHelper;
 namespace AngularApi.Tests.DTO;
 public class PatientReviewDTOValidatorTests {
   private readonly CreatePatientReviewDTOValidator _c=new(); private readonly UpdatePatientReviewDTOValidator _u=new();

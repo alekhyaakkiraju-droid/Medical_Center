@@ -1,4 +1,4 @@
-using AngularApi.DTO;
+using AngularApi.Contracts.DTO;
 using FluentValidation;
 namespace AngularApi.Validators {
     public class CreateMedicalCenterDoctorAvailabilityDTOValidator : AbstractValidator<CreateMedicalCenterDoctorAvailabilityDTO> {

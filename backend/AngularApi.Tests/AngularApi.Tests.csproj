@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AngularApi\AngularApi.csproj" />
+    <ProjectReference Include="..\AngularApi.Contracts\AngularApi.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,6 +1,6 @@
-﻿using AngularApi.DTO;
-using AngularApi.Models;
-using AngularApi.Services.Interfaces;
+﻿using AngularApi.Contracts.DTO;
+using AngularApi.Contracts.Models;
+using AngularApi.Contracts.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

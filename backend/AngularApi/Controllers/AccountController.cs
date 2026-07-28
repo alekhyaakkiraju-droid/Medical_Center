@@ -1,8 +1,9 @@
-﻿using AngularApi.DTO;
-using AngularApi.Models;
+using AngularApi.Contracts.Services;
+﻿using AngularApi.Contracts.DTO;
+using AngularApi.Contracts.Models;
 using AngularApi.Options;
 using AngularApi.Services;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Services.Interfaces;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

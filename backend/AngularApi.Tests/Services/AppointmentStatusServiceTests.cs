@@ -1,5 +1,7 @@
-using AngularApi.DTO;
+using AngularApi.Contracts.Enums;
 using AngularApi.Models;
+using AngularApi.Contracts.DTO;
+using AngularApi.Contracts.Models;
 using AngularApi.Services.impelementation;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;

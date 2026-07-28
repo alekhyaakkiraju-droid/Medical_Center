@@ -1,7 +1,9 @@
-using AngularApi.Filters;
 using AngularApi.Models;
+using AngularApi.Contracts.Enums;
+using AngularApi.Contracts.Models;
+using AngularApi.Filters;
 using AngularApi.Services.impelementation;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Services.Interfaces;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

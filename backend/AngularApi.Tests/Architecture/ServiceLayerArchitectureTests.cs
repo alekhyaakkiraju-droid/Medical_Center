@@ -1,9 +1,11 @@
+using AngularApi.Models;
 using System.Reflection;
 using System.Security.Claims;
 using AngularApi.Controllers;
+using AngularApi.Contracts.DTO;
 using AngularApi.DTO;
-using AngularApi.Models;
-using AngularApi.Services.Interfaces;
+using AngularApi.Contracts.Models;
+using AngularApi.Contracts.Services.Interfaces;
 using AngularApi.Tests.Infrastructure;
 using AngularApi.Validators;
 using FluentAssertions;
