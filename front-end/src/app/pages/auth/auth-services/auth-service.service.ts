@@ -38,6 +38,7 @@ export class AuthServiceService {
   private readonly registerUrl = `${environment.api}/Account/register/user`;
   private readonly meUrl = `${environment.api}/Account/me`;
   private readonly logoutUrl = `${environment.api}/Account/logout`;
+  private readonly refreshTokenUrl = `${environment.api}/Account/refresh-token`;
   private readonly antiforgeryUrl = `${environment.api}/Account/antiforgery-token`;
 
   constructor(
@@ -138,7 +139,17 @@ export class AuthServiceService {
     );
   }
 
-  private clearSession(): void {
+  refreshToken(): Observable<void> {
+    return this.ensureCsrfToken().pipe(
+      switchMap(() =>
+        this.http.post(this.refreshTokenUrl, {}, this.getHttpOptions())
+      ),
+      map(() => void 0),
+      catchError((error) => throwError(() => error))
+    );
+  }
+
+  clearSession(): void {
     this.currentUser = null;
     this.csrfTokenStore.clearToken();
     this.isLoggedSubject.next(false);
