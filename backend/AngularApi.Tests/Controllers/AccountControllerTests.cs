@@ -208,6 +208,28 @@ namespace AngularApi.Tests.Controllers
 
 
         [Fact]
+        public async Task ResetPassword_UrlEncodedToken_ResetsPasswordSuccessfully()
+        {
+            var encodedToken = WebUtility.UrlEncode("reset+token/with=special");
+            var resetPasswordDto = new ResetPasswordDTO
+            {
+                Email = "test@example.com",
+                Token = encodedToken,
+                NewPassword = "NewPassword123!",
+            };
+            var user = new AppUser { Email = resetPasswordDto.Email };
+            _userManagerMock.Setup(x => x.FindByEmailAsync(resetPasswordDto.Email))
+                .ReturnsAsync(user);
+            _userManagerMock.Setup(x => x.ResetPasswordAsync(user, "reset+token/with=special", resetPasswordDto.NewPassword))
+                .ReturnsAsync(IdentityResult.Success);
+
+            var result = await _controller.ResetPassword(resetPasswordDto);
+
+            result.Should().BeOfType<OkObjectResult>();
+            _userManagerMock.Verify(x => x.ResetPasswordAsync(user, "reset+token/with=special", resetPasswordDto.NewPassword), Times.Once);
+        }
+
+        [Fact]
         public async Task ResetPassword_ValidInput_ResetsPassword()
         {
             // Arrange

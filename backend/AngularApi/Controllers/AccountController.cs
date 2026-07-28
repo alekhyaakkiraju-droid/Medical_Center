@@ -300,7 +300,7 @@ namespace AngularApi.Controllers
                 }
 
                 var decodedToken = WebUtility.UrlDecode(resetPasswordDto.Token);
-                var result = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.NewPassword);
+                var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPasswordDto.NewPassword);
 
                 if (result.Succeeded)
                 {
