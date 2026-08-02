@@ -1,5 +1,4 @@
-import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { ReloadService } from '../../../shared/service/reload.service';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { SpecializationService } from '../services/specialization.service';
 import { Subscription } from 'rxjs';
 import { DoctorcsComponent } from '../doctorcs/doctorcs.component';
@@ -15,7 +14,7 @@ import { RouterLink } from '@angular/router';
     styleUrls: ['./Home.component.css'],
     imports: [DoctorcsComponent, FaqComponent, AppointmentRequestComponent, AssetUrlPipe, RouterLink]
 })
-export class HomeComponent implements  OnInit , AfterViewInit {
+export class HomeComponent implements OnInit, OnDestroy {
 
   private subscriptions: Subscription[] = [];
   patients: any[] = [
@@ -32,24 +31,15 @@ export class HomeComponent implements  OnInit , AfterViewInit {
   ];
   specializations: any[] = [];
 
-  constructor(
-    private reload: ReloadService,
-    private specializationService: SpecializationService
-  ) { }
-
-  ngAfterViewInit(): void {   
-    this.reload.initializeLoader();
-  }
+  constructor(private specializationService: SpecializationService) {}
 
   ngOnInit(): void {
     this.subscriptions.push(
-      this.specializationService.getSpecializations().subscribe(
-        (data) => {
+      this.specializationService.getSpecializations().subscribe({
+        next: (data) => {
           this.specializations = data.items.slice(0, 6);
         },
-        (error) => {
-        }
-      )
+      })
     );
   }
 

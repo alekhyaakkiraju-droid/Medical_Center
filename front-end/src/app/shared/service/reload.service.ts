@@ -21,12 +21,8 @@ export class ReloadService {
 
     if (loader) {
       loader.classList.remove('fade-in');
-      setTimeout(() => {
-        loader.classList.add('fade-out');
-      }, 300);
-      setTimeout(() => {
-        this.hidePreloader(preloader);
-      }, 600);
+      loader.classList.add('fade-out');
+      this.hidePreloader(preloader);
       return;
     }
 

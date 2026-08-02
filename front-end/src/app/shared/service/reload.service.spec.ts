@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { ReloadService } from './reload.service';
 import { standaloneComponentTestProviders } from '../../testing/standalone-component-test-providers';
 
@@ -37,14 +37,13 @@ describe('ReloadService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should hide the preloader after initializeLoader runs', fakeAsync(() => {
+  it('should hide the preloader after initializeLoader runs', () => {
     const { preloader } = createPreloader();
 
     service.initializeLoader();
-    tick(600);
 
     expect(preloader.style.display).toBe('none');
-  }));
+  });
 
   it('should not set preloader display to block when dismissing', () => {
     const source = ReloadService.prototype.initializeLoader.toString();

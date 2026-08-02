@@ -59,8 +59,10 @@ export class AuthServiceService {
     private csrfTokenStore: CsrfTokenStore,
     private router: Router
   ) {
-    this.ensureCsrfToken().subscribe();
-    this.loadCurrentUser().subscribe();
+    queueMicrotask(() => {
+      this.ensureCsrfToken().subscribe();
+      this.loadCurrentUser().subscribe();
+    });
   }
 
   ensureCsrfToken(): Observable<void> {
