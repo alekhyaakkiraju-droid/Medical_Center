@@ -3,11 +3,6 @@ name: "2 - CI/CD: medical-center dev"
 on:
   push:
     branches: [main]
-    paths:
-      - backend/**
-      - front-end/**
-      - docker-compose.yml
-      - .github/workflows/2-ci-build-scan-push-medical-center-dev.yaml
     paths-ignore:
       - .opsera-medical-center/k8s/**
       - .github/workflows/1-bootstrap-infrastructure-medical-center.yaml
