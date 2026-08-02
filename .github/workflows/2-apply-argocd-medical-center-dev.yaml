@@ -1,0 +1,40 @@
+name: "2 - Apply ArgoCD app: medical-center dev"
+
+on:
+  workflow_dispatch:
+    inputs:
+      AWS_REGION:
+        description: AWS region
+        required: false
+        default: us-west-2
+      HUB_CLUSTER:
+        description: ArgoCD hub EKS cluster
+        required: false
+        default: argocd-usw2
+
+env:
+  AWS_REGION: ${{ inputs.AWS_REGION || 'us-west-2' }}
+  HUB_CLUSTER: ${{ inputs.HUB_CLUSTER || 'argocd-usw2' }}
+
+jobs:
+  apply-argocd-app:
+    name: Apply medical-center-dev ArgoCD Application
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Hub kubeconfig
+        run: |
+          aws eks update-kubeconfig --name "${HUB_CLUSTER}" --region "${AWS_REGION}" --alias hub
+
+      - name: Apply ArgoCD Application
+        run: |
+          kubectl --context hub apply -f .opsera-medical-center/argocd/medical-center-dev-application.yaml
+          kubectl --context hub get application medical-center-dev -n argocd
