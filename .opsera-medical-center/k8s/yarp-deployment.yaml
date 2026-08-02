@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: yarp
-          image: PLACEHOLDER_YARP_ECR_URI
+          image: 792373136340.dkr.ecr.us-west-2.amazonaws.com/medical-center-yarp:388aefa
           ports:
             - containerPort: 8080
           volumeMounts:
