@@ -1,6 +1,17 @@
 /* You can add global styles to this file, and also import other style files */
 
 :root {
+  /* CareShift brand tokens (WO-049) — WCAG AA contrast on white backgrounds */
+  --color-primary: #48bdc5;
+  --color-primary-dark: #3a9aa1;
+  --color-primary-light: #e8f7f8;
+  --color-accent: #134e4a;
+  --color-text-body: #334155;
+  --color-text-muted: #64748b;
+  --color-text-heading: #0f172a;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafc;
+  --color-border: #e2e8f0;
   --color-focus-ring: #1a7a82;
 }
 
@@ -302,37 +313,16 @@ li {
   font-family: 'Open Sans', sans-serif;
 }
 
-.header-top .top-right .social-links {
+.header-top .top-right .ribbon-links {
   position: relative;
-  display: inline-block;
-  margin-bottom: 0px;
+  display: flex;
+  margin-bottom: 0;
 }
 
 @media (max-width: 767px) {
-  .header-top .top-right .social-links {
+  .header-top .top-right .ribbon-links {
     padding-left: 0;
   }
-}
-
-.header-top .top-right .social-links li {
-  display: inline-block;
-}
-
-.header-top .top-right .social-links li i {
-  width: 50px;
-  height: 56px;
-  line-height: 56px;
-  margin: -1px;
-  font-size: 16px;
-  color: var(--color-text-body);
-  font-weight: 600;
-  text-align: center;
-  border: 1px solid #ececec;
-}
-
-.header-top .top-right .social-links li:hover i {
-  color: #7b64cb;
-  border-color: #7b64cb;
 }
 
 .header-uper {

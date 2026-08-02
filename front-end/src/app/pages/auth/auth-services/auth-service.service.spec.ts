@@ -45,6 +45,9 @@ describe('AuthServiceService', () => {
 
     const meReq = httpMock.expectOne(`${environment.api}/Account/me`);
     meReq.flush(null, { status: 401, statusText: 'Unauthorized' });
+
+    const clearSessionReq = httpMock.expectOne(`${environment.api}/Account/clear-session`);
+    clearSessionReq.flush({ message: 'Session cleared.' });
   });
 
   afterEach(() => {
@@ -63,7 +66,7 @@ describe('AuthServiceService', () => {
     expect(service.getHttpOptions().withCredentials).toBeTrue();
   });
 
-  it('login should use cookie auth and load current user from /me', () => {
+  it('login should use cookie auth and return the signed-in user profile', () => {
     service.login('user@example.com', 'Password123!').subscribe((user) => {
       expect(user?.userName).toBe('test-user');
       expect(service.isRole('user')).toBeTrue();
@@ -75,15 +78,15 @@ describe('AuthServiceService', () => {
     const loginReq = httpMock.expectOne(`${environment.api}/Account/login`);
     expect(loginReq.request.withCredentials).toBeTrue();
     expect(loginReq.request.headers.get('Authorization')).toBeNull();
-    loginReq.flush({ expiration: new Date().toISOString() });
-
-    const meReq = httpMock.expectOne(`${environment.api}/Account/me`);
-    meReq.flush({
+    loginReq.flush({
+      expiration: new Date().toISOString(),
       userId: 'user-1',
       email: 'user@example.com',
       userName: 'test-user',
       roles: ['user'],
     });
+
+    expect(service.isRole('user')).toBeTrue();
   });
 
   it('logout should call backend logout endpoint', () => {

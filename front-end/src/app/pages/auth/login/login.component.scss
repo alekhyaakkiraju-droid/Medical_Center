@@ -1,0 +1,87 @@
+.careshift-login-hero {
+  background: linear-gradient(135deg, #0f172a 0%, #134e4a 55%, #48bdc5 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #fff;
+  text-align: center;
+}
+
+.careshift-login-hero__logo {
+  max-width: 220px;
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.25));
+}
+
+.careshift-login-hero h2 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+}
+
+.careshift-login-hero p {
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 24rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.careshift-uat-panel {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: #f0fdfa;
+  border: 1px solid #99f6e4;
+}
+
+.careshift-uat-panel h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0f766e;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.careshift-uat-panel p {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  color: #475569;
+}
+
+.careshift-uat-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.careshift-uat-btn {
+  border: 1px solid #48bdc5;
+  background: #fff;
+  color: #0f766e;
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.careshift-uat-btn:hover {
+  background: #48bdc5;
+  color: #fff;
+}
+
+.careshift-submit-btn {
+  background: #48bdc5 !important;
+}
+
+.careshift-submit-btn:hover:not(:disabled) {
+  background: #3a9aa1 !important;
+}
+
+.careshift-submit-btn:focus-visible {
+  outline: 2px solid #1a7a82;
+  outline-offset: 2px;
+}

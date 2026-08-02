@@ -3,15 +3,22 @@
   <div class="header-top">
     <div class="container clearfix mx-auto max-w-7xl px-5 sm:px-6">
       <div class="top-left">
-        <h6>CareShift Live Demo — <a routerLink="/demo" class="demo-top-link">Try it now</a></h6>
+        <h6>CareShift Medical Center — quality care, when you need it</h6>
       </div>
       <div class="top-right">
-        <ul class="social-links">
-          @for (link of socialLinks; track link) {
+        <ul class="ribbon-links">
+          @for (link of ribbonLinks; track link.label) {
             <li>
-              <a [href]="link.href" [attr.aria-label]="'Visit our ' + link.aria + ' page'">
-                <i class="fa" [ngClass]="link.icon" [attr.aria-hidden]="true"></i>
-              </a>
+              @if (link.href.startsWith('mailto:') || link.href.startsWith('tel:')) {
+                <a [href]="link.href" class="ribbon-links__item">
+                  <i [class]="link.icon" aria-hidden="true"></i>
+                  <span>{{ link.label }}</span>
+                </a>
+              } @else {
+                <a [href]="link.href" class="ribbon-links__social" [attr.aria-label]="link.aria">
+                  <i [class]="link.icon" aria-hidden="true"></i>
+                </a>
+              }
             </li>
           }
         </ul>
@@ -24,11 +31,15 @@
   <section class="header-uper">
     <div class="container clearfix  mx-auto max-w-7xl px-5 sm:px-6">
       <div class="logo">
-        <figure>
-          <a routerLink="/">
-            <img [src]="'images/loggggo-3.png' | assetUrl" alt="CareShift Medical Center home" width="220px" height="100">
-          </a>
-        </figure>
+        <a routerLink="/" class="careshift-logo" aria-label="CareShift Medical Center home">
+          <span class="careshift-logo__mark" aria-hidden="true">
+            <i class="fa-solid fa-heart-pulse"></i>
+          </span>
+          <span class="careshift-logo__text">
+            <strong>CareShift</strong>
+            <small>Medical Center</small>
+          </span>
+        </a>
       </div>
       <div class="right-side">
         <ul class="contact-info">
@@ -38,36 +49,25 @@
             </div>
             <strong>Call Now</strong>
             <br>
-              <span>+1 (555) 010-0200 (Demo)</span>
+              <span>+1 (555) 010-0200</span>
             </li>
-            @if (!isLoggedIn) {
-              <li class="item item--login">
-                <a routerLink="/auth/login" class="login-link" aria-label="Log in">
+            @if (authReady && isLoggedIn) {
+              <li class="item">
+                <button type="button" class="logout-trigger" aria-label="Log out"
+                  data-bs-toggle="modal" data-bs-target="#logoutModal">
                   <div class="icon-box">
-                    <i class="fa-regular fa-user text-xl text-dark"></i>
+                    <i title="Logout" class=" fa-solid fa-arrow-right-from-bracket text-xl text-dark" aria-hidden="true"></i>
                   </div>
-                  <div class="my-auto"><strong>Log In </strong></div>
-                  <span>Get Started</span>
-                </a>
+                  <div><strong>Log Out</strong></div>
+                </button>
               </li>
             }
-
-              @if (isLoggedIn) {
-                <li class="item">
-                  <button type="button" class="logout-trigger" aria-label="Log out"
-                    data-bs-toggle="modal" data-bs-target="#logoutModal">
-                    <div class="icon-box">
-                      <i title="Logout" class=" fa-solid fa-arrow-right-from-bracket text-xl text-dark" aria-hidden="true"></i>
-                    </div>
-                    <div><strong>Log Out </strong></div>
-                    <span>Good Bye</span>
-                  </button>
-                </li>
-              }
             </ul>
             <div class="link-btn">
-              <a routerLink="/demo" class="btn-style-one btn-style-one--demo">Live Demo</a>
-              <a routerLink="/pages/appointment" class="btn-style-one">Appoinment</a>
+              @if (!isLoggedIn) {
+                <a routerLink="/auth/login" class="btn-style-one">Sign In</a>
+              }
+              <a routerLink="/pages/appointment" class="btn-style-one btn-style-one--outline">Appointment</a>
             </div>
           </div>
         </div>

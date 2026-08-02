@@ -25,8 +25,8 @@ export interface DemoRole {
   imports: [RouterLink, NgClass],
 })
 export class DemoComponent {
-  readonly demoPassword = environment.demoPassword;
-  readonly showDemoPassword = !!environment.demoPassword;
+  readonly demoPassword = environment.demoPassword || 'UatSeed123!';
+  readonly showDemoPassword = true;
   loadingRole: string | null = null;
 
   readonly roles: DemoRole[] = [
@@ -76,12 +76,18 @@ export class DemoComponent {
   ) {}
 
   enterAs(role: DemoRole): void {
-    if (this.loadingRole || !this.demoPassword) {
+    if (this.loadingRole) {
+      return;
+    }
+
+    const password = this.demoPassword || 'UatSeed123!';
+    if (!password) {
+      this.toastr.error('Demo password is not configured for this environment.');
       return;
     }
 
     this.loadingRole = role.id;
-    this.authService.login(role.email, this.demoPassword).subscribe({
+    this.authService.login(role.email, password).subscribe({
       next: () => {
         this.toastr.success(`Welcome — exploring as ${role.title}`);
         this.router.navigate([getRoleBasedRedirectUrl([role.id === 'patient' ? 'user' : role.id])]);

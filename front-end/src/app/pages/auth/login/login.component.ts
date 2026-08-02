@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -11,17 +12,19 @@ import { ModelService } from '../auth-services/model.service';
 import { ToastrService } from 'ngx-toastr';
 import { ForgetPasswordComponent } from '../forgetPassword/forgetPassword.component';
 import { getRoleBasedRedirectUrl } from '../../../core/utils/role-redirect.util';
+import { AssetUrlPipe } from '../../../shared/asset-url.pipe';
 
 @Component({
     selector: 'app-login',
     changeDetection: ChangeDetectionStrategy.Eager,
     templateUrl: './login.component.html',
-    imports: [ReactiveFormsModule, ForgetPasswordComponent, RouterLink]
+    styleUrls: ['./login.component.scss'],
+    imports: [ReactiveFormsModule, ForgetPasswordComponent, RouterLink, AssetUrlPipe]
 })
 export class LoginComponent implements OnInit, AfterViewInit{
 
   private subscriptions: Subscription[] = [];
-   loginForm: FormGroup;
+  loginForm: FormGroup;
 
   constructor(private fb: FormBuilder,
     private toastr: ToastrService,
@@ -123,8 +126,14 @@ export class LoginComponent implements OnInit, AfterViewInit{
           this.onLoginSuccess();
           this.navigateAfterLogin();
         },
-        (error: any) => {
-          this.errorMessage = 'Email or password is incorrect';
+        (error: HttpErrorResponse) => {
+          if (error.status === 400) {
+            this.errorMessage = 'Unable to sign in right now. Refresh the page and try again.';
+          } else if (error.status === 401) {
+            this.errorMessage = 'Invalid email or password. Please try again.';
+          } else {
+            this.errorMessage = 'Sign in failed. Check your connection and try again.';
+          }
           this.onLoginFailed();
         }
       );

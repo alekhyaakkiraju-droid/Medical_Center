@@ -24,11 +24,20 @@ export interface CurrentUser {
   roles: string[];
 }
 
+interface LoginResponse {
+  expiration: string;
+  userId: string;
+  email: string;
+  userName: string;
+  roles: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthServiceService {
   public isLoggedSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  private readonly sessionReadySubject = new BehaviorSubject<boolean>(false);
 
   private currentUser: CurrentUser | null = null;
   private sessionResolve$: Observable<CurrentUser | null> | null = null;
@@ -39,6 +48,7 @@ export class AuthServiceService {
   private readonly registerUrl = `${environment.api}/Account/register/user`;
   private readonly meUrl = `${environment.api}/Account/me`;
   private readonly logoutUrl = `${environment.api}/Account/logout`;
+  private readonly clearSessionUrl = `${environment.api}/Account/clear-session`;
   private readonly sessionTimeoutUrl = `${environment.api}/Account/session-timeout`;
   private readonly refreshTokenUrl = `${environment.api}/Account/refresh-token`;
   private readonly antiforgeryUrl = `${environment.api}/Account/antiforgery-token`;
@@ -57,21 +67,21 @@ export class AuthServiceService {
     return this.http.get<{ token: string }>(this.antiforgeryUrl, this.getHttpOptions()).pipe(
       tap((response) => this.csrfTokenStore.setToken(response.token)),
       map(() => void 0),
-      catchError(() => of(void 0))
+      catchError((error) => throwError(() => error))
     );
   }
 
   loadCurrentUser(): Observable<CurrentUser | null> {
     return this.http.get<CurrentUser>(this.meUrl, this.getHttpOptions()).pipe(
-      tap((user) => {
-        this.currentUser = user;
-        this.isLoggedSubject.next(true);
-      }),
-      catchError(() => {
-        this.currentUser = null;
-        this.isLoggedSubject.next(false);
+      tap((user) => this.applyCurrentUser(user)),
+      catchError((error) => {
+        this.clearSessionState();
+        if (error.status === 401) {
+          this.clearStaleSessionCookies().subscribe();
+        }
         return of(null);
-      })
+      }),
+      finalize(() => this.sessionReadySubject.next(true))
     );
   }
 
@@ -98,9 +108,27 @@ export class AuthServiceService {
 
     return this.ensureCsrfToken().pipe(
       switchMap(() =>
-        this.http.post<{ expiration: string }>(this.loginUrl, loginData, this.getHttpOptions())
+        this.http.post<LoginResponse>(this.loginUrl, loginData, this.getHttpOptions())
       ),
-      switchMap(() => this.loadCurrentUser())
+      tap((response) => {
+        this.applyCurrentUser({
+          userId: response.userId,
+          email: response.email,
+          userName: response.userName,
+          roles: response.roles ?? [],
+        });
+        this.sessionReadySubject.next(true);
+      }),
+      map((response) => ({
+        userId: response.userId,
+        email: response.email,
+        userName: response.userName,
+        roles: response.roles ?? [],
+      })),
+      catchError((error) => {
+        this.clearSessionState();
+        return throwError(() => error);
+      })
     );
   }
 
@@ -175,9 +203,25 @@ export class AuthServiceService {
   }
 
   clearSession(): void {
+    this.clearSessionState();
+  }
+
+  private clearSessionState(): void {
     this.currentUser = null;
     this.csrfTokenStore.clearToken();
     this.isLoggedSubject.next(false);
+  }
+
+  private applyCurrentUser(user: CurrentUser): void {
+    this.currentUser = user;
+    this.isLoggedSubject.next(true);
+  }
+
+  private clearStaleSessionCookies(): Observable<void> {
+    return this.http.post(this.clearSessionUrl, {}, this.getHttpOptions()).pipe(
+      map(() => void 0),
+      catchError(() => of(void 0))
+    );
   }
 
   get isUserLoggedIn(): boolean {
@@ -190,6 +234,10 @@ export class AuthServiceService {
 
   getloggedStatus(): Observable<boolean> {
     return this.isLoggedSubject.asObservable();
+  }
+
+  getSessionReady(): Observable<boolean> {
+    return this.sessionReadySubject.asObservable();
   }
 
   isTokenExpired(): boolean {

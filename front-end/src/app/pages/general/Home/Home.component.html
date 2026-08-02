@@ -2,44 +2,26 @@
   <div class="loader"></div>
 </div>
 
-<div id="carouselExampleCaptions" class="carousel slide " data-bs-ride="carousel">
-  <div class="carousel-indicators">
-    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
-    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
-  </div>
-  <div class="carousel-inner">
-    <div class="carousel-item active">
-      <img [src]="'images/slider/slider-bg-1.jpg' | assetUrl" class="d-block w-100" alt="Healthcare professional providing patient consultation">
-      <div class="carousel-caption d-none d-md-block">
-        <h1 class="fs-2">Your Health, Our Priority</h1>
-        <p> Expert doctors, modern technology, and personalized medical solutions for every patient.</p>
-      </div>
-    </div>
-    <div class="carousel-item">
-      <img [src]="'images/slider/slider-bg-2.jpg' | assetUrl" class="d-block w-100" alt="Modern medical center with advanced healthcare technology">
-      <div class="carousel-caption d-none d-md-block">
-        <h1 class="fs-2">Excellence in Healthcare</h1>
-        <p>Expert doctors, modern technology, and personalized medical solutions for every patient..</p>
-      </div>
-    </div>
-    <div class="carousel-item">
-      <img [src]="'images/slider/slider-bg-3.jpg' | assetUrl" class="d-block w-100" alt="Doctor and patient in a caring healthcare environment">
-      <div class="carousel-caption d-none d-md-block">
-        <h1 class="fs-2">Caring for You, Every Step of the Way</h1>
-        <p> From prevention to recovery, we are here to provide the best medical care for you and your family.</p>
-      </div>
+<section class="home-hero">
+  <img
+    class="home-hero__bg"
+    [src]="'images/slider/slider-bg-1.jpg' | assetUrl"
+    alt=""
+    aria-hidden="true"
+  />
+  <div class="home-hero__overlay" aria-hidden="true"></div>
+  <div class="home-hero__content">
+    <p class="home-hero__eyebrow">CareShift Medical Center</p>
+    <h1>Your health, coordinated in one place</h1>
+    <p class="home-hero__lead">
+      Sign in to book appointments, manage care, and connect with your clinical team.
+    </p>
+    <div class="home-hero__actions">
+      <a routerLink="/auth/login" class="home-hero__btn home-hero__btn--primary">Sign In</a>
+      <a routerLink="/auth/register" class="home-hero__btn home-hero__btn--secondary">Create Account</a>
     </div>
   </div>
-  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Previous</span>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
-    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Next</span>
-  </button>
-</div>
+</section>
 
 <section class="cta mx-auto max-w-6xl px-1 sm:px-4">
   <div class="container">

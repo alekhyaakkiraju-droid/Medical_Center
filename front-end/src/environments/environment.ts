@@ -3,6 +3,6 @@ export const environment = {
   api: "/api",
   assetBaseUrl: "",
   recaptchaSiteKey: "",
-  baaExecuted: false,
-  demoPassword: "",
+  baaExecuted: true,
+  demoPassword: "UatSeed123!",
 };

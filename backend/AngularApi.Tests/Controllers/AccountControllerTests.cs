@@ -137,6 +137,8 @@ namespace AngularApi.Tests.Controllers
                 .ReturnsAsync(true);
             _authCookieServiceMock.Setup(x => x.IssueAuthCookiesAsync(user, default))
                 .ReturnsAsync(new AuthCookieIssueResult(DateTime.UtcNow.AddDays(1)));
+            _userManagerMock.Setup(x => x.GetRolesAsync(user))
+                .ReturnsAsync(new List<string> { "user" });
 
             // Act
             var result = await _controller.Login(loginDto);
@@ -145,7 +147,11 @@ namespace AngularApi.Tests.Controllers
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
             okResult.Value.Should().BeEquivalentTo(new
             {
-                expiration = DateTime.UtcNow.AddDays(1)
+                expiration = DateTime.UtcNow.AddDays(1),
+                userId = "user-1",
+                email = loginDto.Email,
+                userName = "test-user",
+                roles = new[] { "user" }
             }, options => options.Using<DateTime>(ctx =>
                 ctx.Subject.Should().BeCloseTo(ctx.Expectation, TimeSpan.FromMinutes(1))).WhenTypeIs<DateTime>());
         }

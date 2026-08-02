@@ -9,8 +9,10 @@ COPY . .
 
 ARG API_BASE_URL=/api
 ARG ASSET_BASE_URL=
+ARG DEMO_PASSWORD=UatSeed123!
 RUN sed -i "s|api: \"/api\"|api: \"${API_BASE_URL}\"|g" src/environments/environment.ts \
-    && sed -i "s|assetBaseUrl: \"\"|assetBaseUrl: \"${ASSET_BASE_URL}\"|g" src/environments/environment.ts
+    && sed -i "s|assetBaseUrl: \"\"|assetBaseUrl: \"${ASSET_BASE_URL}\"|g" src/environments/environment.ts \
+    && sed -i "s|demoPassword: \"UatSeed123!\"|demoPassword: \"${DEMO_PASSWORD}\"|g" src/environments/environment.ts
 
 RUN ./node_modules/.bin/ng build --configuration production \
     && cp dist/medical-center/browser/index.csr.html dist/medical-center/browser/index.html

@@ -190,10 +190,15 @@ namespace AngularApi.Controllers
                     if (checkpass)
                     {
                         var cookieResult = await _authCookieService.IssueAuthCookiesAsync(found);
+                        var roles = await _userManager.GetRolesAsync(found);
                         await _auditService.RecordAuthEventAsync("LoginSuccess", found.Email, true);
                         return Ok(new
                         {
-                            expiration = cookieResult.ExpirationUtc
+                            expiration = cookieResult.ExpirationUtc,
+                            userId = found.Id,
+                            email = found.Email,
+                            userName = found.UserName,
+                            roles,
                         });
                     }
                 }
@@ -341,6 +346,15 @@ namespace AngularApi.Controllers
         /// Example request body: { "currentPassword": "OldPassword123!", "newPassword": "NewPassword123!" }
         /// </summary>
         /// 
+
+        [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
+        [HttpPost("clear-session")]
+        public IActionResult ClearSession()
+        {
+            _authCookieService.ClearAuthCookies();
+            return Ok(new { message = "Session cleared." });
+        }
 
         [AllowAnonymous]
         [IgnoreAntiforgeryToken]
