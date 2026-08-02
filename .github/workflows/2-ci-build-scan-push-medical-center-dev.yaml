@@ -1,0 +1,213 @@
+name: "2 - CI/CD: medical-center dev"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - backend/**
+      - front-end/**
+      - docker-compose.yml
+      - .github/workflows/2-ci-build-scan-push-medical-center-dev.yaml
+    paths-ignore:
+      - .opsera-medical-center/k8s/**
+      - .github/workflows/1-bootstrap-infrastructure-medical-center.yaml
+      - .github/workflows/2-apply-argocd-medical-center-dev.yaml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  AWS_REGION: us-west-2
+  TENANT: opsera
+  APP_NAME: medical-center
+  ENVIRONMENT: dev
+  NAMESPACE: opsera-medical-center-dev
+  HUB_CLUSTER: argocd-usw2
+  SPOKE_CLUSTER: opsera-usw2-np
+  PUBLIC_URL: https://medical-center-yarp-dev.agent.opsera.dev
+
+jobs:
+  check-bootstrap-prerequisites:
+    name: Check Bootstrap Prerequisites
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify ECR repositories exist
+        run: |
+          for repo in medical-center-api medical-center-yarp medical-center-frontend; do
+            aws ecr describe-repositories --repository-names "${repo}" --region "${AWS_REGION}" >/dev/null
+            echo "ECR OK: ${repo}"
+          done
+
+  build-and-push:
+    name: Build and Push Images
+    needs: [check-bootstrap-prerequisites]
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.image_tag }}
+      ecr_registry: ${{ steps.meta.outputs.ecr_registry }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set image metadata
+        id: meta
+        run: |
+          ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+          echo "ecr_registry=${ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com" >> "${GITHUB_OUTPUT}"
+          echo "image_tag=${GITHUB_SHA::7}" >> "${GITHUB_OUTPUT}"
+
+      - name: Build and push API image
+        run: |
+          REG="${{ steps.meta.outputs.ecr_registry }}"
+          TAG="${{ steps.meta.outputs.image_tag }}"
+          docker build -f backend/AngularApi/Dockerfile -t "${REG}/medical-center-api:${TAG}" backend
+          docker push "${REG}/medical-center-api:${TAG}"
+
+      - name: Build and push YARP image
+        run: |
+          REG="${{ steps.meta.outputs.ecr_registry }}"
+          TAG="${{ steps.meta.outputs.image_tag }}"
+          docker build -f backend/YARPReverseProxy/Dockerfile -t "${REG}/medical-center-yarp:${TAG}" backend
+          docker push "${REG}/medical-center-yarp:${TAG}"
+
+      - name: Build and push frontend image
+        run: |
+          REG="${{ steps.meta.outputs.ecr_registry }}"
+          TAG="${{ steps.meta.outputs.image_tag }}"
+          docker build -f front-end/Dockerfile \
+            --build-arg API_BASE_URL=/api \
+            --build-arg DEMO_PASSWORD=UatSeed123! \
+            -t "${REG}/medical-center-frontend:${TAG}" front-end
+          docker push "${REG}/medical-center-frontend:${TAG}"
+
+  update-manifests:
+    name: Update K8s Manifests
+    needs: [build-and-push]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Patch deployment image URIs
+        env:
+          REG: ${{ needs.build-and-push.outputs.ecr_registry }}
+          TAG: ${{ needs.build-and-push.outputs.image_tag }}
+        run: |
+          API_IMAGE="${REG}/medical-center-api:${TAG}"
+          YARP_IMAGE="${REG}/medical-center-yarp:${TAG}"
+          FRONTEND_IMAGE="${REG}/medical-center-frontend:${TAG}"
+          sed -i "s|^\([[:space:]]*image:\).*medical-center-api.*|\1 ${API_IMAGE}|" .opsera-medical-center/k8s/api-deployment.yaml
+          sed -i "s|^\([[:space:]]*image:\).*medical-center-yarp.*|\1 ${YARP_IMAGE}|" .opsera-medical-center/k8s/yarp-deployment.yaml
+          sed -i "s|^\([[:space:]]*image:\).*medical-center-frontend.*|\1 ${FRONTEND_IMAGE}|" .opsera-medical-center/k8s/frontend-deployment.yaml
+          sed -i "s|PLACEHOLDER_API_ECR_URI|${API_IMAGE}|g" .opsera-medical-center/k8s/api-deployment.yaml
+          sed -i "s|PLACEHOLDER_YARP_ECR_URI|${YARP_IMAGE}|g" .opsera-medical-center/k8s/yarp-deployment.yaml
+          sed -i "s|PLACEHOLDER_FRONTEND_ECR_URI|${FRONTEND_IMAGE}|g" .opsera-medical-center/k8s/frontend-deployment.yaml
+
+      - name: Commit and push manifest updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .opsera-medical-center/k8s/api-deployment.yaml \
+                  .opsera-medical-center/k8s/yarp-deployment.yaml \
+                  .opsera-medical-center/k8s/frontend-deployment.yaml
+          if git diff --staged --quiet; then
+            echo "No manifest changes to commit"
+            exit 0
+          fi
+          git commit -m "chore(c2c): update medical-center dev images to ${GITHUB_SHA::7} [skip ci]"
+          git push
+
+  refresh-ecr-secret:
+    name: Refresh ECR Pull Secret
+    needs: [build-and-push]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update ECR pull secret on spoke
+        run: |
+          aws eks update-kubeconfig --name "${SPOKE_CLUSTER}" --region "${AWS_REGION}" --alias spoke
+          ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+          REG="${ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+          kubectl --context spoke create secret docker-registry ecr-registry-secret \
+            --docker-server="${REG}" \
+            --docker-username=AWS \
+            --docker-password="$(aws ecr get-login-password --region "${AWS_REGION}")" \
+            -n "${NAMESPACE}" \
+            --dry-run=client -o yaml | kubectl --context spoke apply -f -
+          kubectl --context spoke patch serviceaccount default -n "${NAMESPACE}" \
+            -p '{"imagePullSecrets":[{"name":"ecr-registry-secret"}]}'
+
+  argocd-sync:
+    name: Sync ArgoCD Application
+    needs: [update-manifests, refresh-ecr-secret]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Refresh and wait for ArgoCD sync
+        run: |
+          aws eks update-kubeconfig --name "${HUB_CLUSTER}" --region "${AWS_REGION}" --alias hub
+          kubectl --context hub patch application medical-center-dev -n argocd \
+            --type merge \
+            -p '{"metadata":{"annotations":{"argocd.argoproj.io/refresh":"hard"}}}'
+          for i in $(seq 1 36); do
+            STATUS=$(kubectl --context hub get application medical-center-dev -n argocd -o jsonpath='{.status.sync.status}' 2>/dev/null || echo "Unknown")
+            HEALTH=$(kubectl --context hub get application medical-center-dev -n argocd -o jsonpath='{.status.health.status}' 2>/dev/null || echo "Unknown")
+            echo "Sync=${STATUS} Health=${HEALTH} (attempt ${i}/36)"
+            if [ "${STATUS}" = "Synced" ] && [ "${HEALTH}" = "Healthy" ]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          kubectl --context hub get application medical-center-dev -n argocd -o yaml
+          exit 1
+
+  verify-deployment:
+    name: Verify Deployment
+    needs: [argocd-sync]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Wait for rollouts and health check
+        run: |
+          aws eks update-kubeconfig --name "${SPOKE_CLUSTER}" --region "${AWS_REGION}" --alias spoke
+          kubectl --context spoke -n "${NAMESPACE}" rollout status deployment/medical-center-api --timeout=600s
+          kubectl --context spoke -n "${NAMESPACE}" rollout status deployment/medical-center-yarp --timeout=600s
+          kubectl --context spoke -n "${NAMESPACE}" rollout status deployment/medical-center-frontend --timeout=600s
+          curl -sf "${PUBLIC_URL}/" -o /dev/null
+          curl -sf "${PUBLIC_URL}/api/health"

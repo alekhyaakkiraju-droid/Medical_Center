@@ -44,13 +44,16 @@ Bootstrap creates:
 
 ## After bootstrap
 
-1. Apply ArgoCD Application (hub cluster):
+1. ~~Apply ArgoCD Application~~ — done via `2-apply-argocd-medical-center-dev.yaml`
+
+2. **Run CI/CD (Code-to-Cloud — no Forge):**
 
    ```bash
-   kubectl --context hub apply -f .opsera-medical-center/argocd/medical-center-dev-application.yaml
+   gh workflow run 2-ci-build-scan-push-medical-center-dev.yaml
+   gh run watch
    ```
 
-2. Run Forge pipeline **Medical Center Dev EKS** or the CI workflow once added to build/push images and sync manifests.
+   This builds all 3 images, pushes to ECR, updates K8s manifests in git, refreshes ECR pull secret, syncs ArgoCD, and verifies the public URL.
 
 3. Verify: `https://medical-center-yarp-dev.agent.opsera.dev/health`
 
