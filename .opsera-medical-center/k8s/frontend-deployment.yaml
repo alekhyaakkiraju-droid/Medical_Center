@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 792373136340.dkr.ecr.us-west-2.amazonaws.com/medical-center-frontend:fee6ffd-30759159357
+          image: 792373136340.dkr.ecr.us-west-2.amazonaws.com/medical-center-frontend:b649494-30759578806
           ports:
             - containerPort: 80
           volumeMounts:
