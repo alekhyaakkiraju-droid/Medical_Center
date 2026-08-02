@@ -25,7 +25,7 @@ spec:
             - until nc -z medical-center-sqlserver 1433; do echo waiting for sqlserver; sleep 3; done
       containers:
         - name: api
-          image: 792373136340.dkr.ecr.us-west-2.amazonaws.com/medical-center-api:5dcd4e9-30758874437
+          image: 792373136340.dkr.ecr.us-west-2.amazonaws.com/medical-center-api:fee6ffd-30759159357
           ports:
             - containerPort: 8080
           env:

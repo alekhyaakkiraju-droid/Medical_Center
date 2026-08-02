@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: yarp
-          image: 792373136340.dkr.ecr.us-west-2.amazonaws.com/medical-center-yarp:5dcd4e9-30758874437
+          image: 792373136340.dkr.ecr.us-west-2.amazonaws.com/medical-center-yarp:fee6ffd-30759159357
           ports:
             - containerPort: 8080
           volumeMounts:
