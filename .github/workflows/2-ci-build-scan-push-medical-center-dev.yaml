@@ -205,4 +205,4 @@ jobs:
           kubectl --context spoke -n "${NAMESPACE}" rollout status deployment/medical-center-yarp --timeout=600s
           kubectl --context spoke -n "${NAMESPACE}" rollout status deployment/medical-center-frontend --timeout=600s
           curl -sf "${PUBLIC_URL}/" -o /dev/null
-          curl -sf "${PUBLIC_URL}/api/health"
+          curl -sf "${PUBLIC_URL}/api/health" -o /dev/null

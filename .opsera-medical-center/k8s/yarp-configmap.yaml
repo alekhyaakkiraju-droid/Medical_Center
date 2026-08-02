@@ -16,8 +16,19 @@ data:
       },
       "ReverseProxy": {
         "Routes": {
+          "api-health-route": {
+            "ClusterId": "api-cluster",
+            "Order": 0,
+            "Match": {
+              "Path": "/api/health"
+            },
+            "Transforms": [
+              { "PathSet": "/health" }
+            ]
+          },
           "api-route": {
             "ClusterId": "api-cluster",
+            "Order": 1,
             "Match": {
               "Path": "/api/{**catch-all}"
             }
