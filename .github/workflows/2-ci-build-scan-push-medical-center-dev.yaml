@@ -66,7 +66,7 @@ jobs:
         run: |
           ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
           echo "ecr_registry=${ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com" >> "${GITHUB_OUTPUT}"
-          echo "image_tag=${GITHUB_SHA::7}" >> "${GITHUB_OUTPUT}"
+          echo "image_tag=${GITHUB_SHA::7}-${GITHUB_RUN_ID}" >> "${GITHUB_OUTPUT}"
 
       - name: Build and push API image
         run: |
@@ -127,7 +127,7 @@ jobs:
             echo "No manifest changes to commit"
             exit 0
           fi
-          git commit -m "chore(c2c): update medical-center dev images to ${GITHUB_SHA::7} [skip ci]"
+          git commit -m "chore(c2c): update medical-center dev images to ${GITHUB_SHA::7}-${GITHUB_RUN_ID} [skip ci]"
           git push
 
   refresh-ecr-secret:
