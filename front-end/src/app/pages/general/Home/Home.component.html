@@ -52,7 +52,6 @@
   </div>
 </section>
 
-<!--about section-->
 <section class="feature-section section bg-gray ">
   <div class="container max-w-screen-xl px-4 mx-auto">
     <div class="row">
@@ -68,12 +67,12 @@
               </p>
             </div>
             <div class="row">
-              @for (service of services; track service) {
+              @for (service of services; track service.title) {
                 <div class="col-sm-6">
                   <div class="item">
                     <div class="icon-box">
                       <figure>
-                        <img [src]="service.image | assetUrl" [alt]="service.title" />
+                        <img [src]="service.image | assetUrl" [alt]="service.title" loading="lazy" />
                       </figure>
                     </div>
                     <h6>{{ service.title }}</h6>
@@ -87,89 +86,86 @@
       </div>
     </div>
   </section>
-  <!--End about section-->
 
-
-  @defer (on viewport) {
-    <!--Start about us area-->
-    <section class="service-tab-section section ">
-      <div class="outer-box clearfix max-w-screen-xl px-4 mx-auto">
-        <div class="container">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="tabs flex justify-center ">
-                <ul class="nav nav-tabs " role="tablist">
-                  @for (service of specializations; track service) {
-                    <li role="presentation"
-                      [class.active]="service.id === 1">
-                      <a [href]="'#' + service.specializationName.toLowerCase()" data-toggle="tab">{{
-                      service.specializationName }}</a>
-                    </li>
-                  }
-                </ul>
-              </div>
-              <div class="tab-content">
-                @for (specialize of specializations; track specialize) {
-                  <div class="service-box tab-pane"
-                    [class.active]="specialize.id === 1"
-                    [attr.id]="specialize.specializationName.toLowerCase()">
-                    <div class="row ">
-                      <div class="col-md-6">
-                        <img class="img-responsive" [src]="specialize.specializationImage | assetUrl"
-                          alt="service-image" loading="lazy">
-                      </div>
-                      <div class="col-md-6">
-                        <div class="contents">
-                          <div class="section-title">
-                            <h3>{{specialize.specializationName}}</h3>
-                          </div>
-                          <div class="text">
-                            <p>{{specialize.description}}</p>
-                          </div>
-                          <ul class="content-list">
-                            @for (content of specialize.services; track content) {
-                              <li>
-                                <i class="fa fa-dot-circle-o"></i>{{content.description}}
-                              </li>
-                            }
-                          </ul>
-                          <a href="#" class="btn btn-main">Read more</a>
+  <section class="service-tab-section section ">
+    <div class="outer-box clearfix max-w-screen-xl px-4 mx-auto">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="tabs flex justify-center ">
+              <ul class="nav nav-tabs" role="tablist">
+                @for (service of specializations; track service.id) {
+                  <li class="nav-item" role="presentation">
+                    <a
+                      class="nav-link"
+                      [class.active]="service.id === activeSpecializationId"
+                      [attr.data-bs-toggle]="'tab'"
+                      [attr.data-bs-target]="'#' + specializationTabId(service)"
+                      role="tab"
+                      [attr.aria-controls]="specializationTabId(service)"
+                      [attr.aria-selected]="service.id === activeSpecializationId"
+                      href="#"
+                      (click)="setActiveSpecialization(service.id); $event.preventDefault()"
+                    >{{ service.specializationName }}</a>
+                  </li>
+                }
+              </ul>
+            </div>
+            <div class="tab-content">
+              @for (specialize of specializations; track specialize.id) {
+                <div
+                  class="service-box tab-pane fade"
+                  [class.show]="specialize.id === activeSpecializationId"
+                  [class.active]="specialize.id === activeSpecializationId"
+                  [attr.id]="specializationTabId(specialize)"
+                  role="tabpanel"
+                >
+                  <div class="row ">
+                    <div class="col-md-6">
+                      <img class="img-responsive" [src]="specialize.specializationImage | assetUrl"
+                        alt="service-image" loading="lazy">
+                    </div>
+                    <div class="col-md-6">
+                      <div class="contents">
+                        <div class="section-title">
+                          <h3>{{specialize.specializationName}}</h3>
                         </div>
+                        <div class="text">
+                          <p>{{specialize.description}}</p>
+                        </div>
+                        <ul class="content-list">
+                          @for (content of specialize.services; track content.description) {
+                            <li>
+                              <i class="fa fa-dot-circle-o"></i>{{content.description}}
+                            </li>
+                          }
+                        </ul>
                       </div>
                     </div>
                   </div>
-                }
-              </div>
+                </div>
+              }
             </div>
           </div>
         </div>
       </div>
-    </section>
-    <!--End about us area-->
+    </div>
+  </section>
 
-    <!--team section-->
-    <section class="team-section section  max-w-screen-xl px-4 mx-auto">
-      <div class="container">
-        <div class="section-title text-center">
-          <h3>Our Expert
-            <span>Doctors</span>
-          </h3>
-          <p>Our team of highly skilled and experienced doctors is dedicated to providing exceptional care
-            <br>with compassion, expertise, and the latest medical advancements.
-            </p>
-          </div>
-          <app-doctorcs></app-doctorcs>
+  <section class="team-section section max-w-screen-xl px-4 mx-auto">
+    <div class="container">
+      <div class="section-title text-center">
+        <h3>Our Expert
+          <span>Doctors</span>
+        </h3>
+        <p>Our team of highly skilled and experienced doctors is dedicated to providing exceptional care
+          <br>with compassion, expertise, and the latest medical advancements.
+          </p>
         </div>
-      </section>
-      <!--End team section-->
-  } @placeholder {
-    <section class="section max-w-screen-xl px-4 mx-auto" aria-hidden="true">
-      <div class="container py-5 text-center text-muted">Loading services and doctors…</div>
+        <app-doctorcs></app-doctorcs>
+      </div>
     </section>
-  }
 
-
-    <!--testimonial-section-->
     <section class="testimonial-section" [style.background-image]="'url(' + ('images/testimonials/1.jpg' | assetUrl) + ')'">
       <div class="container max-w-screen-xl px-4 mx-auto">
         <div class="section-title text-center">
@@ -178,17 +174,16 @@
           </h3>
         </div>
         <div class="testimonial-carousel">
-          <!--Slide Item-->
-          @for (patient of patients; track patient) {
+          @for (patient of patients; track patient.name) {
             <div class="slide-item">
               <div class="inner-box text-center">
                 <div class="image-box">
                   <figure>
-                    <img [src]="patient.image | assetUrl" alt="" aria-hidden="true" />
+                    <img [src]="patient.image | assetUrl" alt="" aria-hidden="true" loading="lazy" />
                   </figure>
                 </div>
                 <h6>{{patient.name}}</h6>
-                @for (review of patient.reviews; track review) {
+                @for (review of patient.reviews; track review.review) {
                   <p>{{review.review}} </p>
                 }
               </div>
@@ -197,26 +192,21 @@
         </div>
       </div>
     </section>
-    <!--End testimonial-section-->
 
-    @defer (on viewport) {
-      <section class="appoinment-section section max-w-screen-xl px-4 mx-auto">
-        <div class="container">
-          <div class="row">
-            <div class="col-md-6 col-sm-12 col-xs-12">
-              <div class="accordion-section">
-                <div class="section-title">
-                  <h3>FAQ</h3>
-                </div>
+    <section class="appoinment-section section max-w-screen-xl px-4 mx-auto">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6 col-sm-12 col-xs-12">
+            <div class="accordion-section">
+              <div class="section-title">
+                <h3>FAQ</h3>
               </div>
-              <app-faq></app-faq>
             </div>
-            <div class="col-md-6 col-sm-12 col-xs-12">
-              <app-appointment-request></app-appointment-request>
-            </div>
+            <app-faq></app-faq>
+          </div>
+          <div class="col-md-6 col-sm-12 col-xs-12">
+            <app-appointment-request></app-appointment-request>
           </div>
         </div>
-      </section>
-    } @placeholder {
-      <div aria-hidden="true"></div>
-    }
+      </div>
+    </section>

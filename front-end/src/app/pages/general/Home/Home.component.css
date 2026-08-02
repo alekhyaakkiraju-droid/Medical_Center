@@ -18,6 +18,7 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(105deg, rgba(15, 23, 42, 0.88) 0%, rgba(19, 78, 74, 0.72) 55%, rgba(72, 189, 197, 0.35) 100%);
+  pointer-events: none;
 }
 
 .home-hero__content {

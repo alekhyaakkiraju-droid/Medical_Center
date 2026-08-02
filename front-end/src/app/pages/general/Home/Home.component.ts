@@ -30,6 +30,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   ];
   specializations: any[] = [];
+  activeSpecializationId = 1;
 
   constructor(private specializationService: SpecializationService) {}
 
@@ -38,9 +39,18 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.specializationService.getSpecializations().subscribe({
         next: (data) => {
           this.specializations = data.items.slice(0, 6);
+          this.activeSpecializationId = this.specializations[0]?.id ?? 1;
         },
       })
     );
+  }
+
+  specializationTabId(specialization: { specializationName: string }): string {
+    return specialization.specializationName.toLowerCase().replace(/\s+/g, '-');
+  }
+
+  setActiveSpecialization(id: number): void {
+    this.activeSpecializationId = id;
   }
 
   ngOnDestroy(): void {
