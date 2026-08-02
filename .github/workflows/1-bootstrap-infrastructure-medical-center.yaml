@@ -1,0 +1,218 @@
+name: "1 - Bootstrap: medical-center infrastructure"
+
+on:
+  workflow_dispatch:
+    inputs:
+      TENANT:
+        description: Tenant name
+        required: false
+        default: opsera
+      APP_NAME:
+        description: Application name
+        required: false
+        default: medical-center
+      ENVIRONMENT:
+        description: Target environment
+        required: false
+        default: dev
+      AWS_REGION:
+        description: AWS region
+        required: false
+        default: us-west-2
+      mode:
+        description: Setup mode
+        required: false
+        default: quick
+      cloud_provider:
+        description: Cloud provider
+        required: false
+        default: aws
+      HUB_CLUSTER:
+        description: ArgoCD hub EKS cluster
+        required: false
+        default: argocd-usw2
+      SPOKE_CLUSTER:
+        description: Workload spoke EKS cluster
+        required: false
+        default: opsera-usw2-np
+
+env:
+  TENANT: ${{ inputs.TENANT || 'opsera' }}
+  APP_NAME: ${{ inputs.APP_NAME || 'medical-center' }}
+  ENVIRONMENT: ${{ inputs.ENVIRONMENT || 'dev' }}
+  AWS_REGION: ${{ inputs.AWS_REGION || 'us-west-2' }}
+  HUB_CLUSTER: ${{ inputs.HUB_CLUSTER || 'argocd-usw2' }}
+  SPOKE_CLUSTER: ${{ inputs.SPOKE_CLUSTER || 'opsera-usw2-np' }}
+
+jobs:
+  preflight:
+    name: Pre-flight Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate required secrets
+        run: |
+          test -n "${{ secrets.AWS_ACCESS_KEY_ID }}" || (echo "Missing AWS_ACCESS_KEY_ID" && exit 1)
+          test -n "${{ secrets.AWS_SECRET_ACCESS_KEY }}" || (echo "Missing AWS_SECRET_ACCESS_KEY" && exit 1)
+          test -n "${{ secrets.GH_PAT }}" || (echo "Missing GH_PAT" && exit 1)
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify EKS clusters
+        run: |
+          aws eks describe-cluster --name "${HUB_CLUSTER}" --region "${AWS_REGION}" >/dev/null
+          aws eks describe-cluster --name "${SPOKE_CLUSTER}" --region "${AWS_REGION}" >/dev/null
+
+  ecr-setup:
+    name: Setup ECR Repositories
+    needs: [preflight]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Ensure ECR repositories exist
+        run: |
+          for repo in medical-center-api medical-center-yarp medical-center-frontend; do
+            if aws ecr describe-repositories --repository-names "${repo}" --region "${AWS_REGION}" >/dev/null 2>&1; then
+              echo "ECR repo exists: ${repo}"
+            else
+              aws ecr create-repository \
+                --repository-name "${repo}" \
+                --image-tag-mutability IMMUTABLE \
+                --encryption-configuration encryptionType=AES256 \
+                --image-scanning-configuration scanOnPush=true \
+                --region "${AWS_REGION}"
+              echo "Created ECR repo: ${repo}"
+            fi
+          done
+
+  argocd-setup:
+    name: Setup ArgoCD Registration
+    needs: [preflight, ecr-setup]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Hub and Spoke kubeconfig
+        run: |
+          aws eks update-kubeconfig --name "${HUB_CLUSTER}" --region "${AWS_REGION}" --alias hub
+          aws eks update-kubeconfig --name "${SPOKE_CLUSTER}" --region "${AWS_REGION}" --alias spoke
+
+      - name: Register GitHub repository with ArgoCD
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          REPO_SECRET_NAME="repo-$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')-$(echo "${APP_NAME}" | tr '[:upper:]' '[:lower:]')"
+          if kubectl --context hub get secret "${REPO_SECRET_NAME}" -n argocd >/dev/null 2>&1; then
+            echo "Repository secret already exists: ${REPO_SECRET_NAME}"
+          else
+            kubectl --context hub create secret generic "${REPO_SECRET_NAME}" \
+              -n argocd \
+              --from-literal=type=git \
+              --from-literal=url="https://github.com/${{ github.repository }}.git" \
+              --from-literal=username=git \
+              --from-literal=password="${GH_PAT}"
+            kubectl --context hub label secret "${REPO_SECRET_NAME}" -n argocd argocd.argoproj.io/secret-type=repository --overwrite
+          fi
+
+      - name: Register spoke cluster with ArgoCD
+        run: |
+          CLUSTER_SECRET_NAME="cluster-${SPOKE_CLUSTER}"
+          if kubectl --context hub get secret "${CLUSTER_SECRET_NAME}" -n argocd >/dev/null 2>&1; then
+            echo "Spoke cluster already registered: ${SPOKE_CLUSTER}"
+            exit 0
+          fi
+
+          SPOKE_SERVER=$(aws eks describe-cluster --name "${SPOKE_CLUSTER}" --region "${AWS_REGION}" --query 'cluster.endpoint' --output text)
+          SPOKE_CA=$(aws eks describe-cluster --name "${SPOKE_CLUSTER}" --region "${AWS_REGION}" --query 'cluster.certificateAuthority.data' --output text)
+
+          kubectl --context spoke create serviceaccount argocd-manager -n kube-system --dry-run=client -o yaml | kubectl --context spoke apply -f -
+          kubectl --context spoke create clusterrolebinding argocd-manager \
+            --clusterrole=cluster-admin \
+            --serviceaccount=kube-system:argocd-manager \
+            --dry-run=client -o yaml | kubectl --context spoke apply -f -
+
+          TOKEN=$(kubectl --context spoke create token argocd-manager -n kube-system --duration=87600h)
+
+          cat <<EOF | kubectl --context hub apply -f -
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: ${CLUSTER_SECRET_NAME}
+            namespace: argocd
+            labels:
+              argocd.argoproj.io/secret-type: cluster
+          type: Opaque
+          stringData:
+            name: "${SPOKE_CLUSTER}"
+            server: "${SPOKE_SERVER}"
+            config: |
+              {
+                "bearerToken": "${TOKEN}",
+                "tlsClientConfig": {
+                  "insecure": false,
+                  "caData": "${SPOKE_CA}"
+                }
+              }
+          EOF
+
+  k8s-setup:
+    name: Setup Kubernetes Namespaces
+    needs: [preflight, argocd-setup]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Ensure dev namespace exists
+        run: |
+          aws eks update-kubeconfig --name "${SPOKE_CLUSTER}" --region "${AWS_REGION}" --alias spoke
+          NAMESPACE="${TENANT}-${APP_NAME}-${ENVIRONMENT}"
+          if kubectl --context spoke get namespace "${NAMESPACE}" >/dev/null 2>&1; then
+            echo "Namespace exists: ${NAMESPACE}"
+          else
+            kubectl --context spoke create namespace "${NAMESPACE}"
+            kubectl --context spoke label namespace "${NAMESPACE}" tenant="${TENANT}" app="${APP_NAME}" environment="${ENVIRONMENT}" managed-by=opsera-c2c
+          fi
+
+  verify:
+    name: Verify Bootstrap
+    needs: [preflight, ecr-setup, argocd-setup, k8s-setup]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify ECR and folder structure
+        run: |
+          for repo in medical-center-api medical-center-yarp medical-center-frontend; do
+            aws ecr describe-repositories --repository-names "${repo}" --region "${AWS_REGION}" >/dev/null
+          done
+          test -d .opsera-medical-center/k8s/overlays/dev
+          test -f .opsera-medical-center/k8s/kustomization.yaml
+          test -f .opsera-medical-center/argocd/medical-center-dev-application.yaml
+          echo "Bootstrap verification passed"

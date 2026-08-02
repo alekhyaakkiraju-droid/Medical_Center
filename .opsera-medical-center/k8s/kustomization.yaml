@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: opsera-medical-center-dev
+
+resources:
+  - namespace.yaml
+  - dev-secrets.yaml
+  - sqlserver-dev.yaml
+  - mailhog-dev.yaml
+  - yarp-configmap.yaml
+  - frontend-nginx-configmap.yaml
+  - api-service.yaml
+  - yarp-service.yaml
+  - frontend-service.yaml
+  - api-deployment.yaml
+  - yarp-deployment.yaml
+  - frontend-deployment.yaml
+  - ingress.yaml
+
+labels:
+  - includeSelectors: false
+    pairs:
+      tenant: opsera
+      app: medical-center
+      environment: dev
